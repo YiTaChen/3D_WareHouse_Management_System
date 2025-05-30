@@ -1,86 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Conveyor Simulation</title>
-  <link rel="stylesheet" href="index.css">
-  <style>
-    body { margin: 0; overflow: hidden; }
-    #ui { position: absolute; top: 10px; left: 10px; z-index: 10; }
-    button { margin-right: 10px; padding: 8px 16px; }
-  </style>
-</head>
-<body>
-  <div id="ui">
-    <div id="button-container">
-      <button id="spawnBtn">Create Box</button>
-      <button id="moveBtn">Box Move/Stop</button>
-  
-    </div>
-  </div>
-  <div id="firebase">
-    <img id="firebase_link" src="/firebase_link.png" alt="firebase_link">
-  </div>
-  <canvas id="app"></canvas>
-  <script type="module" src="/src/main.js"></script>
-</body>
-<script>
-  const ui = document.getElementById('ui');
-  let isDragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  // 當滑鼠按下時，開始記錄位置
-  ui.addEventListener('mousedown', (e) => {
-    // 確保不是按在按鈕上（否則會干擾點擊事件）
-    if (e.target.tagName === 'BUTTON') return;
-
-    isDragging = true;
-    offsetX = e.clientX - ui.offsetLeft;
-    offsetY = e.clientY - ui.offsetTop;
-  });
-
-  // 拖曳中，移動 UI
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      ui.style.left = (e.clientX - offsetX) + 'px';
-      ui.style.top = (e.clientY - offsetY) + 'px';
-    }
-  });
-
-  // 放開滑鼠，結束拖曳
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-  });
-
-  const ui2 = document.getElementById('firebase');
-  let isDragging2 = false;
-  let offsetX2 = 0;
-  let offsetY2 = 0;
-
-  // 當滑鼠按下時，開始記錄位置
-  ui.addEventListener('mousedown', (e) => {
-    // 確保不是按在按鈕上（否則會干擾點擊事件）
-    if (e.target.tagName === 'BUTTON') return;
-
-    isDragging2 = true;
-    offsetX2 = e.clientX - ui2.offsetLeft;
-    offsetY2 = e.clientY - ui2.offsetTop;
-  });
-
-  // 拖曳中，移動 UI
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging2) {
-      ui2.style.left = (e.clientX - offsetX2) + 'px';
-      ui2.style.top = (e.clientY - offsetY2) + 'px';
-    }
-  });
-
-  // 放開滑鼠，結束拖曳
-  document.addEventListener('mouseup', () => {
-    isDragging2 = false;
-  });
-
-</script>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
