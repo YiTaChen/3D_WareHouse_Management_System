@@ -5,6 +5,7 @@
 
     Most traditional WMS provide summary and data. And a few of them have 2D map for the warehouse. 
     But users are hard to find the correct location, when it comes to reality.
+
     ex: The Tissue is situated on the second floor of 2nd Warehouse, in aisle 15, shelf level 5 and 3 section.
     So we provide 3D warehouse management web system for solving this problem.   
     
