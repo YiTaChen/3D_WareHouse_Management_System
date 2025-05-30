@@ -47,3 +47,110 @@ Options:
 Inventory inbound and outbound process
 Change inventory locations 
 View the inventory contents
+
+
+
+# High-level architecture diagrams.
+
+
+Frontend-backend interaction and database requirements.
+Box position and add new Boxes.
+Get all equipments location and status. 
+Get dynamic position of all items. 
+Get all inventory data.
+
+# Database Schema Design
+
+
+
+
+
+
+
+
+
+
+
+
+
+# API Contract
+“Only example”
+
+Add box: 
+Request: 
+POST /api/boxes
+{
+  "position": [0, 3, 0],
+  "size": [1, 1, 1]
+}
+
+Response:  {
+  "id": "box123",
+  "position": [0, 3, 0],
+  "size": [1, 1, 1],
+  "status": "created"
+}
+
+
+b. Get layouts  
+
+Request:
+GET /api/layouts/current
+
+Response:
+{
+  "id": "layout001",
+  "conveyors": [
+    {"id": "conv1", "position": [-4,0,4], "rotation": [0, 1.57, 0]},
+    ...
+  ]
+}
+
+
+c. Change conveyor speed:
+Request: 
+POST /api/rollers/roller123/speed
+Content-Type: application/json
+{
+  "speed": 40
+}
+
+Response: 
+{
+  "rollerId": "roller123",
+  "speed": 40,
+  "status": "updated"
+}
+
+
+
+# Create Wireframes or UI mockups for the application’s key pages.
+
+https://r3f-gravity-apply-test.web.app/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# d. create Wireframes or UI mockups for the application’s key pages.
+
+
+ref: https://plm.sw.siemens.com/en-US/tecnomatix/plant-simulation-software/
+Links to an external site.
+
+ ref https://www.netsuite.com/portal/products/erp/warehouse-fulfillment/wms.shtml
+Links to an external site.
+   ref: https://www.amsc-usa.com/blog/warehouse-types-and-how-to-choose/
+Links to an external site.
+
