@@ -56,14 +56,23 @@ import Ground from './components/Ground'
 import Materials from './components/Materials'
 import Box from './components/Box'
 import Scene from './components/Scene'
+import { useBoxStore } from './stores/boxStore'
+import { useConveyorStore } from './stores/conveyorStore'
+
+
 
 export default function App() {
-  const [boxes, setBoxes] = useState([])
+  // const [boxes, setBoxes] = useState([])
 
-  const addBox = () => setBoxes([...boxes, { id: Date.now() }])
-  const [rotate, setRotate] = useState(false)
-  
-  const [rollerSpeed, setRollerSpeed] = useState(-20) // Default speed for the roller
+  const boxes = useBoxStore((state) => state.boxes)
+  const addBox = useBoxStore((state) => state.addBox)
+
+  // const addBox = () => setBoxes([...boxes, { id: Date.now() }])
+  // const [rotate, setRotate] = useState(false)
+  // const [rollerSpeed, setRollerSpeed] = useState(-20) // Default speed for the roller
+
+  const { rotate, setRotate, rollerSpeed, setRollerSpeed } = useConveyorStore()
+
 
   const [inputValue, setInputValue] = useState('')
   
@@ -72,11 +81,12 @@ export default function App() {
     if (!isNaN(value)) {
       setRollerSpeed(0-value)
       // onUpdate(0-value) // 傳給外部做實際控制邏輯
-      console.log('更新速度為：', 0-value)
-      setRotate(prev => !prev) // 切換滾筒狀態
-      setRotate(!rotate) // 切換滾筒狀態
+      // console.log('更新速度為：', 0-value)
+      setRotate((prev) => !prev) // 切換滾筒狀態
 
-      
+
+      // setRotate(!rotate) // 切換滾筒狀態 強制切換？
+
     } else {
       setRollerSpeed(-20)
     }
@@ -85,7 +95,7 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
-         <button onClick={addBox}>Add Box</button>
+         <button onClick={()=> addBox()}>Add Box</button>
         <button onClick={() => setRotate(!rotate)}>
           {rotate ? 'Stop Roller' : 'Activate Roller'}
           
@@ -100,6 +110,9 @@ export default function App() {
         <button onClick={handleUpdate}
           className="bg-blue-500 text-white px-3 py-1 rounded"
           >Update Speed</button>
+           {/* <div id="firebase">
+    <img id="firebase_link" src="/firebase_link.png" alt="firebase_link" />
+  </div> */}
       </div>
       </div>
      
@@ -114,9 +127,12 @@ export default function App() {
 
 
            {boxes.map((b) => (
-              <Box key={b.id} position={[-0, 3, 0]} />
+              <Box key={b.id} position={b.position} />
           ))}
-          <Scene rotate={rotate} roller_rolling_deg_Z={rollerSpeed}/>
+          {/* <Scene rotate={rotate} roller_rolling_deg_Z={rollerSpeed}/> */}
+          
+          <Scene />
+          
           {/* {layoutData.conveyors.map((conv) => (
             <ConveyorWithPhysics
               key={conv.id}

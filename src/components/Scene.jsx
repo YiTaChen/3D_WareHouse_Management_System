@@ -5,10 +5,16 @@ import Ground from './Ground'
 import { layoutData } from '../data/layoutData.js'
 import ConveyorWithPhysics from './ConveyorWithPhysics'
 
-export default function Scene({ rotate ,roller_rolling_deg_Z}) {
+import { useConveyorStore } from '../stores/conveyorStore.js'
+
+
+
+export default function Scene() {
 
   //  console.log('Scene rotate:', rotate)
-  
+
+  const { rotate, rollerSpeed } = useConveyorStore();
+
   return (
     <>
 
@@ -22,7 +28,7 @@ export default function Scene({ rotate ,roller_rolling_deg_Z}) {
             position={c.position}
             rotation={c.rotation}
             rotate={rotate}
-            roller_rolling_deg_Z = {roller_rolling_deg_Z}
+            roller_rolling_deg_Z = {rollerSpeed} // 傳遞滾筒速度
           />
         )
       })}
