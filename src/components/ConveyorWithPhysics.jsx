@@ -34,7 +34,7 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
   const { rotate, speed } = useConveyorStore(state => state.getConveyorState(id));
 
 
-  const { scene } = useGLTF('/plateform_conveyor_ver3.gltf')
+  const { scene } = useGLTF('/plateform_conveyor_ver5.gltf') // add lasor sensor and light bulb
 
   // console.log('ConveyorWithPhysics position:', position, 'rotation:', rotation, 'rotate:', rotate)
 
