@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useConveyorStore } from '../stores/conveyorStore';
+import { useBoxStore } from '../stores/boxStore'; // 引入 Box Store
 
 export default function ConveyorExtras({
   id,
@@ -15,6 +16,10 @@ export default function ConveyorExtras({
 }) {
   const setSensorDetected = useConveyorStore(state => state.setSensorDetected);
   const { lightColor } = useConveyorStore(state => state.getConveyorState(id));
+
+  const getBoxData = useBoxStore(state => state.getBoxData); // 獲取 Box 資料的方法
+
+
   
 //   console.log(`invisibleMaterialMesh for ID ${id}:`, invisibleMaterialMesh);
 //   console.log(`ConveyorExtras for ID ${id} - lightColor:`, lightColor);
@@ -98,19 +103,32 @@ export default function ConveyorExtras({
     // material: 'invisible', // 可以定義一個新的碰撞材質
     type: 'Static', // 不會移動
     onCollideBegin: (e) => {
-      // You can add a specific action here, e.g., logging when a box enters the main area
-      console.log(`Conveyor ${id}: Box entered the invisible area!`, e.body.material.name, e.body.position, e.body );
-      if (e.body.material.name === 'box') {
-        console.log(`Conveyor ${id}: Box entered the main detection area!`);
-        // Maybe update a store state if the conveyor is "active" or "blocked"
-        // setConveyorAreaOccupied(id, true); // Example
-      }
+    //   console.log(`Conveyor ${id}: Box entered the invisible area!`, e.body.material.name, e.body.position, e.body );
+    //   if (e.body.material.name === 'box') {
+    //     // console.log(`Conveyor ${id}: Box entered the main detection area!`);
+    //     // Maybe update a store state if the conveyor is "active" or "blocked"
+    //     // setConveyorAreaOccupied(id, true); // Example
+    //   }
+        const boxId = e.body.userData?.appId;
+        if (boxId) { // 確保是 Box 觸發的
+            setSensorDetected(id, 'BulkSensorDetected', true);
+            const boxData = getBoxData(boxId); // 從 store 獲取 Box 的資料
+            console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered the main detection area!`);
+
+          // 例如：if (boxData.content === 'Fragile Item') { /* special handling */ }
+        }
+
+
+
     },
     onCollideEnd: (e) => {
-      if (e.body.material.name === 'box') {
-        console.log(`Conveyor ${id}: Box left the main detection area!`);
-        // setConveyorAreaOccupied(id, false); // Example
-      }
+    
+        const boxId = e.body.userData?.appId;
+        if (boxId) {
+            setSensorDetected(id, 'BulkSensorDetected', false);
+            const boxData = getBoxData(boxId);
+            console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) left the main detection area!`);
+        }
     },
   }));
 
@@ -123,16 +141,20 @@ export default function ConveyorExtras({
     rotation: sensor1Props?.rotation || [0, 0, 0],
     args: sensor1Props?.args || [0.5, 0.5, 0.5], // 默認值，確保有尺寸
     onCollideBegin: (e) => {
-      if (e.body.material.name === 'box') { // 假設 Box 的材質名稱為 'box'
-        setSensorDetected(id, 'sensor1Detected', true);
-        console.log(`Conveyor ${id}: Sensor 1 Detected Box!`);
-      }
+
+
+        // change using bulk sensor first
+
+    //   if (e.body.material.name === 'box') { // 假設 Box 的材質名稱為 'box'
+    //     setSensorDetected(id, 'sensor1Detected', true);
+    //     console.log(`Conveyor ${id}: Sensor 1 Detected Box!`);
+    //   }
     },
     onCollideEnd: (e) => {
-      if (e.body.material.name === 'box') {
-        setSensorDetected(id, 'sensor1Detected', false);
-        console.log(`Conveyor ${id}: Sensor 1 Lost Box!`);
-      }
+    //   if (e.body.material.name === 'box') {
+    //     setSensorDetected(id, 'sensor1Detected', false);
+    //     console.log(`Conveyor ${id}: Sensor 1 Lost Box!`);
+    //   }
     },
   }));
 
@@ -144,16 +166,20 @@ export default function ConveyorExtras({
     rotation: sensor2Props?.rotation || [0, 0, 0],
     args: sensor2Props?.args || [0.5, 0.5, 0.5], // 默認值，確保有尺寸
     onCollideBegin: (e) => {
-      if (e.body.material.name === 'box') {
-        setSensorDetected(id, 'sensor2Detected', true);
-        console.log(`Conveyor ${id}: Sensor 2 Detected Box!`);
-      }
+
+
+        // change using bulk sensor first 
+
+    //   if (e.body.material.name === 'box') {
+    //     setSensorDetected(id, 'sensor2Detected', true);
+    //     console.log(`Conveyor ${id}: Sensor 2 Detected Box!`);
+    //   }
     },
     onCollideEnd: (e) => {
-      if (e.body.material.name === 'box') {
-        setSensorDetected(id, 'sensor2Detected', false);
-        console.log(`Conveyor ${id}: Sensor 2 Lost Box!`);
-      }
+    //   if (e.body.material.name === 'box') {
+    //     setSensorDetected(id, 'sensor2Detected', false);
+    //     console.log(`Conveyor ${id}: Sensor 2 Lost Box!`);
+    //   }
     },
   }));
 

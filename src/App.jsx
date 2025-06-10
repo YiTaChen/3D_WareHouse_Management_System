@@ -16,8 +16,10 @@ import { useConveyorStore } from './stores/conveyorStore'
 export default function App() {
   // const [boxes, setBoxes] = useState([])
 
-  const boxes = useBoxStore((state) => state.boxes)
+  // const boxes = useBoxStore((state) => state.boxes)
   const addBox = useBoxStore((state) => state.addBox)
+  const boxesData = useBoxStore(state => state.boxesData);
+
 
   // const addBox = () => setBoxes([...boxes, { id: Date.now() }])
   // const [rotate, setRotate] = useState(false)
@@ -36,6 +38,46 @@ export default function App() {
 
   // 獲取目前選擇輸送帶的狀態，用於顯示和輸入框預設值
   const currentSelectedConveyorState = conveyorStates[selectedConveyorId] || { rotate: false, speed: -20 };
+
+
+  const setBoxesData = useBoxStore(state => state.setBoxesData); // 獲取設置 Box 資料的方法
+
+  // maybe by api input
+  // const boxesInitialData = {
+  //   'box-A': { id: 'box-A', name: 'Alpha Box', content: 'Electronics' },
+  //   // 'box-B': { id: 'box-B', name: 'Beta Box', content: 'Books' },
+  //   // 'box-C': { id: 'box-C', name: 'Gamma Box', content: 'Tools' },
+  // };
+
+  // 這裡的 initialBoxesSetup 只用於第一次載入到 store，之後不再直接使用它來渲染
+  const initialBoxesSetup = React.useRef({
+    'box-A': { id: 'box-A', name: 'Alpha Box', content: 'Electronics' },
+    // 'box-B': { id: 'box-B', name: 'Beta Box', content: 'Books' },
+  });
+
+  const hasInitializedBoxes = React.useRef(false);
+  React.useEffect(() => {
+    if (!hasInitializedBoxes.current) {
+      Object.values(initialBoxesSetup.current).forEach(box => {
+        addBox(box.id, box); // 使用 addBox action 將資料添加到 store
+      });
+      hasInitializedBoxes.current = true;
+    }
+  }, [addBox]);
+
+  const handleAddRandomBox = () => {
+    const newBoxId = `box-${Date.now()}`; // 確保 ID 唯一
+    const randomName = Math.random() > 0.5 ? 'Special Box' : 'Generic Box';
+    const randomContent = Math.random() > 0.5 ? 'Fragile' : 'Durable';
+    const newBoxData = {
+      id: newBoxId,
+      name: randomName,
+      content: randomContent,
+    };
+    addBox(newBoxId, newBoxData); // 調用 addBox action
+  };
+
+
 
 
   const handleIndividualSpeedUpdate = () => {
@@ -82,7 +124,9 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
-         <button onClick={()=> addBox()}>Add Box</button>
+         {/* <button onClick={()=> addBox()}>Add Box</button> */}
+        <button onClick={handleAddRandomBox}>Add Box</button>
+
         <button onClick={() => setRotate(!rotate)}>
           {rotate ? 'Stop Roller' : 'Activate Roller'}
           
@@ -156,9 +200,17 @@ export default function App() {
           <Ground position={[0, 0, 0]} />
 
 
-           {boxes.map((b) => (
+            {Object.values(boxesData).map((box) => (
+            <Box
+              key={box.id}
+              id={box.id}
+              initialPosition={[0, 5, 0]} 
+            />
+            ))} 
+
+           {/* {boxes.map((b) => (
               <Box key={b.id} position={b.position} />
-          ))}
+          ))} */}
           {/* <Scene rotate={rotate} roller_rolling_deg_Z={rollerSpeed}/> */}
           
           <Scene />

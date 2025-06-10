@@ -1,19 +1,46 @@
-import { useBox } from '@react-three/cannon'
 
-export default function Box({ position }) {
+import React, { useMemo } from 'react';
+import { useBox } from '@react-three/cannon';
+import * as THREE from 'three';
+import { useBoxStore } from '../stores/boxStore'; // 引入 boxStore
+
+
+
+
+export default function Box({ id, initialPosition }) {
  const boxSize = [1, 1, 1]
+
+const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 box 的資料
+
 
   const [ref] = useBox(() => ({
     mass: 1,
-    position,
+    position: initialPosition,
     args: boxSize,
     material: 'box',
+    userData: {
+      appId: id, // 將 id 存入 userData
+      name: boxData ? boxData.name : 'Unknown Box', // 使用 boxData 的 name
+      content: boxData ? boxData.content : 'No Content', // 使用 boxData 的 content
+      type: 'box',
+      size: boxSize,
+    },
   }))
+
+
+  const displayColor = useMemo(() => {
+    if (boxData) {
+      if (boxData.name === 'Red Box') return 'red';
+      if (boxData.name === 'Blue Box') return 'blue';
+    }
+    return 'skyblue'; // 預設顏色
+  }, [boxData]);
+
 
   return (
     <mesh ref={ref} castShadow>
       <boxGeometry args={boxSize} />
-      <meshStandardMaterial color="skyblue" />
+      <meshStandardMaterial color={displayColor} />
     </mesh>
   )
 }
