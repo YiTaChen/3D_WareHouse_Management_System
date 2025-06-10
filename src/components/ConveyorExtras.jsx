@@ -26,14 +26,31 @@ export default function ConveyorExtras({
   
   // ----------------- 燈光控制 -----------------
   useEffect(() => {
+
+    // console.log("Light bulb mesh received:", lightBulbMesh);
     if (lightBulbMesh && lightBulbMesh.material) {
-      // GLTF 材質可能是 MeshStandardMaterial 或其他類型
-      if (lightBulbMesh.material.isMeshStandardMaterial) {
-        lightBulbMesh.material.color.set(lightColor);
-      } else if (lightBulbMesh.material.isMeshBasicMaterial) {
-        // 如果是 MeshBasicMaterial，可能也直接設定顏色
-        lightBulbMesh.material.color.set(lightColor);
+
+         const material = lightBulbMesh.material;
+      const color = new THREE.Color(lightColor); 
+
+      if (material.isMeshStandardMaterial) {
+        material.color.set(color);
+        // 如果希望燈泡自己「發光」，而不是被照亮，需要設置 emissive 屬性
+        material.emissive.set(color); // 設置自發光顏色
+        material.emissiveIntensity = 1; // 自發光強度，可調整
+        material.needsUpdate = true;
+      } else if (material.isMeshBasicMaterial) {
+        material.color.set(color);
+        material.needsUpdate = true;
       }
+
+    //   // GLTF 材質可能是 MeshStandardMaterial 或其他類型
+    //   if (lightBulbMesh.material.isMeshStandardMaterial) {
+    //     lightBulbMesh.material.color.set(lightColor);
+    //   } else if (lightBulbMesh.material.isMeshBasicMaterial) {
+    //     // 如果是 MeshBasicMaterial，可能也直接設定顏色
+    //     lightBulbMesh.material.color.set(lightColor);
+    //   }
       // 如果 GLTF 載入的材質是 ArrayOfMaterials, 則可能需要遍歷
       // For simplicity, we assume it's a single material.
       // If the light bulb has multiple materials or sub-meshes that need to be lit,
@@ -114,7 +131,8 @@ export default function ConveyorExtras({
             setSensorDetected(id, 'BulkSensorDetected', true);
             const boxData = getBoxData(boxId); // 從 store 獲取 Box 的資料
             console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered the main detection area!`);
-
+            // const conv10data = getConveyorState( 'conv10');
+            // console.log(`Conveyor ${conv10}: conv10data:`, conv10data);
           // 例如：if (boxData.content === 'Fragile Item') { /* special handling */ }
         }
 

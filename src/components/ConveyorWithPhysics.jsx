@@ -73,6 +73,9 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
       if (obj.name === 'InvisibleBulkSensor' || obj.name === 'Sensor_0' || obj.name === 'Sensor_1' || obj.name === 'Light_bulb_0') {
         parts[obj.name] = obj;
         // console.log(`Conveyor ${id}: Found part:`, obj.name);
+        if (obj.name === 'Light_bulb_0' && obj.material) {
+           obj.material = obj.material.clone(); // clone for color change, or will change all light bulb color
+          }
       }
     });
     // console.log(`Conveyor ${id}: Found extra parts:`, parts);

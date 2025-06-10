@@ -91,16 +91,28 @@ export default function App() {
   };
 
 
+  // 切換指定輸送帶的轉動狀態
   const handleIndividualRotateToggle = () => {
     if (selectedConveyorId) {
       const currentRotate = currentSelectedConveyorState.rotate;
       setConveyorRotate(selectedConveyorId, !currentRotate); // 切換指定輸送帶的轉動狀態
-      console.log(`切換輸送帶 ${selectedConveyorId} 的滾筒狀態為：`, !currentRotate);
+      // console.log(`切換輸送帶 ${selectedConveyorId} 的滾筒狀態為：`, !currentRotate);
     } else {
-      console.warn('請選擇要控制的輸送帶。');
+      // console.warn('請選擇要控制的輸送帶。');
     }
   };
 
+  const handleAllConveyorsIsRotateToggle = () => {
+    layoutData.conveyors.forEach(conv => {
+      setConveyorRotate(conv.id, true); 
+    })
+  }
+
+  const handleAllConveyorsNotRotateToggle = () => {
+    layoutData.conveyors.forEach(conv => {
+      setConveyorRotate(conv.id, false);
+    })
+  }
 
 
   const [inputValue, setInputValue] = useState('')
@@ -127,10 +139,10 @@ export default function App() {
          {/* <button onClick={()=> addBox()}>Add Box</button> */}
         <button onClick={handleAddRandomBox}>Add Box</button>
 
-        <button onClick={() => setRotate(!rotate)}>
+        {/* <button onClick={() => setRotate(!rotate)}>
           {rotate ? 'Stop Roller' : 'Activate Roller'}
           
-        </button>
+        </button> */}
          {/* <div>
         <label htmlFor="">Roller Speed: </label>
         <input type="number" id="roller_rolling_deg_Z" placeholder={0-0} step="0.1"
@@ -147,7 +159,7 @@ export default function App() {
       </div> */}
       </div>
      
-            <div>
+          <div>
           <label htmlFor="conveyor-select">Select Conveyor: </label>
           <select
             id="conveyor-select"
@@ -187,6 +199,23 @@ export default function App() {
                 Update Speed
               </button>
             </div>
+
+
+              <div>
+
+
+                <button onClick={handleAllConveyorsIsRotateToggle} className="bg-green-500 text-white px-3 py-1 rounded mx-2">
+                  Activate All Conveyors
+                </button>
+                <button onClick={handleAllConveyorsNotRotateToggle} className="bg-red-500 text-white px-3 py-1 rounded mx-2">
+                  Stop All Conveyors
+                </button>
+
+
+              </div>
+
+
+
           </div>
         )}
 
@@ -204,7 +233,7 @@ export default function App() {
             <Box
               key={box.id}
               id={box.id}
-              initialPosition={[0, 5, 0]} 
+              initialPosition={[0, 4, 0]} 
             />
             ))} 
 

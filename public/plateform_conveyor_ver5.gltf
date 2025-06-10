@@ -3,6 +3,9 @@
 		"generator":"Khronos glTF Blender I/O v4.4.56",
 		"version":"2.0"
 	},
+	"extensionsUsed":[
+		"KHR_materials_emissive_strength"
+	],
 	"scene":0,
 	"scenes":[
 		{
@@ -416,7 +419,7 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"ConveyorGreen.145",
+			"name":"ConveyorGreen.146",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.10196078568696976,
@@ -430,7 +433,7 @@
 		},
 		{
 			"doubleSided":true,
-			"name":"Wheel.145",
+			"name":"Wheel.146",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.13333334028720856,
@@ -444,7 +447,7 @@
 		},
 		{
 			"doubleSided":true,
-			"name":"Metal.145",
+			"name":"Metal.146",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.3333333432674408,
@@ -455,11 +458,35 @@
 				"metallicFactor":0,
 				"roughnessFactor":0.5
 			}
+		},
+		{
+			"doubleSided":true,
+			"emissiveFactor":[
+				1,
+				1,
+				0
+			],
+			"extensions":{
+				"KHR_materials_emissive_strength":{
+					"emissiveStrength":10
+				}
+			},
+			"name":"LightBulbMaterial",
+			"pbrMetallicRoughness":{
+				"baseColorFactor":[
+					0.800000011920929,
+					0.800000011920929,
+					0.800000011920929,
+					1
+				],
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"\u7acb\u65b9\u9ad4.715",
+			"name":"\u7acb\u65b9\u9ad4.726",
 			"primitives":[
 				{
 					"attributes":{
@@ -473,7 +500,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.716",
+			"name":"\u7acb\u65b9\u9ad4.727",
 			"primitives":[
 				{
 					"attributes":{
@@ -487,7 +514,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.717",
+			"name":"\u7acb\u65b9\u9ad4.728",
 			"primitives":[
 				{
 					"attributes":{
@@ -501,7 +528,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.718",
+			"name":"\u7acb\u65b9\u9ad4.729",
 			"primitives":[
 				{
 					"attributes":{
@@ -515,7 +542,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.719",
+			"name":"\u7acb\u65b9\u9ad4.730",
 			"primitives":[
 				{
 					"attributes":{
@@ -529,7 +556,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.720",
+			"name":"\u7acb\u65b9\u9ad4.731",
 			"primitives":[
 				{
 					"attributes":{
@@ -543,7 +570,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.721",
+			"name":"\u7acb\u65b9\u9ad4.732",
 			"primitives":[
 				{
 					"attributes":{
@@ -557,7 +584,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.722",
+			"name":"\u7acb\u65b9\u9ad4.733",
 			"primitives":[
 				{
 					"attributes":{
@@ -571,7 +598,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.923",
+			"name":"\u5713\u67f1\u9ad4.938",
 			"primitives":[
 				{
 					"attributes":{
@@ -585,7 +612,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.924",
+			"name":"\u5713\u67f1\u9ad4.939",
 			"primitives":[
 				{
 					"attributes":{
@@ -599,7 +626,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.723",
+			"name":"\u7acb\u65b9\u9ad4.734",
 			"primitives":[
 				{
 					"attributes":{
@@ -613,7 +640,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.724",
+			"name":"\u7acb\u65b9\u9ad4.735",
 			"primitives":[
 				{
 					"attributes":{
@@ -627,7 +654,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.925",
+			"name":"\u5713\u67f1\u9ad4.940",
 			"primitives":[
 				{
 					"attributes":{
@@ -641,7 +668,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.926",
+			"name":"\u5713\u67f1\u9ad4.941",
 			"primitives":[
 				{
 					"attributes":{
@@ -655,7 +682,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.927",
+			"name":"\u5713\u67f1\u9ad4.942",
 			"primitives":[
 				{
 					"attributes":{
@@ -669,7 +696,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.928",
+			"name":"\u5713\u67f1\u9ad4.943",
 			"primitives":[
 				{
 					"attributes":{
@@ -683,7 +710,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.929",
+			"name":"\u5713\u67f1\u9ad4.944",
 			"primitives":[
 				{
 					"attributes":{
@@ -697,7 +724,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.930",
+			"name":"\u5713\u67f1\u9ad4.945",
 			"primitives":[
 				{
 					"attributes":{
@@ -711,7 +738,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.931",
+			"name":"\u5713\u67f1\u9ad4.946",
 			"primitives":[
 				{
 					"attributes":{
@@ -725,7 +752,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.932",
+			"name":"\u5713\u67f1\u9ad4.947",
 			"primitives":[
 				{
 					"attributes":{
@@ -739,7 +766,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.933",
+			"name":"\u5713\u67f1\u9ad4.948",
 			"primitives":[
 				{
 					"attributes":{
@@ -753,7 +780,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.934",
+			"name":"\u5713\u67f1\u9ad4.949",
 			"primitives":[
 				{
 					"attributes":{
@@ -767,7 +794,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.935",
+			"name":"\u5713\u67f1\u9ad4.950",
 			"primitives":[
 				{
 					"attributes":{
@@ -780,7 +807,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.936",
+			"name":"\u5713\u67f1\u9ad4.951",
 			"primitives":[
 				{
 					"attributes":{
@@ -793,7 +820,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.937",
+			"name":"\u5713\u67f1\u9ad4.952",
 			"primitives":[
 				{
 					"attributes":{
@@ -801,12 +828,13 @@
 						"NORMAL":75,
 						"TEXCOORD_0":76
 					},
-					"indices":28
+					"indices":28,
+					"material":3
 				}
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.725",
+			"name":"\u7acb\u65b9\u9ad4.736",
 			"primitives":[
 				{
 					"attributes":{
