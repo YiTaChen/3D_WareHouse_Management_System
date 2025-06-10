@@ -4,6 +4,11 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import RollerCylinder from './RollerCylinder'
 import { useConveyorStore } from '../stores/conveyorStore';
+import ConveyorExtras from './ConveyorExtras';  
+
+
+
+
 
 function getRotatedSize(size, rotation) {
   const euler = new THREE.Euler(...rotation)
@@ -58,6 +63,28 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
     return result
   }, [clonedScene])
 
+
+  // 從克隆後的場景中提取 InvisibleMaterial, Sensor_1, Sensor_2, Light_bulb_1
+  // 我們將這些物件的副本傳遞給 ConveyorExtras
+  const extraParts = useMemo(() => {
+    const parts = {};
+    clonedScene.traverse((obj) => {
+      // console.log('ConveyorWithPhysics obj.name: ', obj.name)
+      if (obj.name === 'InvisibleBulkSensor' || obj.name === 'Sensor_0' || obj.name === 'Sensor_1' || obj.name === 'Light_bulb_0') {
+        parts[obj.name] = obj;
+        // console.log(`Conveyor ${id}: Found part:`, obj.name);
+      }
+    });
+    // console.log(`Conveyor ${id}: Found extra parts:`, parts);
+    return parts;
+  }, [clonedScene, id]);
+
+
+
+
+
+
+
   return (
     <>
       <primitive object={clonedScene} />
@@ -108,6 +135,24 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
           />
         )
       })}
+
+
+      {/* add conveyor platform extra things: sensor and light  */}
+      <ConveyorExtras
+        id={id}
+        conveyorPosition={position}
+        conveyorRotation={rotation}
+        invisibleMaterialMesh={extraParts.InvisibleBulkSensor}
+        sensor1Mesh={extraParts.Sensor_0}
+        sensor2Mesh={extraParts.Sensor_1}
+        lightBulbMesh={extraParts.Light_bulb_0}
+      />
+
+
+
+
+
+
     </>
   )
 }

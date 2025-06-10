@@ -32,8 +32,7 @@
 				21,
 				22,
 				23,
-				24,
-				25
+				24
 			]
 		}
 	],
@@ -390,7 +389,7 @@
 		},
 		{
 			"mesh":24,
-			"name":"Light_bulb_0",
+			"name":"Sensor_0.001",
 			"rotation":[
 				0.7071068286895752,
 				0,
@@ -402,21 +401,12 @@
 				1.5,
 				1
 			]
-		},
-		{
-			"mesh":25,
-			"name":"InvisibleBulkSensor",
-			"translation":[
-				0,
-				2,
-				0
-			]
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"ConveyorGreen.145",
+			"name":"ConveyorGreen.129",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.10196078568696976,
@@ -430,7 +420,7 @@
 		},
 		{
 			"doubleSided":true,
-			"name":"Wheel.145",
+			"name":"Wheel.129",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.13333334028720856,
@@ -444,7 +434,7 @@
 		},
 		{
 			"doubleSided":true,
-			"name":"Metal.145",
+			"name":"Metal.129",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.3333333432674408,
@@ -459,7 +449,7 @@
 	],
 	"meshes":[
 		{
-			"name":"\u7acb\u65b9\u9ad4.715",
+			"name":"\u7acb\u65b9\u9ad4.540",
 			"primitives":[
 				{
 					"attributes":{
@@ -473,7 +463,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.716",
+			"name":"\u7acb\u65b9\u9ad4.541",
 			"primitives":[
 				{
 					"attributes":{
@@ -487,7 +477,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.717",
+			"name":"\u7acb\u65b9\u9ad4.542",
 			"primitives":[
 				{
 					"attributes":{
@@ -501,7 +491,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.718",
+			"name":"\u7acb\u65b9\u9ad4.543",
 			"primitives":[
 				{
 					"attributes":{
@@ -515,7 +505,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.719",
+			"name":"\u7acb\u65b9\u9ad4.544",
 			"primitives":[
 				{
 					"attributes":{
@@ -529,7 +519,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.720",
+			"name":"\u7acb\u65b9\u9ad4.545",
 			"primitives":[
 				{
 					"attributes":{
@@ -543,7 +533,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.721",
+			"name":"\u7acb\u65b9\u9ad4.546",
 			"primitives":[
 				{
 					"attributes":{
@@ -557,7 +547,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.722",
+			"name":"\u7acb\u65b9\u9ad4.547",
 			"primitives":[
 				{
 					"attributes":{
@@ -571,7 +561,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.923",
+			"name":"\u5713\u67f1\u9ad4.683",
 			"primitives":[
 				{
 					"attributes":{
@@ -585,7 +575,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.924",
+			"name":"\u5713\u67f1\u9ad4.684",
 			"primitives":[
 				{
 					"attributes":{
@@ -599,7 +589,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.723",
+			"name":"\u7acb\u65b9\u9ad4.548",
 			"primitives":[
 				{
 					"attributes":{
@@ -613,7 +603,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u9ad4.724",
+			"name":"\u7acb\u65b9\u9ad4.549",
 			"primitives":[
 				{
 					"attributes":{
@@ -627,7 +617,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.925",
+			"name":"\u5713\u67f1\u9ad4.685",
 			"primitives":[
 				{
 					"attributes":{
@@ -641,7 +631,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.926",
+			"name":"\u5713\u67f1\u9ad4.686",
 			"primitives":[
 				{
 					"attributes":{
@@ -655,7 +645,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.927",
+			"name":"\u5713\u67f1\u9ad4.687",
 			"primitives":[
 				{
 					"attributes":{
@@ -669,7 +659,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.928",
+			"name":"\u5713\u67f1\u9ad4.688",
 			"primitives":[
 				{
 					"attributes":{
@@ -683,7 +673,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.929",
+			"name":"\u5713\u67f1\u9ad4.689",
 			"primitives":[
 				{
 					"attributes":{
@@ -697,7 +687,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.930",
+			"name":"\u5713\u67f1\u9ad4.690",
 			"primitives":[
 				{
 					"attributes":{
@@ -711,7 +701,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.931",
+			"name":"\u5713\u67f1\u9ad4.691",
 			"primitives":[
 				{
 					"attributes":{
@@ -725,7 +715,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.932",
+			"name":"\u5713\u67f1\u9ad4.692",
 			"primitives":[
 				{
 					"attributes":{
@@ -739,7 +729,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.933",
+			"name":"\u5713\u67f1\u9ad4.693",
 			"primitives":[
 				{
 					"attributes":{
@@ -753,7 +743,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.934",
+			"name":"\u5713\u67f1\u9ad4.694",
 			"primitives":[
 				{
 					"attributes":{
@@ -767,7 +757,7 @@
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.935",
+			"name":"\u5713\u67f1\u9ad4.695",
 			"primitives":[
 				{
 					"attributes":{
@@ -775,12 +765,13 @@
 						"NORMAL":69,
 						"TEXCOORD_0":70
 					},
-					"indices":28
+					"indices":28,
+					"material":2
 				}
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.936",
+			"name":"\u5713\u67f1\u9ad4.696",
 			"primitives":[
 				{
 					"attributes":{
@@ -788,12 +779,13 @@
 						"NORMAL":72,
 						"TEXCOORD_0":73
 					},
-					"indices":28
+					"indices":28,
+					"material":2
 				}
 			]
 		},
 		{
-			"name":"\u5713\u67f1\u9ad4.937",
+			"name":"\u5713\u67f1\u9ad4.697",
 			"primitives":[
 				{
 					"attributes":{
@@ -801,20 +793,8 @@
 						"NORMAL":75,
 						"TEXCOORD_0":76
 					},
-					"indices":28
-				}
-			]
-		},
-		{
-			"name":"\u7acb\u65b9\u9ad4.725",
-			"primitives":[
-				{
-					"attributes":{
-						"POSITION":77,
-						"NORMAL":78,
-						"TEXCOORD_0":79
-					},
-					"indices":3
+					"indices":28,
+					"material":2
 				}
 			]
 		}
@@ -1531,34 +1511,6 @@
 			"componentType":5126,
 			"count":192,
 			"type":"VEC2"
-		},
-		{
-			"bufferView":77,
-			"componentType":5126,
-			"count":24,
-			"max":[
-				0.8500000238418579,
-				0.8500000238418579,
-				0.8500000238418579
-			],
-			"min":[
-				-0.8500000238418579,
-				-0.8500000238418579,
-				-0.8500000238418579
-			],
-			"type":"VEC3"
-		},
-		{
-			"bufferView":78,
-			"componentType":5126,
-			"count":24,
-			"type":"VEC3"
-		},
-		{
-			"bufferView":79,
-			"componentType":5126,
-			"count":24,
-			"type":"VEC2"
 		}
 	],
 	"bufferViews":[
@@ -2023,30 +1975,12 @@
 			"byteLength":1536,
 			"byteOffset":99120,
 			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":288,
-			"byteOffset":100656,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":288,
-			"byteOffset":100944,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":192,
-			"byteOffset":101232,
-			"target":34962
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":101424,
-			"uri":"plateform_conveyor_ver5.bin"
+			"byteLength":100656,
+			"uri":"plateform_conveyor_ver4.bin"
 		}
 	]
 }

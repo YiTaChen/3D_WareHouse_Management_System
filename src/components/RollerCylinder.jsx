@@ -28,12 +28,18 @@ export default function RollerCylinder({ roller_position, equip_position, rotati
     type: 'Kinematic',
   }))
 //   console.log('RollerCylinder rotate:', rotate)
-  useEffect(() => {
+  // useEffect(() => {
 
-  // api.angularVelocity.set(rotate ? 0 : 0, rotate ? 0 : 0, rotate ? 1 : 0)
-  api.angularVelocity.set(rotate ? roller_rotate_deg_Array[0] : 0, rotate ? roller_rotate_deg_Array[1] : 0, rotate ? roller_rotate_deg_Array[2] : 0)
+  // // api.angularVelocity.set(rotate ? 0 : 0, rotate ? 0 : 0, rotate ? 1 : 0)
+  // api.angularVelocity.set(rotate ? roller_rotate_deg_Array[0] : 0, rotate ? roller_rotate_deg_Array[1] : 0, rotate ? roller_rotate_deg_Array[2] : 0)
    
-  }, [rotate])
+  // }, [rotate])
+
+  useEffect(() => {
+    api.angularVelocity.set(rotate ? roller_rotate_deg_Array[0] : 0, rotate ? roller_rotate_deg_Array[1] : 0, rotate ? roller_rotate_deg_Array[2] : 0)
+  }, [rotate, roller_rotate_deg_Array, api]) // 添加 api 到依賴數組
+
+  
 
   return (
     <mesh ref={ref} rotation={rotationArray} position={roller_position} castShadow receiveShadow>
