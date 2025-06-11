@@ -12,10 +12,12 @@ export default function Box({ id, initialPosition }) {
 
 const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 box 的資料
 
+  console.log(`Box ID: ${id}, Box Data:`, boxData); // 確認 boxData 是否正確獲取
+  console.log(`Box ID: ${id}, Initial Position:`, initialPosition); // 確認 initialPosition 是否正確
 
   const [ref] = useBox(() => ({
     mass: 1,
-    position: initialPosition,
+    position: boxData.AddNewBoxPosition ? boxData.AddNewBoxPosition :initialPosition,
     args: boxSize,
     material: 'box',
     userData: {

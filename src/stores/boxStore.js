@@ -18,7 +18,21 @@ boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
   setBoxesData: (data) => set({ boxesData: data }),
 
   
+  handleAddSingleBox : (boxId, boxContenetData) => {
 
+    const addBox = get().addBox; // 獲取 addBox action
+
+    const newBoxId = boxId ? boxId: `box-${Date.now()}`; // 確保 ID 唯一 
+    const randomName = Math.random() > 0.5 ? 'Special Box' : 'Generic Box';
+    const randomContent = Math.random() > 0.5 ? 'Fragile' : 'Durable';
+    const newBoxData = boxContenetData ? boxContenetData : {
+      id: newBoxId,
+      name: randomName,
+      content: randomContent,
+      AddNewBoxPosition: { x: 3, y: 3, z: 3 }, // 預設位置
+    };
+    addBox(newBoxId, newBoxData); // 調用 addBox action
+  },
 
 
   // addBox: (pos = [0, 3, 0]) => set((state) => ({ boxes: [...state.boxes, { id: Date.now(), position: pos }] })),
@@ -29,7 +43,7 @@ boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
     
     boxesData: {
       ...state.boxesData,
-      [boxId]: { id: boxId, ...data }, // 確保 id 存在
+      [boxId]: { id: boxId, AddNewBoxPosition: data.AddNewBoxPosition , ...data }, // 確保 id 存在
     },
   })),
 

@@ -10,6 +10,7 @@ import Box from './components/Box'
 import Scene from './components/Scene'
 import { useBoxStore } from './stores/boxStore'
 import { useConveyorStore } from './stores/conveyorStore'
+import SubPanel from './components/subpanel'
 
 
 
@@ -133,6 +134,13 @@ export default function App() {
     }
   }
 
+
+
+  const [showSubPanel, setShowSubPanel] = useState(true);
+ 
+
+
+
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
@@ -219,7 +227,12 @@ export default function App() {
           </div>
         )}
 
+      {showSubPanel? 
+      <SubPanel  setShowSubPanel={setShowSubPanel}/> : 
+      <button onClick={()=> setShowSubPanel(true)}>Show Sub-Panel</button>
+      } 
 
+      
       <Canvas shadows camera={{ position: [0, 10, 20], fov: 50 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
