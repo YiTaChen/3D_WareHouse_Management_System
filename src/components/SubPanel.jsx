@@ -30,38 +30,66 @@ export default function SubPanel( {setShowSubPanel}) {
 
     const panelRef = useRef(null);
 
+
+    const [panelPosition, setPanelPosition] = useState({ x: window.innerWidth - 820, y: 20 }); // Adjusted for 800px width
+    const dragHandleRef = useRef(null); // Reference to the specific drag handle area
+
+
     useEffect(() => {
     const ui = panelRef.current;
-    if (!ui) return;
+    const dragHandle = dragHandleRef.current;
+
+    if (!ui || !dragHandle) return;
 
     let isDragging = false;
     let offsetX = 0;
     let offsetY = 0;
 
     const handleMouseDown = (e) => {
-      if (e.target.tagName === 'BUTTON') return;
-      isDragging = true;
-      offsetX = e.clientX - ui.offsetLeft;
-      offsetY = e.clientY - ui.offsetTop;
+    //   if (e.target.tagName === 'BUTTON') return;
+        if (e.target === dragHandle && e.button === 0) {
+          
+            isDragging = true;
+            offsetX = e.clientX - ui.offsetLeft;
+            offsetY = e.clientY - ui.offsetTop;
+
+            ui.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
     };
 
     const handleMouseMove = (e) => {
       if (isDragging) {
+        // setPanelPosition({
+        //             x: e.clientX - offsetX,
+        //             y: e.clientY - offsetY,
+        //         });
+       
         ui.style.left = `${e.clientX - offsetX}px`;
         ui.style.top = `${e.clientY - offsetY}px`;
       }
     };
 
     const handleMouseUp = () => {
-      isDragging = false;
+    //   isDragging = false;
+
+      if (isDragging) { // Only reset if a drag was in progress
+                isDragging = false;
+                ui.style.cursor = 'grab'; // Reset cursor
+            }
     };
 
-    ui.addEventListener('mousedown', handleMouseDown);
+    // ui.addEventListener('mousedown', handleMouseDown);
+    dragHandle.addEventListener('mousedown', handleMouseDown);
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      ui.removeEventListener('mousedown', handleMouseDown);
+        
+    //   ui.removeEventListener('mousedown', handleMouseDown);
+      dragHandle.removeEventListener('mousedown', handleMouseDown);
+
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -95,8 +123,8 @@ export default function SubPanel( {setShowSubPanel}) {
     
       style={{
       position: 'absolute',
-      top: '20px', // 調整位置
-      right: '20px', // 調整位置
+      top: panelPosition.y,   //'20px', // 調整位置
+      right: panelPosition.x, //'20px', // 調整位置
       zIndex: 100, // 確保在其他元素之上
       backgroundColor: 'rgba(255, 255, 255, 0.9)', // 半透明白色背景
       borderRadius: '8px',
@@ -107,16 +135,32 @@ export default function SubPanel( {setShowSubPanel}) {
       flexDirection: 'column',
     }}>
       {/* 分頁標籤 */}
+
+
+       <div><button onClick={()=> setShowSubPanel(false)}>Close SubPanel</button>
+        <br />
+        <label > this tab can be dragged </label>
+        </div>
+                <div
+                    ref={dragHandleRef} // Attach ref here
+                    style={{
+                        flexGrow: 1, // Takes up remaining space
+                        padding: '5px 10px', // Padding to make it easier to click
+                        cursor: 'grab', // Indicate draggable area
+                        userSelect: 'none', // Prevent text selection during drag
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        color: '#555',
+                    }}
+                >
+                    Drag Here
+    </div>
       <div style={{
         display: 'flex',
         borderBottom: '1px solid #ccc',
       }}>
 
-        <div><button onClick={()=> setShowSubPanel(false)}>Close SubPanel</button>
-        <br />
-        <label > this tab can be dragged </label>
-        </div>
-
+       
 
         <TabButton isActive={activeTab === 'tab1'} onClick={() => setActiveTab('tab1')}>
           Add New Box
