@@ -63,7 +63,7 @@ export default function BoxCreate({ tabId }) {
 
 
 
-    const [position, setPosition] = useState({ x: 1, y: 1, z: 1 });
+    const [position, setPosition] = useState({ x: 0, y: 0, z: 0 });
 
     const [items, setItems] = useState([
         generateNewItem(),
@@ -159,7 +159,7 @@ export default function BoxCreate({ tabId }) {
         
 
        <div>
-            <label >Initial Position (x,y,z): </label>
+            <label >Initial Position ( x , z , y ) : </label>
             {['x', 'y', 'z'].map((axis) => (
             <select
                 key={axis}
