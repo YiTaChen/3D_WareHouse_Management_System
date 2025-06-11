@@ -31,7 +31,7 @@ export default function SubPanel( {setShowSubPanel}) {
     const panelRef = useRef(null);
 
 
-    const [panelPosition, setPanelPosition] = useState({ x: window.innerWidth - 820, y: 20 }); // Adjusted for 800px width
+    const [panelPosition, setPanelPosition] = useState({ x: 20, y: 20 }); // Adjusted for 800px width
     const dragHandleRef = useRef(null); // Reference to the specific drag handle area
 
 

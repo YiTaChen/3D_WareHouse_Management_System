@@ -63,7 +63,7 @@ export default function BoxCreate({ tabId }) {
 
 
 
-    const [position, setPosition] = useState({ x: 0, y: 0, z: 0 });
+    const [position, setPosition] = useState({ x: 0, y: 4, z: 0 });
 
     const [items, setItems] = useState([
         generateNewItem(),
