@@ -2,6 +2,13 @@
 
     3D Warehouse Management Web System (3D-WMS)
     
+    ![Demo](./demo_resource_for_readme/3d_demo-3.gif)
+    lastest version 0.3 
+
+
+    try by yourself with firebase link:
+    https://r3f-gravity-apply-test.firebaseapp.com
+
 # 2. Problem Statement:
 
     Most traditional WMS provide summary and data. And a few of them have 2D map for the warehouse. 
