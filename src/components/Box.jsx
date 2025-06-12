@@ -20,6 +20,11 @@ const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 
     position: boxData.AddNewBoxPosition ? boxData.AddNewBoxPosition :initialPosition,
     args: boxSize,
     material: 'box',
+    linearDamping: 0.9,
+    angularDamping: 0.9,
+    sleepSpeedLimit: 0.1, // Velocity threshold to fall asleep (default is 0.1)
+    sleepTimeLimit: 1,    // Time (in seconds) to stay below threshold before sleeping (default is 1)
+    allowSleep: true,     // Explicitly allow this body to sleep
     userData: {
       appId: id, // 將 id 存入 userData
       name: boxData ? boxData.name : 'Unknown Box', // 使用 boxData 的 name

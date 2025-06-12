@@ -2,10 +2,13 @@
 import Ground from './Ground'
 // import CylinderPlatform from './CylinderPlatform'
 // import Conveyor from './Conveyor'
+import { useGLTF } from '@react-three/drei';
 import { layoutData } from '../data/layoutData.js'
 import ConveyorWithPhysics from './ConveyorWithPhysics'
 
-// import { useConveyorStore } from '../stores/conveyorStore.js'
+import { useConveyorStore } from '../stores/conveyorStore.js'
+import ShelfData from '../data/ShelfData'; 
+import Shelf from './Shelf';
 
 
 
@@ -13,7 +16,12 @@ export default function Scene() {
 
   //  console.log('Scene rotate:', rotate)
 
-  // const { rotate, rollerSpeed } = useConveyorStore();
+  // const gltf = useGLTF('/models/conveyor_scene.glb'); // Load your entire scene GLTF
+
+  const { scene } = useGLTF('/plateform_conveyor_ver5.gltf') // add lasor sensor and light bulb
+  
+
+  const { rotate, rollerSpeed } = useConveyorStore();
 
   return (
     <>
@@ -25,7 +33,7 @@ export default function Scene() {
         return (
           <ConveyorWithPhysics
             key={c.id}
-            id={c.id} // conveyor ID
+            id={c.id}
             position={c.position}
             rotation={c.rotation}
             // rotate={rotate}
@@ -43,6 +51,18 @@ export default function Scene() {
         {/* {layoutData.conveyors.map(c => (
           <Conveyor key={c.id} position={c.position} rotation={c.rotation} rotate={rotate} />
         ))} */} 
+
+
+      {ShelfData.shelves.map((s) => (
+        <Shelf
+          key={s.id}
+          id={s.id}
+          modelPath={scene}
+          position={s.position}
+          rotation={s.rotation}
+        />
+      ))}
+
 
 
     </>
