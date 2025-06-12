@@ -9,7 +9,8 @@ import ConveyorWithPhysics from './ConveyorWithPhysics'
 import { useConveyorStore } from '../stores/conveyorStore.js'
 import ShelfData from '../data/ShelfData'; 
 import Shelf from './Shelf';
-
+import Crane from './Crane'; // 引入 Crane 組件
+import CraneData from '../data/CraneData'; // 引入 Crane 資料
 
 
 export default function Scene() {
@@ -63,6 +64,17 @@ export default function Scene() {
         />
       ))}
 
+
+
+      {CraneData.cranes.map((s) => (
+        <Crane
+          key={s.id}
+          id={s.id}
+          modelPath={scene}
+          position={s.position}
+          rotation={s.rotation}
+        />
+      ))}
 
 
     </>
