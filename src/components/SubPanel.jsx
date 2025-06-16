@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Box from './Box';
 import BoxCreate from './subPages/BoxCreate';
+import CraneControlPanel  from './subPages/test';
 
 // 假設你未來會有多個功能模組，每個模組對應一個分頁內容
 // 這裡我們只是 placeholders
@@ -9,11 +10,7 @@ const TabContent1 = () => (
 );
 
 const TabContent2 = () => (
-  <div style={{ padding: '10px' }}>
-    <h3>Tab 2 Content (Maybe some box information )</h3>
-    
-    <p> too tire, wait for next time   </p>
-  </div>
+  <CraneControlPanel tabId={2} />
 );
 
 const TabContent3 = () => (
