@@ -85,6 +85,20 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
 
 
 
+    const [moveTableRef, moveTableApi] = useBox(() => ({
+        mass: 0,
+        type: 'Kinematic',
+        // 初始位置是 Crane 的世界位置 + 本地偏移轉換為世界座標
+        position: new THREE.Vector3(...craneWorldPosition)
+                        .add(new THREE.Vector3(...currentMoveTableLocalOffset).applyEuler(new THREE.Euler(...craneWorldRotation)))
+                        .toArray(),
+        rotation: craneWorldRotation, // moveTable 和 Crane 保持相同的旋轉
+        args: moveTableDefaultProps.args,
+        material: 'craneTable', // 用於與 Box 互動的材質
+    }));
+
+
+
     // ----------------- useFrame for moveTable movement -----------------
     useFrame((state, delta) => {
         // 只有當 Crane 主體不移動時，moveTable 才能移動
@@ -130,12 +144,12 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
         )}
 
         {/* 為了調試，可以渲染 moveTable 的物理碰撞箱 */}
-        {/* {moveTableDefaultProps && (
+        {moveTableDefaultProps && (
             <mesh ref={moveTableRef}>
             <boxGeometry args={moveTableDefaultProps.args} />
             <meshBasicMaterial color="orange" wireframe opacity={0.5} transparent />
             </mesh>
-        )} */}
+        )}
         </>
     );
 
