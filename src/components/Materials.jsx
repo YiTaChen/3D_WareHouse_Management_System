@@ -21,6 +21,9 @@ export default function Materials() {
 
   useContactMaterial('box', 'shelfTable', { friction: 20, restitution: 0.00 })
   
+  useContactMaterial('box', 'craneTable', { friction: 10, restitution: 0 })
+
+
   return null
 }
 

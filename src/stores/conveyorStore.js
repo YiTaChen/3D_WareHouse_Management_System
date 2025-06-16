@@ -69,9 +69,9 @@ export const useConveyorStore = create((set, get) => ({
       ...currentConvState,
       rotate: isRotate,
     };
-    console.log('Conveyor rotate state:', isRotate, 'for id:', id);
-    console.log('Current conveyor state:', currentConvState);
-    console.log('Updated conveyor state:', updatedConvState);
+    // console.log('Conveyor rotate state:', isRotate, 'for id:', id);
+    // console.log('Current conveyor state:', currentConvState);
+    // console.log('Updated conveyor state:', updatedConvState);
 
 
     updatedConvState.lightColor = calculateLightColor(updatedConvState);
