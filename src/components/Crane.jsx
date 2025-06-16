@@ -75,6 +75,9 @@ export default function Crane({ id, modelPath, position, rotation }) {
     clone.position.set(...position);
     clone.rotation.set(...rotation);
     clone.updateMatrixWorld(true);
+
+    // console.log('craneBodyScene position:', position, 'rotation:', rotation);
+
     return clone;
   }, [scene, position, rotation]);
 
@@ -95,6 +98,18 @@ export default function Crane({ id, modelPath, position, rotation }) {
   }, [scene]);
 
 
+  const { clonedScene, bulkSensorMesh } = craneBodyScene;
+
+  // 讓 CraneInvisibleBulkSensor 隱形 (直接對 bulkSensorMesh 操作)
+  useEffect(() => {
+    if (bulkSensorMesh && bulkSensorMesh.material) {
+      bulkSensorMesh.material.transparent = true;
+      bulkSensorMesh.material.opacity = 0;
+      bulkSensorMesh.material.needsUpdate = true;
+    }
+  }, [bulkSensorMesh]);
+
+
   // 讓 CraneInvisibleBulkSensor 隱形
   useEffect(() => {
     if (cranePhysicalParts.bulkSensor && cranePhysicalParts.bulkSensor.material) {
@@ -108,6 +123,7 @@ export default function Crane({ id, modelPath, position, rotation }) {
   // 整個 Crane 作為一個 Kinematic Box，以便我們可以控制其位置
   const [craneRef, craneApi] = useBox(() => ({
     mass: 0, // 無質量，不參與碰撞響應
+    material: 'CraneMeshBody',
     type: 'Kinematic', // 可以通過 api.position.set() 移動
     position: currentCranePosition.toArray(),
     rotation: rotation, // Crane 的初始旋轉
@@ -144,14 +160,72 @@ export default function Crane({ id, modelPath, position, rotation }) {
 
 
   // ----------------- 隱形感測器 (CraneInvisibleBulkSensor) -----------------
-  const bulkSensorProps = useMemo(() => getWorldProperties(cranePhysicalParts.bulkSensor), [cranePhysicalParts.bulkSensor]);
-  const [bulkSensorRef] = useBox(() => ({
+  // const bulkSensorProps = useMemo(() => getWorldProperties(cranePhysicalParts.bulkSensor), [cranePhysicalParts.bulkSensor]);
+  // //   console.log('Crane cranePhysicalParts:', cranePhysicalParts);
+  // // // 提取感測器的世界屬性
+  // //   console.log('Crane bulkSensorProps:', bulkSensorProps);
+
+  // const initialCraneWorldPosition = new THREE.Vector3(...position); // Crane 的初始世界位置
+  // const bulkSensorLocalPosition = new THREE.Vector3(...(bulkSensorProps?.position || [0,0,0])); // 感測器在原始模型中的本地位置
+
+  // // 如果感測器在 Blender 中是相對於 Crane 根部的，你需要將其與 Crane 的初始世界位置結合
+  // // 假設 bulkSensorLocalPosition 已經是相對於 GLTF 模型原點的
+  // const adjustedBulkSensorPosition = initialCraneWorldPosition.add(bulkSensorLocalPosition).toArray();
+
+
+  // change
+  // const [bulkSensorRef] = useBox(() => ({
+  //   mass: 0,
+  //   isTrigger: true,
+  //   type: 'Static', // 感測器通常是靜態的
+  //   position: adjustedBulkSensorPosition?.position || [0, 0, 0],
+  //   rotation: bulkSensorProps?.rotation || [0, 0, 0],
+  //   args: bulkSensorProps?.args || [1, 1, 1],
+  //   onCollideBegin: (e) => {
+  //     const boxId = e.body.userData?.appId;
+  //     if (boxId) {
+  //       setCraneSensorDetected(id, 'BulkSensorDetected', true);
+  //       const boxData = getBoxData(boxId);
+  //       console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered Crane Bulk Sensor.`);
+  //     }
+  //   },
+  //   onCollideEnd: (e) => {
+  //     const boxId = e.body.userData?.appId;
+  //     if (boxId) {
+  //       setCraneSensorDetected(id, 'BulkSensorDetected', false);
+  //       const boxData = getBoxData(boxId);
+  //       console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) left Crane Bulk Sensor.`);
+  //     }
+  //   },
+  // }));
+
+  // ----------------- 隱形感測器 (CraneInvisibleBulkSensor) -----------------
+  // 獲取感測器相對於其父級的本地尺寸和位置
+  const bulkSensorLocalProps = useMemo(() => {
+    if (bulkSensorMesh && bulkSensorMesh.geometry) {
+        // 感測器在 Blender 中的本地位置和尺寸
+        const bbox = new THREE.Box3().setFromObject(bulkSensorMesh); // 使用原始 mesh 獲取其本地邊界框
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+        const position = bulkSensorMesh.position.toArray(); // 使用 mesh 的本地位置
+
+        return {
+            position: position,
+            rotation: bulkSensorMesh.rotation.toArray(),
+            args: size.toArray(),
+        };
+    }
+    return { position: [0, 0, 0], rotation: [0, 0, 0], args: [1, 1, 1] };
+  }, [bulkSensorMesh]);
+
+  // 新增一個 ref 給 bulkSensor 的物理體
+  const [bulkSensorRef, bulkSensorApi] = useBox(() => ({
     mass: 0,
     isTrigger: true,
-    type: 'Static', // 感測器通常是靜態的
-    position: bulkSensorProps?.position || [0, 0, 0],
-    rotation: bulkSensorProps?.rotation || [0, 0, 0],
-    args: bulkSensorProps?.args || [1, 1, 1],
+    type: 'Kinematic', // 設置為 Kinematic，以便我們在 useFrame 中控制它跟隨 Crane
+    position: currentCranePosition.toArray(), // 初始位置隨 Crane 設置
+    rotation: rotation,
+    args: bulkSensorLocalProps.args,
     onCollideBegin: (e) => {
       const boxId = e.body.userData?.appId;
       if (boxId) {
@@ -169,6 +243,9 @@ export default function Crane({ id, modelPath, position, rotation }) {
       }
     },
   }));
+
+
+
 
 
   // ----------------- useFrame for continuous movement -----------------
@@ -191,6 +268,25 @@ export default function Crane({ id, modelPath, position, rotation }) {
       }
     }
 
+
+    // 更新 bulkSensor 的位置，使其跟隨 Crane 的物理體
+    // 獲取 Crane 物理體的當前世界位置和旋轉
+    const cranePhysicsWorldPosition = new THREE.Vector3();
+    const cranePhysicsWorldQuaternion = new THREE.Quaternion();
+    craneApi.position.copy(cranePhysicsWorldPosition); // 直接從 api 獲取當前物理體位置
+    craneApi.quaternion.copy(cranePhysicsWorldQuaternion); // 直接從 api 獲取當前物理體旋轉
+
+    // 計算 bulkSensor 的世界目標位置：Crane 的世界位置 + bulkSensor 的本地偏移（經過 Crane 旋轉）
+    const bulkSensorOffsetFromCrane = new THREE.Vector3(...bulkSensorLocalProps.position);
+    
+    console.log('bulkSensorLocalProps:', bulkSensorLocalProps);
+    
+    bulkSensorOffsetFromCrane.applyQuaternion(cranePhysicsWorldQuaternion);
+    const bulkSensorTargetWorldPosition = cranePhysicsWorldPosition.clone().add(bulkSensorOffsetFromCrane);
+
+    // 設置 bulkSensor 物理體的位置和旋轉
+    bulkSensorApi.position.set(bulkSensorTargetWorldPosition.x, bulkSensorTargetWorldPosition.y, bulkSensorTargetWorldPosition.z);
+    bulkSensorApi.quaternion.set(cranePhysicsWorldQuaternion.x, cranePhysicsWorldQuaternion.y, cranePhysicsWorldQuaternion.z, cranePhysicsWorldQuaternion.w);
 
     // too complicated, so separate parts into MoveTable.jsx, and make the function simple
 
@@ -236,22 +332,25 @@ export default function Crane({ id, modelPath, position, rotation }) {
   return (
     <>
       {/* 渲染 Crane 的其餘部分 GLTF 模型 */}
-      <primitive object={clonedScene} ref={craneRef}>
         {/* Crane 的 GLTF 網格會自動作為 physics body 的子項渲染 */}
+      <primitive object={craneBodyScene} ref={craneRef}>
+      
       </primitive>
 
       {/*  separate to MoveTable.jsx   */ }
-      {/* 單獨渲染 moveTable 的網格，作為其物理體的子項
-      {isolatedMoveTableMesh && (
+      {/* 單獨渲染 moveTable 的網格，作為其物理體的子項 */}
+      {/* {isolatedMoveTableMesh && (
         <primitive object={isolatedMoveTableMesh} ref={moveTableRef} />
       )} */}
 
       {/* 如果需要視覺調試物理碰撞體，可以取消註釋以下代碼 */}
       {/* 僅用於調試，實際應用中應隱藏 */}
-       {bulkSensorProps && (
+       {bulkSensorLocalProps && (
          <mesh ref={bulkSensorRef}>
-           <boxGeometry args={bulkSensorProps.args} />
-           <meshBasicMaterial color="green" wireframe opacity={0.5} transparent />
+           {/* <boxGeometry args={bulkSensorProps.args} /> */}
+           <boxGeometry args={bulkSensorLocalProps.args} />
+           
+           <meshBasicMaterial color="red" wireframe opacity={0.5} transparent />
          </mesh>
        )}
 
@@ -263,7 +362,7 @@ export default function Crane({ id, modelPath, position, rotation }) {
         modelPath={modelPath} // 傳遞 Crane 的模型路徑，讓 MoveTable 自己載入 moveTable 部分
       />
 
-    </>
+    </>  
   );
 }
 
