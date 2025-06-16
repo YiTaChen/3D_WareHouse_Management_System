@@ -21,7 +21,6 @@ const initializeCraneStates = () => {
     // 這裡可以擴展為每個層板或區域的感測器狀態，例如:
     // craneLayer1Occupied: false,
     // craneLayer2Occupied: false,
-    BulkSensorDetected: false,
 
     // Crane 整體移動相關狀態
     currentCranePosition: new THREE.Vector3(0, 3, -10), // Crane 初始世界座標
@@ -37,6 +36,7 @@ const initializeCraneStates = () => {
 
     isCraneMoving: false,
     isMoveTableMoving: false,
+    isMoveTableMoving: false, 
     
   };
   return craneStates;
@@ -82,6 +82,12 @@ export const useCraneStore = create((set, get) => ({
     set((state) => {
       const craneState = state.craneStates[id];
       if (!craneState) return {};
+
+      // 如果 moveTable 正在移動，則不允許 Crane 移動
+      if (craneState.isMoveTableMoving) {
+        console.warn(`Crane ${id}: Cannot move crane while moveTable is in motion.`);
+        return {}; // 不更新狀態
+      }
 
       const newTargetPos = new THREE.Vector3(...targetPosition);
       const newSpeed = speed > 0 ? speed : craneState.craneMoveSpeed; // 使用預設速度如果傳入無效
@@ -138,6 +144,12 @@ export const useCraneStore = create((set, get) => ({
     set((state) => {
       const craneState = state.craneStates[id];
       if (!craneState) return {};
+
+      // 如果 Crane 主體正在移動，則不允許 moveTable 移動
+      if (craneState.isCraneMoving) {
+        console.warn(`Crane ${id}: Cannot move moveTable while crane is in motion.`);
+        return {}; // 不更新狀態
+      }
 
       const newTargetOffset = new THREE.Vector3(...targetOffset);
       const newSpeed = speed > 0 ? speed : craneState.moveTableSpeed; // 使用預設速度如果傳入無效
