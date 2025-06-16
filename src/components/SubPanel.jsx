@@ -3,7 +3,7 @@ import Box from './Box';
 import BoxCreate from './subPages/BoxCreate';
 import CraneControlPanel  from './subPages/test';
 
-// 假設你未來會有多個功能模組，每個模組對應一個分頁內容
+
 // 這裡我們只是 placeholders
 const TabContent1 = () => (
   <BoxCreate tabId={1} />
