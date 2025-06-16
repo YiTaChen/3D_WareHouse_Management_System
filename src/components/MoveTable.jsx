@@ -32,6 +32,17 @@ function getWorldProperties(mesh) {
 }
 
 
+// 輔助函數：獲取 Three.js 物件的本地尺寸 (通常用於創建碰撞體 args)
+function getLocalBoundingBoxSize(mesh) {
+  if (!mesh || !mesh.geometry) return [1, 1, 1];
+
+  const bbox = new THREE.Box3().setFromObject(mesh);
+  const size = new THREE.Vector3();
+  bbox.getSize(size);
+  return size.toArray();
+}
+
+
 
 export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, modelPath }) {
   
@@ -73,16 +84,27 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
     }, [scene]);
 
     // ----------------- moveTable 物理體 -----------------
-    const moveTableDefaultProps = useMemo(() => {
-        if (moveTableMesh && moveTableMesh.geometry) {
-        const bbox = new THREE.Box3().setFromObject(moveTableMesh);
-        const size = new THREE.Vector3();
-        bbox.getSize(size);
-        return { args: size.toArray() };
-        }
-        return { args: [1, 0.2, 1] }; // 預設值
-    }, [moveTableMesh]);
+    // const moveTableDefaultProps = useMemo(() => {
+    //     if (moveTableMesh && moveTableMesh.geometry) {
+    //     const bbox = new THREE.Box3().setFromObject(moveTableMesh);
+    //     const size = new THREE.Vector3();
+    //     bbox.getSize(size);
+    //     return { args: size.toArray() };
+    //     }
+    //     return { args: [1, 0.2, 1] }; // 預設值
+    // }, [moveTableMesh]);
 
+
+    const moveTableLocalProps = useMemo(() => {
+        if (moveTableMesh) {
+        return {
+            position: moveTableMesh.position.toArray(), // 獲取本地位置
+            rotation: moveTableMesh.rotation.toArray(), // 獲取本地旋轉
+            args: getLocalBoundingBoxSize(moveTableMesh), // 獲取本地尺寸
+        };
+        }
+        return { position: [0,0,0], rotation: [0,0,0], args: [1, 0.2, 1] }; // 預設值
+    }, [moveTableMesh]);
 
 
     const [moveTableRef, moveTableApi] = useBox(() => ({
@@ -93,7 +115,10 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
                         .add(new THREE.Vector3(...currentMoveTableLocalOffset).applyEuler(new THREE.Euler(...craneWorldRotation)))
                         .toArray(),
         rotation: craneWorldRotation, // moveTable 和 Crane 保持相同的旋轉
-        args: moveTableDefaultProps.args,
+
+        // args: moveTableDefaultProps.args, // changed to use moveTableLocalProps
+        args: moveTableLocalProps.args,
+        
         material: 'craneTable', // 用於與 Box 互動的材質
     }));
 
@@ -101,9 +126,8 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
 
     // ----------------- useFrame for moveTable movement -----------------
     useFrame((state, delta) => {
-        // 只有當 Crane 主體不移動時，moveTable 才能移動
-        if (!isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset)) {
-        // 獲取 Crane 的最新世界位置和旋轉 (因為 Crane 自己可能在移動)
+            if (!isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset)) {
+        // 獲取 Crane 的最新世界位置和旋轉 (從 props 傳入)
         const cranePos = new THREE.Vector3(...craneWorldPosition);
         const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
 
@@ -116,12 +140,12 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
         const currentMoveTableWorldPosition = new THREE.Vector3();
         moveTableRef.current.getWorldPosition(currentMoveTableWorldPosition);
 
+
         const distance = currentMoveTableWorldPosition.distanceTo(targetMoveTableWorldPosition);
         const moveDistance = moveTableSpeed * delta;
 
         if (moveDistance >= distance) {
             moveTableApi.position.set(targetMoveTableWorldPosition.x, targetMoveTableWorldPosition.y, targetMoveTableWorldPosition.z);
-            // 到達目標後，更新 store 中的本地偏移為最終目標值
             updateMoveTableCurrentLocalOffset(id, targetMoveTableLocalOffset.toArray());
         } else {
             const direction = targetMoveTableWorldPosition.clone().sub(currentMoveTableWorldPosition).normalize();
@@ -129,7 +153,6 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
             moveTableApi.position.set(newWorldPosition.x, newWorldPosition.y, newWorldPosition.z);
 
             // 反向計算新的本地偏移，用於更新 store 狀態
-            // (新世界位置 - Crane世界位置) 應用 Crane 世界旋轉的逆向四元數
             const newLocalOffset = newWorldPosition.clone().sub(cranePos).applyQuaternion(craneQuat.clone().invert());
             updateMoveTableCurrentLocalOffset(id, newLocalOffset.toArray());
         }
@@ -144,9 +167,9 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
         )}
 
         {/* 為了調試，可以渲染 moveTable 的物理碰撞箱 */}
-        {moveTableDefaultProps && (
+        {moveTableLocalProps && (
             <mesh ref={moveTableRef}>
-            <boxGeometry args={moveTableDefaultProps.args} />
+            <boxGeometry args={moveTableLocalProps.args} />
             <meshBasicMaterial color="orange" wireframe opacity={0.5} transparent />
             </mesh>
         )}

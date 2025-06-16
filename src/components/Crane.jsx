@@ -60,7 +60,7 @@ export default function Crane({ id, modelPath, position, rotation }) {
 
   // const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
   // separate to MoveTable
-
+  console.log('Crane currentCranePosition:', currentCranePosition);
 
 
   // 克隆場景並移除 moveTable 網格

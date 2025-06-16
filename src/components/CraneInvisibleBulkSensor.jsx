@@ -23,7 +23,7 @@ function getLocalBoundingBoxSize(mesh) {
 
 
 export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosition, craneWorldRotation }) {
-  const { scene } = useGLTF(modelPath); // 載入完整的 Crane 模型來提取感測器部分
+  const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入完整的 Crane 模型來提取感測器部分
 
   const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
   const getBoxData = useBoxStore(state => state.getBoxData);
