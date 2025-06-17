@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Box from './Box';
 import BoxCreate from './subPages/BoxCreate';
-import CraneControlPanel  from './subPages/test';
-
+import CraneControlPanel  from './subPages/Test';
+import ObjectBindingTest from './subPages/ObjectBindingTest';
 
 // 這裡我們只是 placeholders
 const TabContent1 = () => (
@@ -14,11 +14,7 @@ const TabContent2 = () => (
 );
 
 const TabContent3 = () => (
-  <div style={{ padding: '10px' }}>
-    <h3>Tab 3 Content (All Sensor Status)</h3>
-
-    <p> Under construction ... </p>
-  </div>
+  <ObjectBindingTest tabId={3} />
 );
 
 // 你可以在這裡定義更多的 TabContentX 元件
