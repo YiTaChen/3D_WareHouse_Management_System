@@ -107,6 +107,7 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
     }, [moveTableMesh]);
 
 
+    // ----------------- moveTable 物理體 -----------------
     const [moveTableRef, moveTableApi] = useBox(() => ({
         mass: 0,
         type: 'Kinematic',
@@ -126,36 +127,39 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
 
     // ----------------- useFrame for moveTable movement -----------------
     useFrame((state, delta) => {
-            if (!isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset)) {
+        
+        // 1. --- 相對於 Crane 的世界位置同步 (總是執行) ---
+        // 這確保 moveTable 總是跟隨 Crane 主體的世界移動和旋轉
+
         // 獲取 Crane 的最新世界位置和旋轉 (從 props 傳入)
         const cranePos = new THREE.Vector3(...craneWorldPosition);
         const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
 
-        // 計算 moveTable 的世界目標位置
-        const targetMoveTableWorldPosition = cranePos.clone().add(
-            targetMoveTableLocalOffset.clone().applyQuaternion(craneQuat)
-        );
+        // 計算 moveTable 的世界位置：Crane 的世界位置 + currentMoveTableLocalOffset（經過 Crane 旋轉）
+        const moveTableOffsetFromCrane = new THREE.Vector3(...currentMoveTableLocalOffset);
+        moveTableOffsetFromCrane.applyQuaternion(craneQuat); // 將本地偏移量轉換為世界方向
+        const moveTableActualWorldPosition = cranePos.clone().add(moveTableOffsetFromCrane);
 
-        // 獲取 moveTable 的當前世界位置
-        const currentMoveTableWorldPosition = new THREE.Vector3();
-        moveTableRef.current.getWorldPosition(currentMoveTableWorldPosition);
+        // 設定 moveTable 物理體的世界位置和旋轉
+        moveTableApi.position.set(moveTableActualWorldPosition.x, moveTableActualWorldPosition.y, moveTableActualWorldPosition.z);
+        moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w); // 保持與 Crane 同步旋轉
 
 
-        const distance = currentMoveTableWorldPosition.distanceTo(targetMoveTableWorldPosition);
-        const moveDistance = moveTableSpeed * delta;
+        // 2. --- moveTable 相對於 Crane 的自身移動邏輯 (條件執行) ---
+        // 只有當 Crane 主體靜止且 moveTable 需要進行相對移動時才更新其 currentMoveTableLocalOffset
+        if (!isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset)) {
+            const distance = currentMoveTableLocalOffset.distanceTo(targetMoveTableLocalOffset);
+            const moveDistance = moveTableSpeed * delta;
 
-        if (moveDistance >= distance) {
-            moveTableApi.position.set(targetMoveTableWorldPosition.x, targetMoveTableWorldPosition.y, targetMoveTableWorldPosition.z);
-            updateMoveTableCurrentLocalOffset(id, targetMoveTableLocalOffset.toArray());
-        } else {
-            const direction = targetMoveTableWorldPosition.clone().sub(currentMoveTableWorldPosition).normalize();
-            const newWorldPosition = currentMoveTableWorldPosition.clone().add(direction.multiplyScalar(moveDistance));
-            moveTableApi.position.set(newWorldPosition.x, newWorldPosition.y, newWorldPosition.z);
-
-            // 反向計算新的本地偏移，用於更新 store 狀態
-            const newLocalOffset = newWorldPosition.clone().sub(cranePos).applyQuaternion(craneQuat.clone().invert());
-            updateMoveTableCurrentLocalOffset(id, newLocalOffset.toArray());
-        }
+            if (moveDistance >= distance) {
+                // 到達目標，直接設定最終偏移量
+                updateMoveTableCurrentLocalOffset(id, targetMoveTableLocalOffset.toArray());
+            } else {
+                // 向目標移動
+                const direction = targetMoveTableLocalOffset.clone().sub(currentMoveTableLocalOffset).normalize();
+                const newLocalOffset = currentMoveTableLocalOffset.clone().add(direction.multiplyScalar(moveDistance));
+                updateMoveTableCurrentLocalOffset(id, newLocalOffset.toArray());
+            }
         }
     });
 
