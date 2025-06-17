@@ -1,6 +1,6 @@
 
 
-import React, { useMemo, useEffect, useRef  } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback  } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
@@ -37,6 +37,15 @@ function getWorldProperties(mesh) {
     args: finalSize,
   };
 }
+
+
+  function getLocalBoundingBoxSize(mesh) {
+    if (!mesh || !mesh.geometry) return [1, 1, 1];
+      const bbox = new THREE.Box3().setFromObject(mesh);
+      const size = new THREE.Vector3();
+      bbox.getSize(size);
+      return size.toArray();
+  }
 
 export default function Crane({ id, modelPath, position, rotation }) {
   const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入貨架的 GLTF 模型
@@ -109,8 +118,10 @@ export default function Crane({ id, modelPath, position, rotation }) {
     type: 'Kinematic', // 可以通過 api.position.set() 移動
     position: currentCranePosition.toArray(),
     rotation: rotation, // Crane 的初始旋轉
-    args: [0, 0, 0], // 需要根據你的實際 Crane 模型尺寸調整這個 args // change to [0, 0, 0] for only position reference
+    args: [0.1, 0.1, 0.1], // 需要根據你的實際 Crane 模型尺寸調整這個 args // change to [0, 0, 0] for only position reference
                      // 這是整個 Crane 的碰撞箱尺寸，可以用 Blender 測量
+
+    userData: { id: `craneBody-${id}` }
   }));
 
 
@@ -186,6 +197,7 @@ export default function Crane({ id, modelPath, position, rotation }) {
           craneWorldPosition={currentCranePosition.toArray()}
           craneWorldRotation={rotation}
           modelPath={modelPath} // Sensor 也從完整的模型中提取
+          setCraneSensorDetected={setCraneSensorDetected}
         />
 
 

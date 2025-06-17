@@ -29,48 +29,37 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
         targetMoveTableLocalOffset,
         moveTableSpeed,
         isCraneMoving, // 新增：判斷 Crane 主體是否在移動
-    } = useCraneStore(state => state.getCraneState(id));
+        setMoveTableRef // Get the action to set moveTable ref
+
+    } = useCraneStore(state => ({
+        ...state.getCraneState(id),
+        setMoveTableRef: state.setMoveTableRef //
+    }));
 
     const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
 
-    // // 提取 moveTable 網格
-    // const moveTableMesh = useMemo(() => {
-    //     let mesh = null;
-    //     console.log('obj.name:', scene.name);
-    //     scene.traverse((obj) => {
-    //     if (obj.name === 'movePlate') {
-    //         mesh = obj.clone(); // 克隆 moveTable，確保它獨立
-    //         // 確保原始 GLTF 中的 moveTable 是隱形的
-    //         if (mesh.material) {
-    //             mesh.material.transparent = true;
-    //             mesh.material.opacity = 0; // 完全透明
-    //             mesh.material.needsUpdate = true;
-    //         }
-    //         // 如果 moveTable 是一個組，裡面有子網格，需要遍歷它們
-    //         mesh.traverse((child) => {
-    //             if (child.isMesh && child.material) {
-    //                 child.material = child.material.clone(); // 克隆材質以避免修改原始
-    //                 child.material.transparent = true;
-    //                 child.material.opacity = 0;
-    //                 child.material.needsUpdate = true;
-    //             }
-    //         });
-    //     }
-    //     });
-    //     return mesh;
-    // }, [scene]);
-
-
     const moveTableMesh = useMemo(() => {
-    let mesh = null;
-    fullCraneScene.traverse((obj) => {
-      if (obj.name === 'movePlate') {
-        mesh = obj.clone(); // 克隆 movePlate
-        // ... 設置透明材質 ...
-      }
-    });
-    return mesh;
-  }, [fullCraneScene]); // 依賴 fullCraneScene
+        let mesh = null;
+        fullCraneScene.traverse((obj) => {
+        if (obj.name === 'movePlate') {
+            mesh = obj.clone();
+            if (mesh.material) {
+            mesh.material.transparent = true;
+            mesh.material.opacity = 0;
+            mesh.material.needsUpdate = true;
+            }
+            mesh.traverse((child) => {
+            if (child.isMesh && child.material) {
+                child.material = child.material.clone();
+                child.material.transparent = true;
+                child.material.opacity = 0;
+                child.material.needsUpdate = true;
+            }
+            });
+        }
+        });
+        return mesh;
+    }, [fullCraneScene]);
 
     // ----------------- moveTable 物理體 -----------------
     // const moveTableDefaultProps = useMemo(() => {
@@ -88,7 +77,7 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
         
         
         if (moveTableMesh) {
-            console.log('moveTableMesh:', moveTableMesh.position);
+            // console.log('moveTableMesh:', moveTableMesh.position);
         return {
             
             position: moveTableMesh.position.toArray(), // 獲取本地位置
@@ -117,8 +106,21 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
         args: moveTableLocalProps.args,
         
         material: 'craneTable', // 用於與 Box 互動的材質
+
+        userData: { id: `movePlate-${id}`, args: moveTableLocalProps.args }
+
     }));
 
+
+    useEffect(() => {
+        if (moveTableRef.current) {
+            setMoveTableRef(id, moveTableRef); // Store the moveTable's physics body Ref
+        }
+        // Cleanup: Remove the ref from the store when the component unmounts
+        return () => {
+            setMoveTableRef(id, null);
+        };
+    }, [id, moveTableRef, setMoveTableRef]);
 
 
     // ----------------- useFrame for moveTable movement -----------------
