@@ -23,6 +23,8 @@ export default function Materials() {
   
   useContactMaterial('box', 'craneTable', { friction: 10, restitution: 0 })
 
+  useContactMaterial('box', 'CraneMeshBody', { friction: 1000, restitution: 0 })
+
 
   return null
 }
