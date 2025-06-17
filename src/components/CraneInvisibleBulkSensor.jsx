@@ -23,35 +23,49 @@ function getLocalBoundingBoxSize(mesh) {
 
 
 export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosition, craneWorldRotation }) {
-  const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入完整的 Crane 模型來提取感測器部分
+  
+  
+  // const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入完整的 Crane 模型來提取感測器部分
+  const { scene: fullCraneScene } = useGLTF('/Crane_ver1.gltf');
 
   const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
   const getBoxData = useBoxStore(state => state.getBoxData);
 
-  // 提取感測器網格
+  // // 提取感測器網格
+  // const bulkSensorMesh = useMemo(() => {
+  //   let mesh = null;
+  //   scene.traverse((obj) => {
+  //     if (obj.isMesh && obj.name === 'CraneInvisibleBulkSensor') {
+  //       mesh = obj.clone(); // 克隆網格以確保獨立性
+  //       // 將 Blender 中的感測器網格隱形
+  //       if (mesh.material) {
+  //         mesh.material.transparent = true;
+  //         mesh.material.opacity = 0;
+  //         mesh.material.needsUpdate = true;
+  //       }
+  //       mesh.traverse((child) => { // 如果感測器是個組，遍歷其子網格
+  //           if (child.isMesh && child.material) {
+  //               child.material = child.material.clone();
+  //               child.material.transparent = true;
+  //               child.material.opacity = 0;
+  //               child.material.needsUpdate = true;
+  //           }
+  //       });
+  //     }
+  //   });
+  //   return mesh;
+  // }, [scene]);
+
   const bulkSensorMesh = useMemo(() => {
     let mesh = null;
-    scene.traverse((obj) => {
+    fullCraneScene.traverse((obj) => {
       if (obj.isMesh && obj.name === 'CraneInvisibleBulkSensor') {
-        mesh = obj.clone(); // 克隆網格以確保獨立性
-        // 將 Blender 中的感測器網格隱形
-        if (mesh.material) {
-          mesh.material.transparent = true;
-          mesh.material.opacity = 0;
-          mesh.material.needsUpdate = true;
-        }
-        mesh.traverse((child) => { // 如果感測器是個組，遍歷其子網格
-            if (child.isMesh && child.material) {
-                child.material = child.material.clone();
-                child.material.transparent = true;
-                child.material.opacity = 0;
-                child.material.needsUpdate = true;
-            }
-        });
+        mesh = obj.clone(); // 克隆感測器
+        // ... 設置透明材質 ...
       }
     });
     return mesh;
-  }, [scene]);
+  }, [fullCraneScene]); // 依賴 fullCraneScene
 
   // 獲取感測器在 Blender 中的本地位置和尺寸
   const bulkSensorLocalProps = useMemo(() => {

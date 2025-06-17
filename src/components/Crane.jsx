@@ -40,6 +40,7 @@ function getWorldProperties(mesh) {
 
 export default function Crane({ id, modelPath, position, rotation }) {
   const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入貨架的 GLTF 模型
+  // const { scene: gltfScene } = useGLTF('/Crane_ver1.gltf'); // 載入貨架的 GLTF 模型
 
   const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
   const getBoxData = useBoxStore(state => state.getBoxData);
@@ -60,23 +61,43 @@ export default function Crane({ id, modelPath, position, rotation }) {
 
   // const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
   // separate to MoveTable
-  console.log('Crane currentCranePosition:', currentCranePosition);
+  
+  // console.log('Crane currentCranePosition:', currentCranePosition);
 
 
-  // 克隆場景並移除 moveTable 網格
   const craneBodyScene = useMemo(() => {
-    const clone = scene.clone(true);
-    clone.traverse((obj) => {
-      if (obj.name === 'moveTable' && obj.parent) {
-        obj.parent.remove(obj); // 移除 moveTable
+      // 確保 scene 已經載入
+      if (!scene) {
+        console.warn("GLTF scene not loaded yet for Crane. Skipping clone.");
+        return null;
       }
-      // 不再移除 CraneInvisibleBulkSensor，因為它會被獨立處理
-    });
-    clone.position.set(...position);
-    clone.rotation.set(...rotation);
-    clone.updateMatrixWorld(true);
-    return clone;
-  }, [scene, position, rotation]);
+
+      const clone = scene.clone(true); // 深度克隆整個場景
+
+      // 收集要移除的物件
+      const objectsToDetach = [];
+      clone.traverse((obj) => {
+        // 如果這個物件是 movePlate 或 CraneInvisibleBulkSensor
+        if (obj.name === 'movePlate' || obj.name === 'CraneInvisibleBulkSensor') {
+          objectsToDetach.push(obj);
+        }
+      });
+
+      // 在遍歷結束後，將這些物件從克隆場景中「分離」
+      // 注意：這裡不是 obj.parent.remove(obj); 而是將它們從層級中移除但不刪除
+      // 因為它們的 Mesh 還需要傳給獨立組件的 primitive
+      // 實際操作中，obj.parent.remove(obj) 是正確的，因為你希望 clone 裡沒有它們
+      objectsToDetach.forEach(obj => {
+          if (obj.parent) {
+              obj.parent.remove(obj); // 從 craneBodyScene 樹中移除
+          }
+      });
+
+      clone.position.set(...position);
+      clone.rotation.set(...rotation);
+      clone.updateMatrixWorld(true);
+      return clone;
+    }, [scene, position, rotation]);
 
 
 

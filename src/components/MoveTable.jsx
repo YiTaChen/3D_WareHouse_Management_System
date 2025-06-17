@@ -6,32 +6,6 @@ import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
 
 
-function getWorldProperties(mesh) {
-    if (!mesh) return null;
-
-    const worldPosition = new THREE.Vector3();
-    const worldQuaternion = new THREE.Quaternion();
-    const worldScale = new THREE.Vector3();
-
-    mesh.updateWorldMatrix(true, false);
-    mesh.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-
-    const localSize = mesh.geometry && mesh.geometry.boundingBox ?
-        new THREE.Vector3().subVectors(mesh.geometry.boundingBox.max, mesh.geometry.boundingBox.min) :
-        new THREE.Vector3(1, 1, 1);
-    const finalSize = localSize.multiply(worldScale).toArray();
-
-    const euler = new THREE.Euler().setFromQuaternion(worldQuaternion);
-    const rotationArray = [euler.x, euler.y, euler.z];
-
-    return {
-        position: worldPosition.toArray(),
-        rotation: rotationArray,
-        args: finalSize,
-    };
-}
-
-
 // 輔助函數：獲取 Three.js 物件的本地尺寸 (通常用於創建碰撞體 args)
 function getLocalBoundingBoxSize(mesh) {
   if (!mesh || !mesh.geometry) return [1, 1, 1];
@@ -46,7 +20,9 @@ function getLocalBoundingBoxSize(mesh) {
 
 export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, modelPath }) {
   
-    const { scene } = useGLTF('/Crane_ver1.gltf');
+    // const { scene } = useGLTF('/Crane_ver1.gltf');
+    const { scene: fullCraneScene } = useGLTF('/Crane_ver1.gltf');
+
 
     const {
         currentMoveTableLocalOffset,
@@ -57,31 +33,44 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
 
     const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
 
-    // 提取 moveTable 網格
+    // // 提取 moveTable 網格
+    // const moveTableMesh = useMemo(() => {
+    //     let mesh = null;
+    //     console.log('obj.name:', scene.name);
+    //     scene.traverse((obj) => {
+    //     if (obj.name === 'movePlate') {
+    //         mesh = obj.clone(); // 克隆 moveTable，確保它獨立
+    //         // 確保原始 GLTF 中的 moveTable 是隱形的
+    //         if (mesh.material) {
+    //             mesh.material.transparent = true;
+    //             mesh.material.opacity = 0; // 完全透明
+    //             mesh.material.needsUpdate = true;
+    //         }
+    //         // 如果 moveTable 是一個組，裡面有子網格，需要遍歷它們
+    //         mesh.traverse((child) => {
+    //             if (child.isMesh && child.material) {
+    //                 child.material = child.material.clone(); // 克隆材質以避免修改原始
+    //                 child.material.transparent = true;
+    //                 child.material.opacity = 0;
+    //                 child.material.needsUpdate = true;
+    //             }
+    //         });
+    //     }
+    //     });
+    //     return mesh;
+    // }, [scene]);
+
+
     const moveTableMesh = useMemo(() => {
-        let mesh = null;
-        scene.traverse((obj) => {
-        if (obj.name === 'moveTable') {
-            mesh = obj.clone(); // 克隆 moveTable，確保它獨立
-            // 確保原始 GLTF 中的 moveTable 是隱形的
-            if (mesh.material) {
-                mesh.material.transparent = true;
-                mesh.material.opacity = 0; // 完全透明
-                mesh.material.needsUpdate = true;
-            }
-            // 如果 moveTable 是一個組，裡面有子網格，需要遍歷它們
-            mesh.traverse((child) => {
-                if (child.isMesh && child.material) {
-                    child.material = child.material.clone(); // 克隆材質以避免修改原始
-                    child.material.transparent = true;
-                    child.material.opacity = 0;
-                    child.material.needsUpdate = true;
-                }
-            });
-        }
-        });
-        return mesh;
-    }, [scene]);
+    let mesh = null;
+    fullCraneScene.traverse((obj) => {
+      if (obj.name === 'movePlate') {
+        mesh = obj.clone(); // 克隆 movePlate
+        // ... 設置透明材質 ...
+      }
+    });
+    return mesh;
+  }, [fullCraneScene]); // 依賴 fullCraneScene
 
     // ----------------- moveTable 物理體 -----------------
     // const moveTableDefaultProps = useMemo(() => {
@@ -96,14 +85,21 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
 
 
     const moveTableLocalProps = useMemo(() => {
+        
+        
         if (moveTableMesh) {
+            console.log('moveTableMesh:', moveTableMesh.position);
         return {
+            
             position: moveTableMesh.position.toArray(), // 獲取本地位置
+            // position: [0, 1, 0], // 預設值
+
             rotation: moveTableMesh.rotation.toArray(), // 獲取本地旋轉
             args: getLocalBoundingBoxSize(moveTableMesh), // 獲取本地尺寸
         };
         }
-        return { position: [0,0,0], rotation: [0,0,0], args: [1, 0.2, 1] }; // 預設值
+        console.warn('moveTableMesh is not available, using default props');
+        return { position: [0,0,0], rotation: [0,0,0], args: [2, 1, 2] }; // 預設值
     }, [moveTableMesh]);
 
 
