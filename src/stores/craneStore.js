@@ -2,43 +2,47 @@ import { create } from 'zustand';
 // 假設你有一個 CraneData.js 包含貨架的配置
 // import CraneData from '../data/CraneData'; // 如果有需要，可以引入貨架數據
 import * as THREE from 'three'; // 引入 Three.js 用於向量計算
-
+import CraneData from '../data/CraneData'; 
 
 const initializeCraneStates = () => {
   const craneStates = {};
-  // 這裡可以根據你的 CraneData 來初始化多個貨架的狀態
-  // 例如，如果每個貨架有唯一的 ID，可以這樣做
-  // CraneData.shelves.forEach(crane => {
-  //   craneStates[crane.id] = {
-  //     BulkSensorDetected: false,
-  //     // 其他可能狀態，例如每個層板的狀態
-  //   };
-  // });
+  
 
-  // 暫時為單個貨架設置一個預設狀態，你可以根據實際 CraneData 調整
-  craneStates['crane001'] = { // 使用你的 GLTF 模型名或一個唯一的 ID
-    BulkSensorDetected: false,
-    // 這裡可以擴展為每個層板或區域的感測器狀態，例如:
-    // craneLayer1Occupied: false,
-    // craneLayer2Occupied: false,
+  CraneData.cranes.forEach(craneConfig => {
+    // Basic validation to ensure necessary properties exist
+    if (!craneConfig.id || !craneConfig.position || !craneConfig.rotation || !craneConfig.movePlateOffset) {
+      console.warn(`Skipping invalid crane configuration:`, craneConfig);
+      return;
+    }
 
-    // Crane 整體移動相關狀態
-    currentCranePosition: new THREE.Vector3(0, 3, -10), // Crane 初始世界座標
-    targetCranePosition: new THREE.Vector3(0, 3, -10),  // Crane 目標世界座標
-    craneMoveSpeed: 1, // Crane 整體移動速度 (單位/秒)
+    craneStates[craneConfig.id] = {
+   
+    //  ** change hard coded crane id to craneConfig.id **
+    // 暫時為單個貨架設置一個預設狀態，你可以根據實際 CraneData 調整
+    // craneStates['crane001'] = { // 使用你的 GLTF 模型名或一個唯一的 ID
+      
+        BulkSensorDetected: false,
+        // 這裡可以擴展為每個層板或區域的感測器狀態，例如:
+        // craneLayer1Occupied: false,
+        // craneLayer2Occupied: false,
 
-    // moveTable 移動相關狀態
-    // 注意：moveTable 的位置是相對於 Crane 根部的「偏移量」
-    // 因為它的物理體是 Kinematic，我們會直接設定它的世界座標，但邏輯上它是相對於 Crane 移動
-    currentMoveTableLocalOffset: new THREE.Vector3(0, 1, 0), // moveTable 相對於 Crane 根部的當前本地偏移 (預設為 0)
-    targetMoveTableLocalOffset: new THREE.Vector3(0, 1, 0),  // moveTable 相對於 Crane 根部的目標本地偏移
-    moveTableSpeed: 1, // moveTable 移動速度 (單位/秒)
+        // Crane 整體移動相關狀態
+        currentCranePosition: new THREE.Vector3(0, 3, -10), // Crane 初始世界座標
+        targetCranePosition: new THREE.Vector3(0, 3, -10),  // Crane 目標世界座標
+        craneMoveSpeed: 1, // Crane 整體移動速度 (單位/秒)
 
-    isCraneMoving: false,
-    isMoveTableMoving: false,
-    isMoveTableMoving: false, 
-    
-  };
+        // moveTable 移動相關狀態
+        // 注意：moveTable 的位置是相對於 Crane 根部的「偏移量」
+        // 因為它的物理體是 Kinematic，我們會直接設定它的世界座標，但邏輯上它是相對於 Crane 移動
+        currentMoveTableLocalOffset: new THREE.Vector3(...craneConfig.movePlateOffset),
+        targetMoveTableLocalOffset: new THREE.Vector3(...craneConfig.movePlateOffset),
+        moveTableSpeed: 1, // moveTable 移動速度 (單位/秒)
+
+        isCraneMoving: false,
+        isMoveTableMoving: false,
+        
+     };
+  });
   return craneStates;
 };
 
@@ -81,7 +85,10 @@ export const useCraneStore = create((set, get) => ({
   setCraneTargetPosition: (id, targetPosition, speed) => {
     set((state) => {
       const craneState = state.craneStates[id];
-      if (!craneState) return {};
+      if (!craneState) {
+        console.warn(`Crane ${id} not found in store.`);
+        return {};
+      }
 
       // 如果 moveTable 正在移動，則不允許 Crane 移動
       if (craneState.isMoveTableMoving) {
@@ -134,39 +141,42 @@ export const useCraneStore = create((set, get) => ({
 
   // --- 新增 moveTable 移動 Action ---
 
-  /**
-   * 設定 moveTable 相對於 Crane 根部的目標本地偏移和速度
-   * @param {string} id - Crane 的 ID
-   * @param {number[]} targetOffset - 目標本地偏移量 [offsetX, offsetY, offsetZ]
-   * @param {number} speed - 移動速度 (單位/秒)
-   */
-  setMoveTableTargetLocalOffset: (id, targetOffset, speed) => {
-    set((state) => {
-      const craneState = state.craneStates[id];
-      if (!craneState) return {};
+  // /**
+  //  * 設定 moveTable 相對於 Crane 根部的目標本地偏移和速度
+  //  * @param {string} id - Crane 的 ID
+  //  * @param {number[]} targetOffset - 目標本地偏移量 [offsetX, offsetY, offsetZ]
+  //  * @param {number} speed - 移動速度 (單位/秒)
+  //  */
+  // setMoveTableTargetLocalOffset: (id, targetOffset, speed) => {
+  //   set((state) => {
+  //     const craneState = state.craneStates[id];
+  //     if (!craneState) {
+  //       console.warn(`Crane ${id} not found in store.`);
+  //       return {};
+  //     }
 
-      // 如果 Crane 主體正在移動，則不允許 moveTable 移動
-      if (craneState.isCraneMoving) {
-        console.warn(`Crane ${id}: Cannot move moveTable while crane is in motion.`);
-        return {}; // 不更新狀態
-      }
+  //     // 如果 Crane 主體正在移動，則不允許 moveTable 移動
+  //     if (craneState.isCraneMoving) {
+  //       console.warn(`Crane ${id}: Cannot move moveTable while crane is in motion.`);
+  //       return {}; // 不更新狀態
+  //     }
 
-      const newTargetOffset = new THREE.Vector3(...targetOffset);
-      const newSpeed = speed > 0 ? speed : craneState.moveTableSpeed; // 使用預設速度如果傳入無效
+  //     const newTargetOffset = new THREE.Vector3(...targetOffset);
+  //     const newSpeed = speed > 0 ? speed : craneState.moveTableSpeed; // 使用預設速度如果傳入無效
 
-      return {
-        craneStates: {
-          ...state.craneStates,
-          [id]: {
-            ...craneState,
-            targetMoveTableLocalOffset: newTargetOffset,
-            moveTableSpeed: newSpeed,
-            isMoveTableMoving: !craneState.currentMoveTableLocalOffset.equals(newTargetOffset), // 如果目標不同於當前，則認為正在移動
-          },
-        },
-      };
-    });
-  },
+  //     return {
+  //       craneStates: {
+  //         ...state.craneStates,
+  //         [id]: {
+  //           ...craneState,
+  //           targetMoveTableLocalOffset: newTargetOffset,
+  //           moveTableSpeed: newSpeed,
+  //           isMoveTableMoving: !craneState.currentMoveTableLocalOffset.equals(newTargetOffset), // 如果目標不同於當前，則認為正在移動
+  //         },
+  //       },
+  //     };
+  //   });
+  // },
 
   /**
    * 更新 moveTable 的當前實際本地偏移 (由 Crane.jsx 調用)
@@ -194,6 +204,55 @@ export const useCraneStore = create((set, get) => ({
     });
   },
 
+  /**
+   * 設定 moveTable 相對於其「初始本地偏移」的目標額外位移和速度。
+   *
+   * 範例：如果 movePlate 初始在 [0,1,0]，
+   * 調用 setMoveTableTargetLocalOffset('crane001', [0, -1, -1], speed)
+   * 則 movePlate 會移動到 [0,1,0] + [0,-1,-1] = [0,0,-1] 的絕對本地偏移。
+   *
+   * @param {string} id - Crane 的 ID
+   * @param {number[]} relativeOffset - 相對於 movePlate 初始位置的額外位移量 [offsetX, offsetY, offsetZ]
+   * @param {number} speed - 移動速度 (單位/秒)
+   */
+  setMoveTableTargetLocalOffset: (id, relativeOffset, speed) => { // 參數名稱改為 relativeOffset 更清晰
+    set((state) => {
+      const craneState = state.craneStates[id];
+      if (!craneState) {
+        console.warn(`Crane ${id} not found in store.`);
+        return {};
+      }
 
+      // 如果 Crane 主體正在移動，則不允許 moveTable 移動
+      if (craneState.isCraneMoving) {
+        console.warn(`Crane ${id}: Cannot move moveTable while crane is in motion.`);
+        return {}; // 不更新狀態
+      }
+
+      // 1. 獲取該 Crane 類型在 CraneData 中定義的 movePlate 初始偏移量
+      const craneConfig = get().craneStates[id]; // 獲取當前 crane 的配置 (包括 movePlateOffset)
+      const initialMovePlateOffset = new THREE.Vector3(...craneConfig.currentMoveTableLocalOffset); // 這裡使用 currentMoveTableLocalOffset 作為基礎，因為它已經包含了初始值
+
+      // 2. 計算最終的絕對目標本地偏移量
+      // (初始本地偏移 + 提供的相對偏移)
+      const finalAbsoluteTargetOffset = initialMovePlateOffset.clone().add(new THREE.Vector3(...relativeOffset)); // 注意這裡使用 initialMovePlateOffset.clone() 避免修改原對象
+
+      const newSpeed = speed > 0 ? speed : craneState.moveTableSpeed; // 使用預設速度如果傳入無效
+
+      return {
+        craneStates: {
+          ...state.craneStates,
+          [id]: {
+            ...craneState,
+            // 將計算出的絕對目標偏移量存入 targetMoveTableLocalOffset
+            targetMoveTableLocalOffset: finalAbsoluteTargetOffset,
+            moveTableSpeed: newSpeed,
+            // 判斷是否移動的邏輯依然基於 current 和 target 的絕對值
+            isMoveTableMoving: !craneState.currentMoveTableLocalOffset.equals(finalAbsoluteTargetOffset),
+          },
+        },
+      };
+    });
+  },
 
 }));
