@@ -19,7 +19,7 @@ export default function CraneControlPanel() {
 
   // 移動 moveTable 相對於 Crane 根部在 Y 軸上向上移動 1 單位 (回到原位)
   const moveMoveTableUp = () => {
-    setMoveTableTargetLocalOffset('crane001', [0, 0, 0], 0.5);
+    setMoveTableTargetLocalOffset('crane001', [0, 1, 0], 0.5);
   };
 
   return (
