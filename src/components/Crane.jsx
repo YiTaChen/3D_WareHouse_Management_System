@@ -1,6 +1,6 @@
 
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef  } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
@@ -88,10 +88,12 @@ export default function Crane({ id, modelPath, position, rotation }) {
     type: 'Kinematic', // 可以通過 api.position.set() 移動
     position: currentCranePosition.toArray(),
     rotation: rotation, // Crane 的初始旋轉
-    args: [3, 5, 3], // 需要根據你的實際 Crane 模型尺寸調整這個 args
+    args: [0, 0, 0], // 需要根據你的實際 Crane 模型尺寸調整這個 args // change to [0, 0, 0] for only position reference
                      // 這是整個 Crane 的碰撞箱尺寸，可以用 Blender 測量
   }));
 
+
+  // const debugMeshRef = useRef(); // for debug mesh
 
   // ----------------- useFrame for continuous movement -----------------
   useFrame((state, delta) => {
@@ -110,10 +112,23 @@ export default function Crane({ id, modelPath, position, rotation }) {
         const newPosition = currentCranePosition.clone().add(direction.multiplyScalar(moveDistance));
         craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
         updateCraneCurrentPosition(id, newPosition.toArray());
+      
       }
+
     }
 
+    // //  debug mesh with the physics body
+    // if (debugMeshRef.current && craneRef.current) {
+    //     // Get the current world position and quaternion of the physics body's mesh (craneRef.current)
+    //     const physicsMeshPosition = new THREE.Vector3();
+    //     const physicsMeshQuaternion = new THREE.Quaternion();
+    //     craneRef.current.getWorldPosition(physicsMeshPosition);
+    //     craneRef.current.getWorldQuaternion(physicsMeshQuaternion);
 
+    //     // Apply these to the debug mesh
+    //     debugMeshRef.current.position.copy(physicsMeshPosition);
+    //     debugMeshRef.current.quaternion.copy(physicsMeshQuaternion);
+    // }
 
   });
 
@@ -122,9 +137,18 @@ export default function Crane({ id, modelPath, position, rotation }) {
     <>
       {/* 渲染 Crane 的其餘部分 GLTF 模型 */}
         {/* Crane 的 GLTF 網格會自動作為 physics body 的子項渲染 */}
-      <primitive object={craneBodyScene} ref={craneRef}>
+      <primitive object={craneBodyScene} 
+                  ref={craneRef}
+                  
+                  >
       
       </primitive>
+
+
+      {/* <mesh ref={debugMeshRef}>
+        <boxGeometry args={[3, 1, 3]} />
+        <meshBasicMaterial color="blue" wireframe opacity={0.3} transparent />
+      </mesh> */}
 
    
        {/* 傳遞 Crane 的當前位置和旋轉給 MoveTable 組件 */}
