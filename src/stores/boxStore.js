@@ -14,10 +14,24 @@ import { create } from 'zustand';
 export const useBoxStore = create((set, get) => ({
   //  boxes: [],
 boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
+boxRefs: {},   // 新增：儲存每個 Box 物理體的 React Ref 
+
    // 初始化或設定多個 Box 資料
   setBoxesData: (data) => set({ boxesData: data }),
-
   
+  setBoxRef: (id, ref) => {
+    set((state) => ({
+      boxRefs: {
+        ...state.boxRefs,
+        [id]: ref,
+      },
+    }));
+  },
+  
+  getBoxData: (boxId) => get().boxesData[boxId],
+
+  getBoxRef: (id) => get().boxRefs[id],
+
   handleAddSingleBox : (boxId, boxContenetData) => {
 
     const addBox = get().addBox; // 獲取 addBox action
@@ -34,23 +48,42 @@ boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
     addBox(newBoxId, newBoxData); // 調用 addBox action
   },
 
-
+  // to check
   // addBox: (pos = [0, 3, 0]) => set((state) => ({ boxes: [...state.boxes, { id: Date.now(), position: pos }] })),
-  addBox: (boxId = Date.now(), data) => set((state) => (
+  // addBox: (boxId = Date.now(), data) => set((state) => (
     
-    console.log('Adding box with ID:', boxId, 'and data:', data), // Debugging log
-    {
-    
-    boxesData: {
-      ...state.boxesData,
-      [boxId]: { id: boxId, AddNewBoxPosition: data.AddNewBoxPosition , ...data }, // 確保 id 存在
-    },
-  })),
+  //   console.log('Adding box with ID:', boxId, 'and data:', data), // Debugging log
+  //   {
+  //     boxesData: {
+  //       ...state.boxesData,
+  //       [boxId]: { id: boxId, AddNewBoxPosition: data.AddNewBoxPosition , ...data }, // 確保 id 存在
+  //   },
+  // })),
+
+  addBox: (id = Date.now(), data) => {
+    set((state) => ({
+      boxesData: {
+        ...state.boxesData,
+        [id]: data,
+      },
+    }));
+  },
+
 
   removeBox: (boxId) => set((state) => {
+    
+    // remove box data from boxesData
     const newBoxesData = { ...state.boxesData };
     delete newBoxesData[boxId];
-    return { boxesData: newBoxesData };
+    
+    // remove box ref as well
+    const newBoxRefs = { ...state.boxRefs };
+    delete newBoxRefs[boxId];
+
+    return {
+      boxesData: newBoxesData,
+      boxRefs: newBoxRefs,   // 更新 boxRefs
+     };
   }),
 
   updateBoxData: (boxId, newData) => set((state) => ({
@@ -63,7 +96,23 @@ boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
     },
   })),
 
-  getBoxData: (boxId) => get().boxesData[boxId],
+ 
+
+  /**
+   * 設置指定 Box 的物理體 Ref。
+   * @param {string} id - Box 的 ID。
+   * @param {object|null} ref - Box 物理體的 React Ref。
+   */
+  setBoxRef: (id, ref) => {
+    set((state) => ({
+      boxRefs: {
+        ...state.boxRefs,
+        [id]: ref,
+      },
+    }));
+  },
+
+
 
 
   // clearBoxes: () => set({ boxes: [] }),
