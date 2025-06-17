@@ -48,6 +48,22 @@ const initializeCraneStates = () => {
 
 export const useCraneStore = create((set, get) => ({
   craneStates: initializeCraneStates(),
+  moveTableRefs: {}, // Store for moveTable physics refs for link crane and moveTable
+
+  // set a crane 的 moveTable's ref
+  setMoveTableRef: (craneId, ref) => {
+    set((state) => ({
+      moveTableRefs: {
+        ...state.moveTableRefs,
+        [craneId]: ref,
+      },
+    }));
+  },
+
+  // get crane's moveTable ref
+  getMoveTableRef: (craneId) => get().moveTableRefs[craneId],
+
+
 
   /**
    * 設定指定貨架的感應器狀態
@@ -229,13 +245,24 @@ export const useCraneStore = create((set, get) => ({
         return {}; // 不更新狀態
       }
 
-      // 1. 獲取該 Crane 類型在 CraneData 中定義的 movePlate 初始偏移量
-      const craneConfig = get().craneStates[id]; // 獲取當前 crane 的配置 (包括 movePlateOffset)
-      const initialMovePlateOffset = new THREE.Vector3(...craneConfig.currentMoveTableLocalOffset); // 這裡使用 currentMoveTableLocalOffset 作為基礎，因為它已經包含了初始值
+      // old one
+      // // 1. 獲取該 Crane 類型在 CraneData 中定義的 movePlate 初始偏移量
+      // const craneConfig = get().craneStates[id]; // 獲取當前 crane 的配置 (包括 movePlateOffset)
+      // const initialMovePlateOffset = new THREE.Vector3(...craneConfig.currentMoveTableLocalOffset); // 這裡使用 currentMoveTableLocalOffset 作為基礎，因為它已經包含了初始值
 
-      // 2. 計算最終的絕對目標本地偏移量
-      // (初始本地偏移 + 提供的相對偏移)
-      const finalAbsoluteTargetOffset = initialMovePlateOffset.clone().add(new THREE.Vector3(...relativeOffset)); // 注意這裡使用 initialMovePlateOffset.clone() 避免修改原對象
+      // // 2. 計算最終的絕對目標本地偏移量
+      // // (初始本地偏移 + 提供的相對偏移)
+      // const finalAbsoluteTargetOffset = initialMovePlateOffset.clone().add(new THREE.Vector3(...relativeOffset)); // 注意這裡使用 initialMovePlateOffset.clone() 避免修改原對象
+
+
+      // 獲取該 Crane 類型在 CraneData 中定義的 movePlate 初始偏移量
+      // 這裡直接使用 store 中記錄的 movePlateOffset 作為基準
+      // 因為 initializeCraneStates 已經將 CraneData.movePlateOffset 寫入 currentMoveTableLocalOffset
+      const initialBaseOffset = new THREE.Vector3(...CraneData.cranes.find(c => c.id === id).movePlateOffset);
+
+      // 計算最終的絕對目標本地偏移量 (初始本地偏移 + 提供的相對偏移)
+      const finalAbsoluteTargetOffset = initialBaseOffset.clone().add(new THREE.Vector3(...relativeOffset));
+
 
       const newSpeed = speed > 0 ? speed : craneState.moveTableSpeed; // 使用預設速度如果傳入無效
 
