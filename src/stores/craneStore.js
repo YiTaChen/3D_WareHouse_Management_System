@@ -30,8 +30,8 @@ const initializeCraneStates = () => {
     // moveTable 移動相關狀態
     // 注意：moveTable 的位置是相對於 Crane 根部的「偏移量」
     // 因為它的物理體是 Kinematic，我們會直接設定它的世界座標，但邏輯上它是相對於 Crane 移動
-    currentMoveTableLocalOffset: new THREE.Vector3(0, 0, 0), // moveTable 相對於 Crane 根部的當前本地偏移 (預設為 0)
-    targetMoveTableLocalOffset: new THREE.Vector3(0, 0, 0),  // moveTable 相對於 Crane 根部的目標本地偏移
+    currentMoveTableLocalOffset: new THREE.Vector3(0, 1, 0), // moveTable 相對於 Crane 根部的當前本地偏移 (預設為 0)
+    targetMoveTableLocalOffset: new THREE.Vector3(0, 1, 0),  // moveTable 相對於 Crane 根部的目標本地偏移
     moveTableSpeed: 1, // moveTable 移動速度 (單位/秒)
 
     isCraneMoving: false,
