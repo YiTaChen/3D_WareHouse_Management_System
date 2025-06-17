@@ -2,7 +2,8 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { useLockConstraint } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useBindingStore } from '../stores/bindingStore'; // 引入綁定 Store
-
+import { useCraneStore } from '../stores/craneStore'; // Import craneStore
+import { useBoxStore } from '../stores/boxStore';     // Import boxStore
 
 
 /**
@@ -10,14 +11,19 @@ import { useBindingStore } from '../stores/bindingStore'; // 引入綁定 Store
  * @param {string} craneId - 執行綁定操作的 Crane 的 ID。
  */
 export const useObjectBinding = (craneId) => {
-  const { setCraneBinding, getCraneBinding, isObjectBoundToAnyCrane, isCraneBound } = useBindingStore();
+    const { setCraneBinding, getCraneBinding, isObjectBoundToAnyCrane, isCraneBound } = useBindingStore();
 
-  // 用於動態設定約束的兩個物理體引用
-  const [constrainedBodies, setConstrainedBodies] = useState({ bodyA: null, bodyB: null });
+
+    const getMoveTableRef = useCraneStore(state => state.getMoveTableRef); // Get getter for moveTable ref
+    const getBoxRef = useBoxStore(state => state.getBoxRef);               // Get getter for box ref
+
+
+    // 用於動態設定約束的兩個物理體引用
+    const [constrainedBodies, setConstrainedBodies] = useState({ bodyA: null, bodyB: null });
 
   // useLockConstraint hook 會監聽 constrainedBodies 的變化來創建/銷毀約束
   // 當 bodyA 和 bodyB 都為 null 時，約束不會被創建
-  const [constraintApi] = useLockConstraint(
+    const [constraintApi] = useLockConstraint(
     constrainedBodies.bodyA,
     constrainedBodies.bodyB,
     {
@@ -45,44 +51,43 @@ export const useObjectBinding = (craneId) => {
   }, [craneId, getCraneBinding, setCraneBinding]);
 
 
-  
-  /**
+
+    /**
    * 嘗試綁定一個載具物理體到 Crane 的 movePlate 物理體上。
-   * @param {object} carrierRef - 載具物理體 (如 Box 或 Pallet) 的 React ref。
-   * @param {string} carrierId - 載具的唯一 ID。
-   * @param {object} movePlateRef - Crane 的 movePlate 物理體的 React ref。
-   * @returns {boolean} - 如果成功綁定返回 true，否則 false (如已綁定或被其他 Crane 綁定)。
+   * @param {string} targetBoxId - 目標 Box 的 ID。
+   * @returns {boolean} - 如果成功綁定返回 true，否則 false。
    */
-  const bindObject = useCallback((carrierRef, carrierId, movePlateRef) => { // 調整參數順序
-    if (!carrierRef || !carrierRef.current || !movePlateRef || !movePlateRef.current) {
-      console.warn('Cannot bind: Invalid refs provided for carrier or movePlate.');
-      return false;
-    }
+    const bindObject = useCallback((targetBoxId) => { // Removed ref parameters
+        // 1. Get refs from stores using IDs
+        const movePlateRef = getMoveTableRef(craneId);
+        const boxRef = getBoxRef(targetBoxId);
 
-    if (isObjectBoundToAnyCrane(carrierId)) {
-      console.warn(`Object ${carrierId} is already bound to another crane. Cannot bind.`);
-      return false;
-    }
+        if (!boxRef || !boxRef.current || !movePlateRef || !movePlateRef.current) {
+        console.warn(`Cannot bind: Box (${targetBoxId}) or MoveTable (${craneId}) physics ref not available in store.`);
+        return false;
+        }
 
-    if (isCraneBound(craneId)) {
-      console.warn(`Crane ${craneId} is already bound to an object. Unbind first.`);
-      return false;
-    }
+        if (isObjectBoundToAnyCrane(targetBoxId)) {
+        console.warn(`Object ${targetBoxId} is already bound to another crane. Cannot bind.`);
+        return false;
+        }
 
-    // 將物理體設置到 state 中，這會觸發 useLockConstraint 創建約束
-    setConstrainedBodies({
-      bodyA: movePlateRef, // movePlate 是父體
-      bodyB: carrierRef,   // carrier 是子體
-    });
+        if (isCraneBound(craneId)) {
+        console.warn(`Crane ${craneId} is already bound to an object. Unbind first.`);
+        return false;
+        }
 
-    // 將約束 API 和綁定物件 ID 儲存到 store
-    // 注意：constraintApi 可能在這一幀還未完全建立，但 useLockConstraint 會在下一幀生效
-    // 我們在這裡儲存的是 useLockConstraint 返回的 api，它會自動管理內部的約束狀態
-    setCraneBinding(craneId, carrierId, constraintApi);
-    console.log(`Attempted to bind object ${carrierId} to crane ${craneId}.`);
-    return true;
+        setConstrainedBodies({
+        bodyA: movePlateRef,
+        bodyB: boxRef,
+        });
 
-  }, [craneId, isObjectBoundToAnyCrane, isCraneBound, setCraneBinding, constraintApi, setConstrainedBodies]); // 確保所有依賴項都包含在內
+        setCraneBinding(craneId, targetBoxId, constraintApi);
+        console.log(`Attempted to bind object ${targetBoxId} to crane ${craneId}.`);
+        return true;
+
+    }, [craneId, isObjectBoundToAnyCrane, isCraneBound, setCraneBinding, constraintApi, setConstrainedBodies, getMoveTableRef, getBoxRef]); // Added new dependencies
+
 
 
   /**
