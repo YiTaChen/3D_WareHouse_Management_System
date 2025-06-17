@@ -19,7 +19,7 @@ export default function Scene() {
 
   // const gltf = useGLTF('/models/conveyor_scene.glb'); // Load your entire scene GLTF
 
-  const { scene } = useGLTF('/plateform_conveyor_ver5.gltf') // add lasor sensor and light bulb
+  // const { scene } = useGLTF('/plateform_conveyor_ver5.gltf') // add lasor sensor and light bulb
   
 
   const { rotate, rollerSpeed } = useConveyorStore();
@@ -58,7 +58,7 @@ export default function Scene() {
         <Shelf
           key={s.id}
           id={s.id}
-          modelPath={scene}
+          modelPath=""
           position={s.position}
           rotation={s.rotation}
         />
@@ -70,7 +70,7 @@ export default function Scene() {
         <Crane
           key={s.id}
           id={s.id}
-          modelPath={scene}
+          modelPath="/Crane_ver1.gltf"
           position={s.position}
           rotation={s.rotation}
         />
