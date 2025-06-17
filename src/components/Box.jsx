@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useBoxStore } from '../stores/boxStore'; // 引入 boxStore
@@ -8,14 +8,17 @@ import { useBoxStore } from '../stores/boxStore'; // 引入 boxStore
 
 
 export default function Box({ id, initialPosition }) {
- const boxSize = [1, 1, 1]
+  const boxSize = [1, 1, 1]
 
-const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 box 的資料
+  const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 box 的資料
+  const setBoxRef = useBoxStore(state => state.setBoxRef); // 獲取 set Box Ref 的 action
 
-  console.log(`Box ID: ${id}, Box Data:`, boxData); // 確認 boxData 是否正確獲取
-  console.log(`Box ID: ${id}, Initial Position:`, initialPosition); // 確認 initialPosition 是否正確
 
-  const [ref] = useBox(() => ({
+
+  // console.log(`Box ID: ${id}, Box Data:`, boxData); // 確認 boxData 是否正確獲取
+  // console.log(`Box ID: ${id}, Initial Position:`, initialPosition); // 確認 initialPosition 是否正確
+
+  const [boxBodyRef] = useBox(() => ({
     mass: 1,
     position: boxData.AddNewBoxPosition ? boxData.AddNewBoxPosition :initialPosition,
     args: boxSize,
@@ -35,6 +38,18 @@ const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 
   }))
 
 
+  // 使用 useEffect 來設置 Box 的物理體 Ref
+  useEffect(() => {
+    if (boxBodyRef.current) {
+      setBoxRef(id, boxBodyRef); // 將 Box 的物理體 Ref 存儲到 store
+    }
+    // 清理函數：當 Box 被移除時，從 store 中移除其 Ref
+    return () => {
+      setBoxRef(id, null);
+    };
+  }, [id, boxBodyRef, setBoxRef]);
+
+
   const displayColor = useMemo(() => {
     if (boxData) {
       if (boxData.name === 'Red Box') return 'red';
@@ -45,7 +60,7 @@ const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 
 
 
   return (
-    <mesh ref={ref} castShadow>
+    <mesh ref={boxBodyRef} castShadow>
       <boxGeometry args={boxSize} />
       <meshStandardMaterial color={displayColor} />
     </mesh>
