@@ -24,17 +24,24 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation, 
     const { scene: fullCraneScene } = useGLTF('/Crane_ver1.gltf');
 
 
-    const {
-        currentMoveTableLocalOffset,
-        targetMoveTableLocalOffset,
-        moveTableSpeed,
-        isCraneMoving, // 新增：判斷 Crane 主體是否在移動
-        setMoveTableRef // Get the action to set moveTable ref
+    // const {
+    //     currentMoveTableLocalOffset,
+    //     targetMoveTableLocalOffset,
+    //     moveTableSpeed,
+    //     isCraneMoving, // 新增：判斷 Crane 主體是否在移動
+    //     setMoveTableRef // Get the action to set moveTable ref
 
-    } = useCraneStore(state => ({
-        ...state.getCraneState(id),
-        setMoveTableRef: state.setMoveTableRef //
-    }));
+    // } = useCraneStore(state => ({
+    //     ...state.getCraneState(id),
+    //     setMoveTableRef: state.setMoveTableRef //
+    // }));
+
+    const currentMoveTableLocalOffset = useCraneStore(state => state.getCraneState(id).currentMoveTableLocalOffset);
+    const targetMoveTableLocalOffset = useCraneStore(state => state.getCraneState(id).targetMoveTableLocalOffset);
+    const moveTableSpeed = useCraneStore(state => state.getCraneState(id).moveTableSpeed);
+    const isCraneMoving = useCraneStore(state => state.getCraneState(id).isCraneMoving);
+    const setMoveTableRef = useCraneStore(state => state.setMoveTableRef);
+   
 
     const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
 
