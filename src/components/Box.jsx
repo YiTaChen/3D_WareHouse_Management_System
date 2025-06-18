@@ -13,14 +13,20 @@ export default function Box({ id, initialPosition }) {
   const boxData = useBoxStore(state => state.getBoxData(id)); // 從 store 獲取 box 的資料
   const setBoxRef = useBoxStore(state => state.setBoxRef); // 獲取 set Box Ref 的 action
 
+  console.log('boxData:', boxData); // 確認 boxData 是否正確獲取
 
+  if (!boxData) {
+    console.warn(`Box component with ID ${id} rendered without boxData. Skipping.`);
+    return null; // Or render a placeholder/error state
+  }
 
   // console.log(`Box ID: ${id}, Box Data:`, boxData); // 確認 boxData 是否正確獲取
   // console.log(`Box ID: ${id}, Initial Position:`, initialPosition); // 確認 initialPosition 是否正確
 
   const [boxBodyRef] = useBox(() => ({
     mass: 1,
-    position: boxData.AddNewBoxPosition ? boxData.AddNewBoxPosition :initialPosition,
+    // position: boxData.position ? boxData.position :initialPosition,
+    position: boxData.position, // <--- Directly use boxData.position
     args: boxSize,
     material: 'box',
     linearDamping: 0.9,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useBoxStore } from '../../stores/boxStore'
 import { ProductList } from '../../data/ProductList' // 假設你有一個產品列表數據
-
+// import { useBoxStore } from '../../stores/boxStore';
 
 
 
@@ -21,7 +21,7 @@ export default function BoxCreate({ tabId }) {
 
 
     const addSingleBox = useBoxStore((state) => state.handleAddSingleBox)
-
+    const addBox = useBoxStore((state) => state.addBox);
 
     // const addSingleBoxWithData = () => {
     //     const boxData = {
@@ -46,21 +46,23 @@ export default function BoxCreate({ tabId }) {
                 name: product.ProductName,
                 content: product.catogory,
                 quantity: item.quantity,
+                position: [position.x, position.y, position.z], // 預設位置
             };
             allContent[product.id] = oneContent;
         })
         const boxData = {
-            NewBoxId: `box-${Date.now()}-${Math.random().toString(36).slice(2)}`, // 唯一 ID
+            id: `box-${Date.now()}-${Math.random().toString(36).slice(2)}`, // 唯一 ID
             content: allContent,
-            AddNewBoxPosition: [position.x, position.y, position.z],
-
+            // AddNewBoxPosition: [position.x, position.y, position.z],
+            position: [position.x, position.y, position.z], // 預設位置
         };
 
-        
-        addSingleBox(boxData.NewBoxId, boxData);
+        console.log('boxid   dddd : ',boxData.NewBoxId, boxData);
+        addSingleBox(boxData.id, boxData);
         ;
     };
 
+   
 
 
     const [position, setPosition] = useState({ x: 0, y: 4, z: 0 });

@@ -11,7 +11,8 @@ import Scene from './components/Scene'
 import { useBoxStore } from './stores/boxStore'
 import { useConveyorStore } from './stores/conveyorStore'
 import SubPanel from './components/subpanel'
-
+import { useCraneStore } from './stores/craneStore'; 
+import CraneBindingLogic from './components/CraneBindingLogic';
 
 
 export default function App() {
@@ -52,7 +53,7 @@ export default function App() {
 
   // 這裡的 initialBoxesSetup 只用於第一次載入到 store，之後不再直接使用它來渲染
   const initialBoxesSetup = React.useRef({
-    'box-A': { id: 'box-A', name: 'Alpha Box', content: 'Electronics' },
+    'box-A': { id: 'box-A', name: 'Alpha Box', content: 'Electronics' , position: [0, 4, 0] }, // 初始位置
     // 'box-B': { id: 'box-B', name: 'Beta Box', content: 'Books' },
   });
 
@@ -74,6 +75,7 @@ export default function App() {
       id: newBoxId,
       name: randomName,
       content: randomContent,
+      position: [0, 4, 0], 
     };
     addBox(newBoxId, newBoxData); // 調用 addBox action
   };
@@ -138,7 +140,7 @@ export default function App() {
 
   const [showSubPanel, setShowSubPanel] = useState(true);
  
-
+  const craneIds = Object.keys(useCraneStore(state => state.craneStates));
 
 
   return (
@@ -253,7 +255,7 @@ export default function App() {
             <Box
               key={box.id}
               id={box.id}
-              initialPosition={[0, 4, 0]} 
+              initialPosition={box.position} 
             />
             ))} 
 
@@ -272,6 +274,17 @@ export default function App() {
               rotate={rotate}
             />
           ))} */}
+
+
+            {/* 为每个 Crane 渲染 CraneBindingLogic，它会将其绑定函数存储到 Zustand 
+                for sub panel can use the cannon logic outside the <physics> tag */}
+            {craneIds.map(id => (
+              <CraneBindingLogic key={`crane-binding-${id}`} craneId={id} />
+            ))}
+
+
+
+
         </Physics>
       </Canvas>
     </div>

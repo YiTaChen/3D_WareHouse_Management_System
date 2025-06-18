@@ -13,11 +13,18 @@ import { create } from 'zustand';
 
 export const useBoxStore = create((set, get) => ({
   //  boxes: [],
-boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
-boxRefs: {},   // 新增：儲存每個 Box 物理體的 React Ref 
+  boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
+  boxRefs: {},   // 新增：儲存每個 Box 物理體的 React Ref 
 
    // 初始化或設定多個 Box 資料
-  setBoxesData: (data) => set({ boxesData: data }),
+  setBoxesData: (id,data) => {
+    set((state) => ({
+      boxesData: {
+        ...state.boxesData,
+        [id]: data, // 使用 id 作為 key
+      },
+    }));
+  },
   
   setBoxRef: (id, ref) => {
     set((state) => ({
@@ -39,11 +46,14 @@ boxRefs: {},   // 新增：儲存每個 Box 物理體的 React Ref
     const newBoxId = boxId ? boxId: `box-${Date.now()}`; // 確保 ID 唯一 
     const randomName = Math.random() > 0.5 ? 'Special Box' : 'Generic Box';
     const randomContent = Math.random() > 0.5 ? 'Fragile' : 'Durable';
-    const newBoxData = boxContenetData ? boxContenetData : {
+    const newBoxData = boxContenetData ? {
+      ...boxContenetData,
+      position: boxContenetData.position || [0, 3, 0], // Use existing position or default
+    } : {
       id: newBoxId,
       name: randomName,
       content: randomContent,
-      AddNewBoxPosition: { x: 3, y: 3, z: 3 }, // 預設位置
+      position: [0, 3, 0], // Default position
     };
     addBox(newBoxId, newBoxData); // 調用 addBox action
   },
