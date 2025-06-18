@@ -1,10 +1,10 @@
 import React, { use, useState } from 'react'; // Added useState for targetBoxId input\
-import { useObjectBinding } from '../hooks/useObjectBinding';
-import { useCraneStore } from '../stores/craneStore'; // To get craneIds
-import { useBoxStore } from '../stores/boxStore'; // To get boxesData
+import { useObjectBinding } from '../../hooks/useObjectBinding';
+import { useCraneStore } from '../../stores/craneStore'; // To get craneIds
+import { useBoxStore } from '../../stores/boxStore'; // To get boxesData
 
 
-export default function SubPanel() { // Removed ref props
+export default function ObjectBindingTest() { // Removed ref props
   const craneId = 'crane001'; // The Crane ID you want to control
 
   // Use useObjectBinding Hook

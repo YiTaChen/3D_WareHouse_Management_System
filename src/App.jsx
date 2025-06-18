@@ -243,6 +243,8 @@ export default function App() {
            
 
         >
+          
+          
           <Materials />
           <Ground position={[0, 0, 0]} />
 
