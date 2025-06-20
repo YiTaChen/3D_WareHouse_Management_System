@@ -1,6 +1,6 @@
 import React from 'react';
-import { useMissionStore } from '../stores/missionStore';
-import { cranePickupMission } from '../missions/craneMissionData';
+import { useMissionStore } from '../../stores/missionStore';
+import { cranePickupMission } from '..//../missions/craneMissionData';
 
 const MissionPanel = () => {
   const mission = useMissionStore((s) => s.mission);
