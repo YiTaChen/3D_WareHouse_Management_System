@@ -3,6 +3,7 @@ import Box from './Box';
 import BoxCreate from './subPages/BoxCreate';
 import CraneControlPanel  from './subPages/Test';
 import ObjectBindingTest from './subPages/ObjectBindingTest';
+import BoxControlPanel from './subPages/BoxControlPanel';
 
 // 這裡我們只是 placeholders
 const TabContent1 = () => (
@@ -15,6 +16,10 @@ const TabContent2 = () => (
 
 const TabContent3 = () => (
   <ObjectBindingTest tabId={3} />
+);
+
+const TabContent4 = () => (
+  <BoxControlPanel tabId={4} />
 );
 
 // 你可以在這裡定義更多的 TabContentX 元件
@@ -104,6 +109,11 @@ export default function SubPanel( {setShowSubPanel}) {
         return <TabContent2 />;
       case 'tab3':
         return <TabContent3 />;
+      case 'tab4':
+        return <TabContent4 />;
+
+
+
       // 這裡可以新增更多 case
       default:
         return <TabContent1 />;
@@ -163,6 +173,9 @@ export default function SubPanel( {setShowSubPanel}) {
         </TabButton>
         <TabButton isActive={activeTab === 'tab3'} onClick={() => setActiveTab('tab3')}>
           Sensor Status
+        </TabButton>
+        <TabButton isActive={activeTab === 'tab4'} onClick={() => setActiveTab('tab4')}>
+          Box Control Test
         </TabButton>
         {/* 在這裡新增更多 TabButton */}
       </div>
