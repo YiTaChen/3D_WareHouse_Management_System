@@ -71,7 +71,7 @@ export default function Scene() {
           key={s.id}
           id={s.id}
           modelPath="/Crane_ver1.gltf"
-          position={s.position}
+          // position={s.position}
           rotation={s.rotation}
         />
       ))}

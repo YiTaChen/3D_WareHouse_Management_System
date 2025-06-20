@@ -1,209 +1,166 @@
-
-
-import React, { useMemo, useEffect, useRef, useCallback  } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
-import { useCraneStore } from '../stores/craneStore'; // 引入新的 Crane Store
-import { useBoxStore } from '../stores/boxStore'; // 引入 Box Store
-import { useFrame } from '@react-three/fiber'; // 引入 
-import MoveTable from './MoveTable'; // 引入新的 MoveTable 組件
-import CraneInvisibleBulkSensor from './CraneInvisibleBulkSensor'; // 引入新的 CraneInvisibleBulkSensor 組件
+import { useCraneStore } from '../stores/craneStore';
+import { useFrame } from '@react-three/fiber';
+import MoveTable from './MoveTable';
+import CraneInvisibleBulkSensor from './CraneInvisibleBulkSensor';
 
 
-// 輔助函數：獲取 Three.js 物件的世界座標、旋轉和尺寸
-// 這個函數與 ConveyorExtras 中的一樣，可以考慮提取到一個共用的 utils 文件中
-function getWorldProperties(mesh) {
-  if (!mesh) return null;
-
-  const worldPosition = new THREE.Vector3();
-  const worldQuaternion = new THREE.Quaternion();
-  const worldScale = new THREE.Vector3();
-
-  mesh.updateWorldMatrix(true, false); // 確保世界矩陣是最新的
-  mesh.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-
-  const localSize = mesh.geometry && mesh.geometry.boundingBox ?
-    new THREE.Vector3().subVectors(mesh.geometry.boundingBox.max, mesh.geometry.boundingBox.min) :
-    new THREE.Vector3(1, 1, 1); // Fallback for meshes without boundingBox (e.g., empty groups)
-  const finalSize = localSize.multiply(worldScale).toArray();
-
-  const euler = new THREE.Euler().setFromQuaternion(worldQuaternion);
-  const rotationArray = [euler.x, euler.y, euler.z];
-
-  return {
-    position: worldPosition.toArray(),
-    rotation: rotationArray,
-    args: finalSize,
-  };
+// 輔助函數：獲取 Three.js 物件的本地尺寸 (用於創建碰撞體 args)
+function getLocalBoundingBoxSize(mesh) {
+    if (!mesh || !mesh.geometry) return [1, 1, 1];
+    const bbox = new THREE.Box3().setFromObject(mesh);
+    const size = new THREE.Vector3();
+    bbox.getSize(size);
+    return size.toArray();
 }
 
-
-  function getLocalBoundingBoxSize(mesh) {
-    if (!mesh || !mesh.geometry) return [1, 1, 1];
-      const bbox = new THREE.Box3().setFromObject(mesh);
-      const size = new THREE.Vector3();
-      bbox.getSize(size);
-      return size.toArray();
-  }
-
 export default function Crane({ id, modelPath, position, rotation }) {
-  const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入貨架的 GLTF 模型
-  // const { scene: gltfScene } = useGLTF('/Crane_ver1.gltf'); // 載入貨架的 GLTF 模型
+  const { scene } = useGLTF(modelPath || '/Crane_ver1.gltf'); 
 
   const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
-  const getBoxData = useBoxStore(state => state.getBoxData);
-
-  // 從 store 中獲取相關狀態和 action
+  
   const {
     currentCranePosition,
     targetCranePosition,
     craneMoveSpeed,
-    // currentMoveTableLocalOffset, // separate to MoveTable 
-    // targetMoveTableLocalOffset,   // separate to MoveTable 
-    // moveTableSpeed,             // separate to MoveTable 
-    isMoveTableMoving, // 新增：判斷 moveTable 是否在移動
-
+    isMoveTableMoving, 
   } = useCraneStore(state => state.getCraneState(id));
 
   const updateCraneCurrentPosition = useCraneStore(state => state.updateCraneCurrentPosition);
 
-  // const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
-  // separate to MoveTable
-  
-  // console.log('Crane currentCranePosition:', currentCranePosition);
+  const hasSetInitialPosition = useRef(false);
 
-
-  const craneBodyScene = useMemo(() => {
-      // 確保 scene 已經載入
+  const craneBodyVisualMesh = useMemo(() => {
       if (!scene) {
         console.warn("GLTF scene not loaded yet for Crane. Skipping clone.");
         return null;
       }
 
-      const clone = scene.clone(true); // 深度克隆整個場景
+      const clone = scene.clone(true); 
 
-      // 收集要移除的物件
       const objectsToDetach = [];
       clone.traverse((obj) => {
-        // 如果這個物件是 movePlate 或 CraneInvisibleBulkSensor
         if (obj.name === 'movePlate' || obj.name === 'CraneInvisibleBulkSensor') {
           objectsToDetach.push(obj);
         }
       });
-
-      // 在遍歷結束後，將這些物件從克隆場景中「分離」
-      // 注意：這裡不是 obj.parent.remove(obj); 而是將它們從層級中移除但不刪除
-      // 因為它們的 Mesh 還需要傳給獨立組件的 primitive
-      // 實際操作中，obj.parent.remove(obj) 是正確的，因為你希望 clone 裡沒有它們
       objectsToDetach.forEach(obj => {
           if (obj.parent) {
-              obj.parent.remove(obj); // 從 craneBodyScene 樹中移除
+              obj.parent.remove(obj);
           }
       });
 
-      clone.position.set(...position);
-      clone.rotation.set(...rotation);
-      clone.updateMatrixWorld(true);
+      clone.position.set(0, 0, 0); 
+      clone.rotation.set(0, 0, 0);
+      clone.updateMatrixWorld(true); 
       return clone;
-    }, [scene, position, rotation]);
+    }, [scene]); 
 
-
+    // console.log(`[Crane.jsx] Crane ${id} is rendering. currentCranePosition from store:`, currentCranePosition.toArray());
 
   // ----------------- Crane 整體物理體 -----------------
-  // 整個 Crane 作為一個 Kinematic Box，以便我們可以控制其位置
   const [craneRef, craneApi] = useBox(() => ({
-    mass: 0, // 無質量，不參與碰撞響應
+    mass: 0, 
     material: 'CraneMeshBody',
-    type: 'Kinematic', // 可以通過 api.position.set() 移動
-    position: currentCranePosition.toArray(),
-    rotation: rotation, // Crane 的初始旋轉
-    args: [0.1, 0.1, 0.1], // 需要根據你的實際 Crane 模型尺寸調整這個 args // change to [0, 0, 0] for only position reference
-                     // 這是整個 Crane 的碰撞箱尺寸，可以用 Blender 測量
-
+    type: 'Kinematic', 
+    position: currentCranePosition.toArray(), // 初始位置從 store 獲取
+    rotation: rotation, 
+    args: [0.1, 0.1, 0.1], 
     userData: { id: `craneBody-${id}` }
-  }));
+  })); 
 
+  useEffect(() => {
+    // 這個 useEffect 僅用於首次掛載時，確保物理體位置與 store 初始值同步
+    if (craneApi && currentCranePosition && !hasSetInitialPosition.current) {
+      craneApi.position.set(currentCranePosition.x, currentCranePosition.y, currentCranePosition.z);
+      hasSetInitialPosition.current = true; 
+      console.log(`[Crane.jsx useEffect] Setting initial physical position for ${id} to:`, currentCranePosition.toArray());
+    }
+  }, [craneApi, id, currentCranePosition]); 
 
-  // const debugMeshRef = useRef(); // for debug mesh
-
-  // ----------------- useFrame for continuous movement -----------------
-  useFrame((state, delta) => {
-    // Crane 整體移動  , 只有當 moveTable 不在移動時，Crane 才能移動
-    if (!isMoveTableMoving && !currentCranePosition.equals(targetCranePosition)) {
-      const distance = currentCranePosition.distanceTo(targetCranePosition);
-      const moveDistance = craneMoveSpeed * delta; // 每幀移動的距離
-
-      if (moveDistance >= distance) {
-        // 到達或超過目標位置
-        craneApi.position.set(targetCranePosition.x, targetCranePosition.y, targetCranePosition.z);
-        updateCraneCurrentPosition(id, targetCranePosition.toArray());
-      } else {
-        // 向目標移動
-        const direction = targetCranePosition.clone().sub(currentCranePosition).normalize();
-        const newPosition = currentCranePosition.clone().add(direction.multiplyScalar(moveDistance));
-        craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
-        updateCraneCurrentPosition(id, newPosition.toArray());
-      
-      }
-
+  // ----------------- useFrame for Crane's continuous movement -----------------
+  useFrame((state, delta) => { // 重新引入 delta 參數以實現平滑移動
+    if (!craneApi || !craneApi.position || !targetCranePosition) {
+        return;
     }
 
-    // //  debug mesh with the physics body
-    // if (debugMeshRef.current && craneRef.current) {
-    //     // Get the current world position and quaternion of the physics body's mesh (craneRef.current)
-    //     const physicsMeshPosition = new THREE.Vector3();
-    //     const physicsMeshQuaternion = new THREE.Quaternion();
-    //     craneRef.current.getWorldPosition(physicsMeshPosition);
-    //     craneRef.current.getWorldQuaternion(physicsMeshQuaternion);
+    const currentPhysicsPosition = new THREE.Vector3();
+    craneApi.position.copy(currentPhysicsPosition); 
 
-    //     // Apply these to the debug mesh
-    //     debugMeshRef.current.position.copy(physicsMeshPosition);
-    //     debugMeshRef.current.quaternion.copy(physicsMeshQuaternion);
-    // }
+    let newPosition; // 用來儲存最終應該設定給物理體的位置
 
+    // 判斷是否需要移動
+    const shouldMove = !currentCranePosition.equals(targetCranePosition) && !isMoveTableMoving;
+
+    if (shouldMove) {
+        // 執行移動邏輯
+        const distance = currentCranePosition.distanceTo(targetCranePosition); // 使用 store 中的 currentCranePosition 來計算距離
+        const moveStep = craneMoveSpeed * delta; 
+
+        if (moveStep >= distance) {
+            newPosition = targetCranePosition; 
+        } else {
+            const direction = targetCranePosition.clone().sub(currentCranePosition).normalize(); // 使用 store 中的 currentCranePosition
+            newPosition = currentCranePosition.clone().add(direction.multiplyScalar(moveStep));
+        }
+        // 更新 store，同時也會更新 isCraneMoving 狀態
+        updateCraneCurrentPosition(id, newPosition.toArray()); 
+
+    } else {
+        // 不移動時，物理體的位置應該精確地等於 store 中的 currentCranePosition
+        // 這強制物理引擎將其保持在目標位置，防止回到原點
+        newPosition = currentCranePosition; // 直接使用 store 中的值
+        
+        // 如果已經到達目標位置，確保 isCraneMoving 是 false
+        const currentIsCraneMoving = useCraneStore.getState().getCraneState(id).isCraneMoving;
+        if (currentIsCraneMoving) {
+            // 這裡更新 store 只是為了將 isCraneMoving 設為 false，位置本身應該已經正確
+            updateCraneCurrentPosition(id, newPosition.toArray()); 
+        }
+    }
+    
+    // 確保物理體的位置始終被設定為計算出的 newPosition
+    // 這是防止 Kinematic 物體回到 [0,0,0] 的關鍵
+    craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
+    
   });
 
 
   return (
     <>
-      {/* 渲染 Crane 的其餘部分 GLTF 模型 */}
-        {/* Crane 的 GLTF 網格會自動作為 physics body 的子項渲染 */}
-      <primitive object={craneBodyScene} 
-                  ref={craneRef}
-                  
-                  >
-      
-      </primitive>
+      <group ref={craneRef}> 
+        {craneBodyVisualMesh && (
+          <primitive 
+              object={craneBodyVisualMesh} 
+              position={[0,0,0]} 
+              rotation={[0,0,0]}
+          />
+        )}
+        {/* 可以考慮添加一個可視化的物理體來確認其位置是否正確 */}
+        {/* <mesh>
+            <boxGeometry args={[3, 5, 3]} /> 
+            <meshBasicMaterial color="red" wireframe opacity={0.5} transparent />
+        </mesh> */}
+      </group>
 
-
-      {/* <mesh ref={debugMeshRef}>
-        <boxGeometry args={[3, 1, 3]} />
-        <meshBasicMaterial color="blue" wireframe opacity={0.3} transparent />
-      </mesh> */}
-
-   
-       {/* 傳遞 Crane 的當前位置和旋轉給 MoveTable 組件 */}
+       {/* 傳遞 Crane 的當前**物理世界位置**和旋轉給 MoveTable 和 Sensor 組件 */}
       <MoveTable
         id={id}
-        craneWorldPosition={currentCranePosition.toArray()} // 傳遞 Crane 的世界位置
-        craneWorldRotation={rotation} // 傳遞 Crane 的世界旋轉
-        modelPath={modelPath} // 傳遞 Crane 的模型路徑，讓 MoveTable 自己載入 moveTable 部分
+        craneWorldPosition={currentCranePosition.toArray()} 
+        craneWorldRotation={rotation} 
+        modelPath={modelPath} 
       />
 
-        {/* 傳遞 Crane 的當前位置和旋轉給 CraneInvisibleBulkSensor 組件 */}
-        <CraneInvisibleBulkSensor
+      <CraneInvisibleBulkSensor
           id={id}
           craneWorldPosition={currentCranePosition.toArray()}
           craneWorldRotation={rotation}
-          modelPath={modelPath} // Sensor 也從完整的模型中提取
+          modelPath={modelPath} 
           setCraneSensorDetected={setCraneSensorDetected}
         />
-
-
     </>  
   );
 }
-
-
-

@@ -1,5 +1,7 @@
 
 import { create } from 'zustand';
+import * as THREE from 'three';
+
 
 // const initialBoxesData = {
 //   'box-001': { id: 'box-001', name: 'Red Box', content: 'Fragile Item' },
@@ -8,16 +10,16 @@ import { create } from 'zustand';
 // };
 
 
-
-
-
 export const useBoxStore = create((set, get) => ({
-  //  boxes: [],
   boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
-  boxRefs: {},   // 新增：儲存每個 Box 物理體的 React Ref 
+  boxRefs: {}, // 儲存每個 Box 物理體的 React Ref
 
-   // 初始化或設定多個 Box 資料
-  setBoxesData: (id,data) => {
+  isBoxBound: (boxId) => {
+  const boundMoveTable = get().boxBoundToMoveplate[boxId];
+  return !!boundMoveTable;
+},
+  // 初始化或設定多個 Box 資料
+  setBoxesData: (id, data) => {
     set((state) => ({
       boxesData: {
         ...state.boxesData,
@@ -25,50 +27,41 @@ export const useBoxStore = create((set, get) => ({
       },
     }));
   },
-  
+
+  // 設置 Box 的物理體 Ref（移除重複定義）
   setBoxRef: (id, ref) => {
+    console.log(`Setting box ref for ${id}:`, ref);
     set((state) => ({
       boxRefs: {
         ...state.boxRefs,
-        [id]: ref,
-      },
+        [id]: ref
+      }
     }));
   },
-  
-  getBoxData: (boxId) => get().boxesData[boxId],
 
+  getBoxData: (boxId) => get().boxesData[boxId],
   getBoxRef: (id) => get().boxRefs[id],
 
-  handleAddSingleBox : (boxId, boxContenetData) => {
-
-    const addBox = get().addBox; // 獲取 addBox action
-
-    const newBoxId = boxId ? boxId: `box-${Date.now()}`; // 確保 ID 唯一 
+  handleAddSingleBox: (boxId, boxContenetData) => {
+    const addBox = get().addBox;
+    const newBoxId = boxId ? boxId : `box-${Date.now()}`;
     const randomName = Math.random() > 0.5 ? 'Special Box' : 'Generic Box';
     const randomContent = Math.random() > 0.5 ? 'Fragile' : 'Durable';
     const newBoxData = boxContenetData ? {
       ...boxContenetData,
-      position: boxContenetData.position || [0, 3, 0], // Use existing position or default
+      position: boxContenetData.position || [0, 3, 0],
     } : {
       id: newBoxId,
       name: randomName,
       content: randomContent,
-      position: [0, 3, 0], // Default position
+      position: [0, 3, 0],
     };
-    addBox(newBoxId, newBoxData); // 調用 addBox action
+    addBox(newBoxId, newBoxData);
   },
 
-  // to check
-  // addBox: (pos = [0, 3, 0]) => set((state) => ({ boxes: [...state.boxes, { id: Date.now(), position: pos }] })),
-  // addBox: (boxId = Date.now(), data) => set((state) => (
-    
-  //   console.log('Adding box with ID:', boxId, 'and data:', data), // Debugging log
-  //   {
-  //     boxesData: {
-  //       ...state.boxesData,
-  //       [boxId]: { id: boxId, AddNewBoxPosition: data.AddNewBoxPosition , ...data }, // 確保 id 存在
-  //   },
-  // })),
+
+  
+
 
   addBox: (id = Date.now(), data) => {
     set((state) => ({
@@ -79,21 +72,17 @@ export const useBoxStore = create((set, get) => ({
     }));
   },
 
-
   removeBox: (boxId) => set((state) => {
-    
-    // remove box data from boxesData
     const newBoxesData = { ...state.boxesData };
     delete newBoxesData[boxId];
-    
-    // remove box ref as well
+
     const newBoxRefs = { ...state.boxRefs };
     delete newBoxRefs[boxId];
 
     return {
       boxesData: newBoxesData,
-      boxRefs: newBoxRefs,   // 更新 boxRefs
-     };
+      boxRefs: newBoxRefs,
+    };
   }),
 
   updateBoxData: (boxId, newData) => set((state) => ({
@@ -106,25 +95,104 @@ export const useBoxStore = create((set, get) => ({
     },
   })),
 
- 
 
-  /**
-   * 設置指定 Box 的物理體 Ref。
-   * @param {string} id - Box 的 ID。
-   * @param {object|null} ref - Box 物理體的 React Ref。
-   */
-  setBoxRef: (id, ref) => {
-    set((state) => ({
-      boxRefs: {
-        ...state.boxRefs,
-        [id]: ref,
-      },
-    }));
+
+
+ getBoxWorldPosition: (boxId) => {
+  const ref = get().boxRefs[boxId]?.ref?.current;
+  if (ref) {
+    const pos = new THREE.Vector3();
+    ref.getWorldPosition(pos);
+    return pos.toArray(); // ⚠️ 這會是 array，例如 [1.234, 0.0, -5.6]
+  }
+  return null;
+},
+
+  // 檢查 Box 是否處於睡眠狀態
+  // 使用物理引擎的 velocity 屬性來判斷
+  // 如果速度接近零，則認為 Box 處於睡眠狀態
+
+getBoxSleepStatus: (boxId) => {
+  const velocity = get().boxRefs[boxId]?.api?.velocity;
+  let lastVelocity = [0, 0, 0];
+  if (!velocity) return null;
+
+  velocity.subscribe(v => {
+    lastVelocity = v;
+  })();
+
+  return lastVelocity.every(val => Math.abs(val) < 0.001);
+},
+
+
+
+
+
+wakeUpBox: (boxId) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.api?.wakeUp) {
+      ref.api.wakeUp();
+      console.log(`Box ${boxId} woke up`);
+    }
+  },
+
+  moveBoxUp: (boxId, amount = 1) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.ref?.current) {
+      const obj = ref.ref.current;
+      obj.position.y += amount;
+      if (ref.api?.position) ref.api.position.set(obj.position.x, obj.position.y, obj.position.z);
+      console.log(`Box ${boxId} moved up by ${amount}`);
+    }
+  },
+
+  setStaticBox: (boxId) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.api?.mass) {
+      ref.api.mass.set(0);   // 讓物理質量變成 0，等於靜態
+      ref.api.wakeUp && ref.api.wakeUp();
+      console.log(`Box ${boxId} set to static`);
+    }
+  },
+
+  setPassiveBox: (boxId) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.api?.mass) {
+      ref.api.mass.set(1);   // 恢復動態質量
+      ref.api.wakeUp && ref.api.wakeUp();
+      console.log(`Box ${boxId} set to passive (dynamic)`);
+    }
   },
 
 
 
+  // 新增：存放 Box 綁定到哪個 MoveTable
+  boxBoundToMoveplate: {},
 
-  // clearBoxes: () => set({ boxes: [] }),
-  // getBoxById: (id) => get().boxes.find((b) => b.id === id),
+  // 設定 Box 綁定 MoveTable (或 Crane) 的關係
+  setBoxBoundToMoveplate: (boxId, moveTableId) => {
+    set((state) => ({
+      boxBoundToMoveplate: {
+        ...state.boxBoundToMoveplate,
+        [boxId]: moveTableId,
+      },
+    }));
+    console.log(`Box ${boxId} bound to MoveTable ${moveTableId}`);
+  },
+
+  // 清除 Box 綁定
+  clearBoxBoundToMoveplate: (boxId) => {
+    set((state) => {
+      const newBindings = { ...state.boxBoundToMoveplate };
+      delete newBindings[boxId];
+      return { boxBoundToMoveplate: newBindings };
+    });
+    console.log(`Box ${boxId} unbound from MoveTable`);
+  },
+
+  // 查詢 Box 綁定到哪個 MoveTable
+  getBoxBoundMoveplate: (boxId) => {
+    return get().boxBoundToMoveplate[boxId] || null;
+  },
+
 }));
