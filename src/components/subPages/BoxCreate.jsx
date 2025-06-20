@@ -34,33 +34,38 @@ export default function BoxCreate({ tabId }) {
     // }
 
     const addSingleBoxWithData = () => {
+  const allContent = {};
 
-        const allContent ={};
-        
+  items.forEach((item) => {
+    if (!item.product) return; // 忽略沒選產品的列
+    console.log("itemddddm");
+    const product = ProductList.ProductList.find(p => p.id === item.product);
+    if (!product) return;
 
-        items.forEach((item) => {
-        const product = ProductList.ProductList.find(p => p.id === item.product);
-        if (!product) return;
-            const oneContent = {
-                id: `ID-product-Item-${Date.now()}-${Math.random().toString(36).slice(2)}`, // 唯一 ID
-                name: product.ProductName,
-                content: product.catogory,
-                quantity: item.quantity,
-                position: [position.x, position.y, position.z], // 預設位置
-            };
-            allContent[product.id] = oneContent;
-        })
-        const boxData = {
-            id: `box-${Date.now()}-${Math.random().toString(36).slice(2)}`, // 唯一 ID
-            content: allContent,
-            // AddNewBoxPosition: [position.x, position.y, position.z],
-            position: [position.x, position.y, position.z], // 預設位置
-        };
-
-        console.log('boxid   dddd : ',boxData.NewBoxId, boxData);
-        addSingleBox(boxData.id, boxData);
-        ;
+    const oneContent = {
+      id: `ID-product-Item-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      name: product.ProductName,
+      content: product.catogory,
+      quantity: item.quantity,
+      position: [position.x, position.y, position.z],
     };
+
+    allContent[product.id] = oneContent;
+  });
+
+  if (Object.keys(allContent).length === 0) {
+    alert("Please select at least one product before adding a box.");
+    return;
+  }
+
+  const boxData = {
+    id: `box-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    content: allContent,
+    position: [position.x, position.y, position.z],
+  };
+
+  addSingleBox(boxData.id, boxData);
+};
 
    
 
