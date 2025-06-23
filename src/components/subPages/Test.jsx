@@ -42,10 +42,10 @@ export default function CraneControlPanel() {
 
     const { currentCranePosition, rotation, currentMoveTableLocalOffset, targetMoveTableLocalOffset } = craneState;
 
-    console.log('currentCranePosition:', currentCranePosition?.toArray());
-    console.log('rotation:', rotation?.toArray ? rotation.toArray() : rotation);
-    console.log('currentMoveTableLocalOffset:', currentMoveTableLocalOffset?.toArray());
-    console.log('targetMoveTableLocalOffset:', targetMoveTableLocalOffset?.toArray());
+    // console.log('currentCranePosition:', currentCranePosition?.toArray());
+    // console.log('rotation:', rotation?.toArray ? rotation.toArray() : rotation);
+    // console.log('currentMoveTableLocalOffset:', currentMoveTableLocalOffset?.toArray());
+    // console.log('targetMoveTableLocalOffset:', targetMoveTableLocalOffset?.toArray());
 
     const cranePos = currentCranePosition.clone();
     const craneRot = new THREE.Euler(...rotation.toArray());
@@ -57,8 +57,8 @@ export default function CraneControlPanel() {
     const currentWorld = cranePos.clone().add(currentOffset);
     const targetWorld = cranePos.clone().add(targetOffset);
 
-    console.log('currentWorld:', currentWorld.toArray());
-    console.log('targetWorld:', targetWorld.toArray());
+    // console.log('currentWorld:', currentWorld.toArray());
+    // console.log('targetWorld:', targetWorld.toArray());
 
     return {
       current: currentWorld.toArray().map(n => n.toFixed(2)).join(', '),

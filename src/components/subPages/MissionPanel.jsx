@@ -119,22 +119,22 @@ const MissionPanel = () => {
           </select>
         </label>
       </div>
-      <h3>任務控制面板</h3>
+      <h3>Mission Control Panel</h3>
       {/* <button onClick={() => setMission(JSON.parse(JSON.stringify(cranePickupMission)))}> */}
 
       <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission)))}>
 
 
         
-        載入任務
+        Load Mission
       </button>
       <button onClick={runMission} disabled={!mission}>
-        執行任務
+        Run Mission
       </button>
 
       {mission && (
         <div style={{ marginTop: '1rem' }}>
-          <p>任務狀態：{mission.status}</p>
+          <p>Mission Status：{mission.status}</p>
           {mission.tasks.map((task) => (
             <div key={task.id}>
               <strong>{task.name}（{task.status}）</strong>

@@ -98,7 +98,7 @@ const initializeCraneStates = () => {
       isMoveTableMoving: false,
       moveTableRef: null
     };
-    console.log(`[craneStore.js] Initializing crane ${craneConfig.id} with currentCranePosition:`, craneStates[craneConfig.id].currentCranePosition.toArray());
+    // console.log(`[craneStore.js] Initializing crane ${craneConfig.id} with currentCranePosition:`, craneStates[craneConfig.id].currentCranePosition.toArray());
   });
   return craneStates;
 };
@@ -126,13 +126,13 @@ export const useCraneStore = create((set, get) => ({
     
     updatedCraneStates[craneId].moveTableRef = moveTableData;
     
-    if (moveTableData) {
-      console.log(`Store: MoveTable ${craneId} ref set`, {
-        hasRef: !!moveTableData.ref?.current,
-        hasApi: !!moveTableData.api,
-        isReady: moveTableData.isReady
-      });
-    }
+    // if (moveTableData) {
+    //   console.log(`Store: MoveTable ${craneId} ref set`, {
+    //     hasRef: !!moveTableData.ref?.current,
+    //     hasApi: !!moveTableData.api,
+    //     isReady: moveTableData.isReady
+    //   });
+    // }
     
     return { craneStates: updatedCraneStates };
   }),

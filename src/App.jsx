@@ -163,7 +163,7 @@ export default function App() {
         <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
         <OrbitControls />
         <Physics
-          gravity={[0, -9.81, 0]}
+          // gravity={[0, -9.81, 0]}
           timeStep={1 / 60} // 保留 timeStep 設置，因為它可能對物理穩定性有幫助
         >
 

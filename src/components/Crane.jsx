@@ -77,7 +77,7 @@ export default function Crane({ id, modelPath, position, rotation }) {
     if (craneApi && currentCranePosition && !hasSetInitialPosition.current) {
       craneApi.position.set(currentCranePosition.x, currentCranePosition.y, currentCranePosition.z);
       hasSetInitialPosition.current = true; 
-      console.log(`[Crane.jsx useEffect] Setting initial physical position for ${id} to:`, currentCranePosition.toArray());
+      // console.log(`[Crane.jsx useEffect] Setting initial physical position for ${id} to:`, currentCranePosition.toArray());
     }
   }, [craneApi, id, currentCranePosition]); 
 

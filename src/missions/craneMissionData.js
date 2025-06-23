@@ -176,13 +176,13 @@ export const cranePickupMission = {
   tasks: [
     {
       id: 'task1',
-      name: 'Crane move to port',
+      name: '1. Crane move to port',
       currentStepIndex: 0,
       status: 'pending',
       steps: [
         {
           id: 'step1',
-          name: 'Crane 移動',
+          name: 'Crane move',
           functionKey: 'moveCrane',
           params: { craneName: 'crane001', targetPosition: [0, 0, -1], speed: 3 },
           status: 'pending',
@@ -192,41 +192,41 @@ export const cranePickupMission = {
     },
     {
       id: 'task2',
-      name: '取貨2',
+      name: '2. Take Box',
       currentStepIndex: 0,
       status: 'pending',
       steps: [
         {
           id: 'step1',
-          name: '伸出平台',
+          name: 'extend platform',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [0, 0, 2], speed: 1 },
           status: 'pending',
         },
         {
           id: 'step2',
-          name: '上升接取貨物',
+          name: 'upward to take box',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [0, 0.3, 2], speed: 1 },
           status: 'pending',
         },
         {
           id: 'step3',
-          name: '固定box',
+          name: 'Binding box',
           functionKey: 'craneBindingBox',
           params: { craneId: 'crane001', boxId: '' },
           status: 'pending',
         },
         {
           id: 'step4',
-          name: '回收平台',
+          name: 'collect platform',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [0, 0.3, 0], speed: 1 },
           status: 'pending',
         },
         {
           id: 'step5',
-          name: '下降回原位',
+          name: 'downward to original position',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [0, 0, 0], speed: 1 },
           status: 'pending',
@@ -235,13 +235,13 @@ export const cranePickupMission = {
     },
     {
       id: 'task3',
-      name: 'Crane move to Shelf',
+      name: '3. Crane move to Shelf',
       currentStepIndex: 0,
       status: 'pending',
       steps: [
         {
           id: 'step1',
-          name: 'Crane 移動',
+          name: 'Crane move to shelf',
           functionKey: 'moveCrane',
           params: { craneName: 'crane001', targetPosition: [-6, 2, -8], speed: 3 },
           status: 'pending',
@@ -251,20 +251,20 @@ export const cranePickupMission = {
     },
     {
       id: 'task4',
-      name: '放置box',
+      name: '4. Put Box on Shelf',
       currentStepIndex: 0,
       status: 'pending',
       steps: [
         {
           id: 'step1',
-          name: '伸出平台',
+          name: 'upward extend platform',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [0, 0.3, 0], speed: 1 },
           status: 'pending',
         },
         {
           id: 'step2',
-          name: '上升接取貨物',
+          name: 'extend platform to shelf',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [-2, 0.3, 0], speed: 1 },
           status: 'pending',
@@ -278,14 +278,14 @@ export const cranePickupMission = {
         },
         {
           id: 'step4',
-          name: '回收平台',
+          name: 'downward platform',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [-2, 0, 0], speed: 1 },
           status: 'pending',
         },
         {
           id: 'step5',
-          name: '下降回原位',
+          name: 'collect platform',
           functionKey: 'moveCraneTable',
           params: { craneName: 'crane001', offset: [0, 0, 0], speed: 1 },
           status: 'pending',
@@ -294,13 +294,13 @@ export const cranePickupMission = {
     },
     {
       id: 'task5',
-      name: 'Crane move to origin position',
+      name: '5. Crane move to origin position',
       currentStepIndex: 0,
       status: 'pending',
       steps: [
         {
           id: 'step1',
-          name: 'Crane 移動',
+          name: 'Crane move back',
           functionKey: 'moveCrane',
           params: { craneName: 'crane001', targetPosition: [0, 4, -10], speed: 3 },
           status: 'pending',
