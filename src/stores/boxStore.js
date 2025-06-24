@@ -30,7 +30,7 @@ export const useBoxStore = create((set, get) => ({
 
   // 設置 Box 的物理體 Ref（移除重複定義）
   setBoxRef: (id, ref) => {
-    console.log(`Setting box ref for ${id}:`, ref);
+    // console.log(`Setting box ref for ${id}:`, ref);
     set((state) => ({
       boxRefs: {
         ...state.boxRefs,
@@ -132,7 +132,7 @@ wakeUpBox: (boxId) => {
     const ref = get().boxRefs[boxId];
     if (ref?.api?.wakeUp) {
       ref.api.wakeUp();
-      console.log(`Box ${boxId} woke up`);
+      // console.log(`Box ${boxId} woke up`);
     }
   },
 
@@ -142,27 +142,27 @@ wakeUpBox: (boxId) => {
       const obj = ref.ref.current;
       obj.position.y += amount;
       if (ref.api?.position) ref.api.position.set(obj.position.x, obj.position.y, obj.position.z);
-      console.log(`Box ${boxId} moved up by ${amount}`);
+      // console.log(`Box ${boxId} moved up by ${amount}`);
     }
   },
 
-  setStaticBox: (boxId) => {
-    const ref = get().boxRefs[boxId];
-    if (ref?.api?.mass) {
-      ref.api.mass.set(0);   // 讓物理質量變成 0，等於靜態
-      ref.api.wakeUp && ref.api.wakeUp();
-      console.log(`Box ${boxId} set to static`);
-    }
-  },
+  // setStaticBox: (boxId) => {
+  //   const ref = get().boxRefs[boxId];
+  //   if (ref?.api?.mass) {
+  //     ref.api.mass.set(0);   // 讓物理質量變成 0，等於靜態
+  //     ref.api.wakeUp && ref.api.wakeUp();
+  //     console.log(`Box ${boxId} set to static`);
+  //   }
+  // },
 
-  setPassiveBox: (boxId) => {
-    const ref = get().boxRefs[boxId];
-    if (ref?.api?.mass) {
-      ref.api.mass.set(1);   // 恢復動態質量
-      ref.api.wakeUp && ref.api.wakeUp();
-      console.log(`Box ${boxId} set to passive (dynamic)`);
-    }
-  },
+  // setPassiveBox: (boxId) => {
+  //   const ref = get().boxRefs[boxId];
+  //   if (ref?.api?.mass) {
+  //     ref.api.mass.set(1);   // 恢復動態質量
+  //     ref.api.wakeUp && ref.api.wakeUp();
+  //     console.log(`Box ${boxId} set to passive (dynamic)`);
+  //   }
+  // },
 
 
 
@@ -177,7 +177,7 @@ wakeUpBox: (boxId) => {
         [boxId]: moveTableId,
       },
     }));
-    console.log(`Box ${boxId} bound to MoveTable ${moveTableId}`);
+    // console.log(`Box ${boxId} bound to MoveTable ${moveTableId}`);
   },
 
   // 清除 Box 綁定
@@ -187,12 +187,101 @@ wakeUpBox: (boxId) => {
       delete newBindings[boxId];
       return { boxBoundToMoveplate: newBindings };
     });
-    console.log(`Box ${boxId} unbound from MoveTable`);
+    // console.log(`Box ${boxId} unbound from MoveTable`);
   },
 
   // 查詢 Box 綁定到哪個 MoveTable
   getBoxBoundMoveplate: (boxId) => {
     return get().boxBoundToMoveplate[boxId] || null;
   },
+
+
+  setStaticBox: (boxId) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.api?.mass) {
+      get().setBoxVelocity(boxId, [0, 0, 0]); // 確保靜態時速度為零
+      get().setBoxAngularVelocity(boxId, [0, 0, 0]); // 確保靜態時角速度為零
+      ref.api.mass.set(0);
+      ref.api.wakeUp && ref.api.wakeUp();
+      set((state) => ({
+        boxesData: {
+          ...state.boxesData,
+          [boxId]: {
+            ...state.boxesData[boxId],
+            boxType: 'static',
+          },
+        },
+      }));
+      // console.log(`Box ${boxId} set to static`);
+    }
+  },
+
+  setPassiveBox: (boxId) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.api?.mass) {
+      ref.api.mass.set(1);
+      ref.api.wakeUp && ref.api.wakeUp();
+      set((state) => ({
+        boxesData: {
+          ...state.boxesData,
+          [boxId]: {
+            ...state.boxesData[boxId],
+            boxType: 'dynamic',
+          },
+        },
+      }));
+      // console.log(`Box ${boxId} set to passive (dynamic)`);
+    }
+  },
+
+  getBoxType: (boxId) => {
+    return get().boxesData[boxId]?.boxType || 'dynamic';
+  },
+
+
+  getBoxVelocity: (boxId) => {
+
+    const ref = get().boxRefs[boxId];
+    
+    // const api = get().boxRefs[boxId]?.api;
+    const api = ref?.api;
+
+    if (api?.velocity) {
+      let currentVelocity = [0, 0, 0];
+      api.velocity.subscribe(v => {
+        currentVelocity = v;
+      })();
+      return currentVelocity;
+    }
+    return null;
+  },
+
+  setBoxVelocity: (boxId, velocity) => {
+    const api = get().boxRefs[boxId]?.api;
+    if (api?.velocity?.set && Array.isArray(velocity) && velocity.length === 3) {
+      api.velocity.set(...velocity);
+      // console.log(`Velocity of Box ${boxId} set to`, velocity);
+    }
+  },
+
+  setBoxAngularVelocity: (boxId, angularVelocity) => {
+    const api = get().boxRefs[boxId]?.api;
+    if (api?.angularVelocity?.set && Array.isArray(angularVelocity) && angularVelocity.length === 3) {
+      api.angularVelocity.set(...angularVelocity);
+      // console.log(`Angular velocity of Box ${boxId} set to`, angularVelocity);
+    }
+  },
+
+  stopBoxMotion: (boxId) => {
+    const ref = get().boxRefs[boxId];
+    if (ref?.api?.velocity?.set) {
+      ref.api.velocity.set(0, 0, 0);
+      ref.api.angularVelocity.set(0, 0, 0);
+      ref.api.wakeUp?.();  // 先喚醒再讓它睡
+      ref.api.sleep?.();
+      // console.log(`Box ${boxId} velocity cleared and put to sleep`);
+    }
+  },
+
 
 }));

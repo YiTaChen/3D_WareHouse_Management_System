@@ -144,6 +144,8 @@
 
 import React, { useState } from 'react';
 import { useBoxStore } from '../../stores/boxStore';
+import { useBoxEquipStore } from '../../stores/boxEquipStore';
+
 
 export default function BoxControlPanel() {
   const [selectedBoxId, setSelectedBoxId] = useState('');
@@ -157,6 +159,8 @@ export default function BoxControlPanel() {
   const selectedBoxData = selectedBoxId ? getBoxData(selectedBoxId) : null;
   const isSleeping = selectedBoxId ? getBoxSleepStatus(selectedBoxId) : null;
   const worldPosition = selectedBoxId ? getBoxWorldPosition(selectedBoxId) : null;
+  const getEquipmentForBox = useBoxEquipStore(state => state.getEquipmentForBox);
+
 
 
   const wakeUpBox = () => {
@@ -179,6 +183,24 @@ export default function BoxControlPanel() {
     useBoxStore.getState().setPassiveBox(selectedBoxId);
     };
 
+    const stopBoxMotion = () => {
+    if (!selectedBoxId) return;
+    useBoxStore.getState().stopBoxMotion(selectedBoxId);
+  };  
+
+    const getBoxType = (boxId) => {
+    const boxData = boxesData[boxId];
+    if (!boxData) return 'N/A';
+    return boxData.boxType || 'unknown';
+  };
+
+
+    const getBoxVelocity = (boxId) => {
+      const boxData = boxesData[boxId];
+      if (!boxData || !boxData.velocity) return 'N/A';
+      return boxData.velocity.map(v => v.toFixed(2)).join(', ');
+    };
+
   const formatArray = (arr) => 
     Array.isArray(arr) ? arr.map(n => n.toFixed(2)).join(', ') : 'N/A';
 
@@ -193,6 +215,16 @@ export default function BoxControlPanel() {
     }
     return String(content);
   };
+
+
+  const getEquipmentName = (boxId) => {
+    const equipment = getEquipmentForBox(boxId);
+    // console.log(`Equipment for Box ${boxId}:`, equipment);
+    return equipment ? equipment : 'N/A';
+  };
+  
+
+
 
   return (
     <div style={{ padding: '1rem', background: '#e0f7ff', fontFamily: 'sans-serif' }}>
@@ -221,6 +253,9 @@ export default function BoxControlPanel() {
           <p>Initial Position: {formatArray(selectedBoxData.position)}</p>
           <p>World Position: {formatArray(worldPosition)}</p>
           <p>Sleeping: {isSleeping === null ? 'N/A' : isSleeping ? 'Yes' : 'No'}</p>
+          <p>Box Type: {getBoxType(selectedBoxId)}</p>
+          <p>Box Velocity: {formatArray(getBoxVelocity(selectedBoxId))}</p>
+          <p>Box Equipment: {getEquipmentName(selectedBoxId)}</p>
         </div>
 
                  
@@ -229,7 +264,7 @@ export default function BoxControlPanel() {
        <div style={{ marginTop: '1rem' }}>
             <button onClick={wakeUpBox}>Wake Up</button>
             <button onClick={moveBoxUp} style={{ marginLeft: '0.5rem' }}>Move Up</button>
-            <button onClick={setStaticBox} style={{ marginLeft: '0.5rem' }}>Make Static (展示用)</button>
+            <button onClick={stopBoxMotion} style={{ marginLeft: '0.5rem' }}>Make Static (展示用)</button>
             <button onClick={setPassiveBox} style={{ marginLeft: '0.5rem' }}>Make Passive (可滑落)</button>
           </div>
 
