@@ -8,8 +8,14 @@ export default function Ground() {
 
   return (
     <mesh ref={ref} receiveShadow>
-      <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial color="#999" />
+      <planeGeometry args={[100, 50]} />
+
+      {/* <planeGeometry args={[10, 10]} /> */}
+
+      {/* <meshStandardMaterial color="#999" /> */}
+   
+      <meshStandardMaterial color="#E6F0FF" />
+   
     </mesh>
   )
 }
