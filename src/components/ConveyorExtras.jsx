@@ -4,6 +4,7 @@ import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useConveyorStore } from '../stores/conveyorStore';
 import { useBoxStore } from '../stores/boxStore'; // 引入 Box Store
+import { useBoxEquipStore } from '../stores/boxEquipStore';
 
 export default function ConveyorExtras({
   id,
@@ -109,6 +110,11 @@ export default function ConveyorExtras({
     };
   };
 
+
+  const setBoxCollidingWithEquipment = useBoxEquipStore(state => state.setBoxCollidingWithEquipment);
+  const clearBoxCollision = useBoxEquipStore(state => state.clearBoxCollision); // 使用判斷，確保函數存在
+
+
   // ----------------- 隱形碰撞體 (InvisibleMaterial) -----------------
   const invisibleMaterialProps = useMemo(() => getWorldProperties(invisibleMaterialMesh), [invisibleMaterialMesh]);
   const [invisibleRef] = useBox(() => ({
@@ -130,7 +136,11 @@ export default function ConveyorExtras({
         if (boxId) { // 確保是 Box 觸發的
             setSensorDetected(id, 'BulkSensorDetected', true);
             const boxData = getBoxData(boxId); // 從 store 獲取 Box 的資料
-            console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered the main detection area!`);
+
+            // console.log('clearBoxCollision:', clearBoxCollision);
+            clearBoxCollision(boxId); // clear last one 
+            setBoxCollidingWithEquipment(boxId, id); // add current one
+            // console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered the main detection area!`);
             // const conv10data = getConveyorState( 'conv10');
             // console.log(`Conveyor ${conv10}: conv10data:`, conv10data);
           // 例如：if (boxData.content === 'Fragile Item') { /* special handling */ }
@@ -145,7 +155,7 @@ export default function ConveyorExtras({
         if (boxId) {
             setSensorDetected(id, 'BulkSensorDetected', false);
             const boxData = getBoxData(boxId);
-            console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) left the main detection area!`);
+            // console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) left the main detection area!`);
         }
     },
   }));
@@ -212,14 +222,14 @@ export default function ConveyorExtras({
           <boxGeometry args={invisibleMaterialProps.args} />
           <meshBasicMaterial color="red" wireframe />
         </mesh>
-      )}
-      {sensor1Props && (
+      )} */}
+      {/* {sensor1Props && (
         <mesh ref={sensor1Ref}>
           <boxGeometry args={sensor1Props.args} />
           <meshBasicMaterial color="blue" wireframe />
         </mesh>
-      )}
-      {sensor2Props && (
+      )} */}
+      {/* {sensor2Props && (
         <mesh ref={sensor2Ref}>
           <boxGeometry args={sensor2Props.args} />
           <meshBasicMaterial color="green" wireframe />

@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
 import { useBoxStore } from '../stores/boxStore';
 import { useFrame } from '@react-three/fiber';
-
+import { useBoxEquipStore } from '../stores/boxEquipStore';
 
 
 
@@ -79,6 +79,10 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
     return { position: [0, 0, 0], rotation: [0, 0, 0], args: [1, 1, 1] };
   }, [bulkSensorMesh]);
 
+  const setBoxCollidingWithEquipment = useBoxEquipStore(state => state.setBoxCollidingWithEquipment);
+  const clearBoxCollision = useBoxEquipStore(state => state.clearBoxCollision); // 使用判斷，確保函數存在
+
+
   // ----------------- 隱形感測器物理體 -----------------
   const [bulkSensorRef, bulkSensorApi] = useBox(() => ({
     mass: 0,
@@ -94,7 +98,11 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
       if (boxId) {
         setCraneSensorDetected(id, 'BulkSensorDetected', true);
         const boxData = getBoxData(boxId);
-        console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered Crane Bulk Sensor.`);
+
+        clearBoxCollision(boxId); // clear last one 
+        setBoxCollidingWithEquipment(boxId, id); // add current one
+
+        // console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered Crane Bulk Sensor.`);
       }
     },
     onCollideEnd: (e) => {
@@ -102,7 +110,7 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
       if (boxId) {
         setCraneSensorDetected(id, 'BulkSensorDetected', false);
         const boxData = getBoxData(boxId);
-        console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) left Crane Bulk Sensor.`);
+        // console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) left Crane Bulk Sensor.`);
       }
     },
   }));

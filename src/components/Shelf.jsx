@@ -4,6 +4,7 @@ import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useShelfStore } from '../stores/shelfStore'; // 引入新的 Shelf Store
 import { useBoxStore } from '../stores/boxStore'; // 引入 Box Store
+import { useBoxEquipStore } from '../stores/boxEquipStore';
 
 // 輔助函數：獲取 Three.js 物件的世界座標、旋轉和尺寸
 // 這個函數與 ConveyorExtras 中的一樣，可以考慮提取到一個共用的 utils 文件中
@@ -84,6 +85,12 @@ export default function Shelf({ id, modelPath, position, rotation }) {
     material: 'shelfTable', // 定義一個新的接觸材質
   }));
 
+
+
+  const setBoxCollidingWithEquipment = useBoxEquipStore(state => state.setBoxCollidingWithEquipment);
+  const clearBoxCollision = useBoxEquipStore(state => state.clearBoxCollision);
+  
+
   // ----------------- 隱形感測器 (ShelfInvisibleBulkSensor) -----------------
   const bulkSensorProps = useMemo(() => getWorldProperties(shelfParts.bulkSensor), [shelfParts.bulkSensor]);
   const [bulkSensorRef] = useBox(() => ({
@@ -98,8 +105,13 @@ export default function Shelf({ id, modelPath, position, rotation }) {
       const boxId = e.body.userData?.appId; // 假設 Box 在創建時設定了 userData.appId
       if (boxId) {
         setShelfSensorDetected(id, 'BulkSensorDetected', true);
+
+        clearBoxCollision(boxId); // clear last one 
+        setBoxCollidingWithEquipment(boxId, id); // add current one
+            
+
         const boxData = getBoxData(boxId);
-        console.log(`Shelf ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered Shelf Bulk Sensor.`);
+        // console.log(`Shelf ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered Shelf Bulk Sensor.`);
       }
     },
     onCollideEnd: (e) => {
@@ -107,7 +119,7 @@ export default function Shelf({ id, modelPath, position, rotation }) {
       if (boxId) {
         setShelfSensorDetected(id, 'BulkSensorDetected', false);
         const boxData = getBoxData(boxId);
-        console.log(`Shelf ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) left Shelf Bulk Sensor.`);
+        // console.log(`Shelf ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) left Shelf Bulk Sensor.`);
       }
     },
   }));

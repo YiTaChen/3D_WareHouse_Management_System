@@ -25,7 +25,7 @@ export const useBoxEquipStore = create(
       set((state) => {
         state.boxCollisionStatus[boxId] = equipmentId;
       });
-      console.log(`[BoxCollisionStatusStore] Box ${boxId} now colliding with Equipment ${equipmentId}. Current state:`, get().boxCollisionStatus);
+    //   console.log(`[BoxCollisionStatusStore] Box ${boxId} now colliding with Equipment ${equipmentId}. Current state:`, get().boxCollisionStatus);
     },
 
     /**
@@ -37,8 +37,11 @@ export const useBoxEquipStore = create(
         if (state.boxCollisionStatus[boxId]) {
           delete state.boxCollisionStatus[boxId];
         }
+        else {
+        //   console.warn(`[BoxCollisionStatusStore] Attempted to clear collision for Box ${boxId}, but it was not colliding with any Equipment.`);
+        }
       });
-      console.log(`[BoxCollisionStatusStore] Box ${boxId} no longer colliding. Current state:`, get().boxCollisionStatus);
+    //   console.log(`[BoxCollisionStatusStore] Box ${boxId} no longer colliding. Current state:`, get().boxCollisionStatus);
     },
 
     /**
