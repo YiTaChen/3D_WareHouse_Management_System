@@ -57,6 +57,12 @@ export default function Shelf({ id, modelPath, position, rotation }) {
           parts.table = obj;
         } else if (obj.name === 'ShelfInvisibleBulkSensor') { // 假設你的感測器網格名稱為 'ShelfInvisibleBulkSensor'
           parts.bulkSensor = obj;
+        } else if (obj.name.startsWith('Leg_')) { // 檢查是否是腿部網格
+          
+          if (!parts.legs) {
+            parts.legs = []; // 初始化腿部網格陣列
+          }
+          parts.legs.push(obj); // 將腿部網格加入陣列
         }
       }
     });
@@ -69,9 +75,32 @@ export default function Shelf({ id, modelPath, position, rotation }) {
     if (shelfParts.bulkSensor && shelfParts.bulkSensor.material) {
       shelfParts.bulkSensor.material.transparent = true;
       shelfParts.bulkSensor.material.opacity = 0;
-      shelfParts.bulkSensor.material.needsUpdate = true;
+      shelfParts.bulkSensor.material.needsUpdate = false;
     }
   }, [shelfParts.bulkSensor]);
+
+
+  // 讓 Shelftable 透明
+  useEffect(() => {
+    if (shelfParts.table && shelfParts.table.material) {
+      shelfParts.table.material.transparent = true;
+      shelfParts.table.material.opacity = 0.7;
+      shelfParts.table.material.needsUpdate = false;
+    }
+  }, [shelfParts.table]);
+
+
+  // --- 新增：讓 Leg_0 到 Leg_3 透明 ---
+  useEffect(() => {
+    shelfParts.legs.forEach(leg => {
+      if (leg && leg.material) {
+        leg.material.transparent = false;
+        leg.material.opacity = 1; // 設定腿部透明度，與桌面相同
+        leg.material.needsUpdate = false;
+      }
+    });
+  }, [shelfParts.legs]); // 依賴於 shelfParts.legs 陣列
+
 
 
   // ----------------- 物理平面 (table) -----------------
