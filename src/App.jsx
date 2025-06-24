@@ -158,7 +158,7 @@ export default function App() {
       <button onClick={()=> setShowSubPanel(true)}>Show Sub-Panel</button>
       } 
 
-      <Canvas shadows camera={{ position: [0, 10, 20], fov: 50 }}>
+      <Canvas shadows camera={{ position: [-35, 22, 24], fov: 35 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
         <OrbitControls />
