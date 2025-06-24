@@ -4,6 +4,7 @@ import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
+import { CraneData } from '../data/CraneData';
 
 // 幫助取得 local 尺寸
 function getLocalBoundingBoxSize(mesh) {
@@ -31,6 +32,14 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
     };
   }, [scene]);
 
+
+  const moveTableInitialPosition = useMemo(() => {
+  const craneConfig = CraneData.cranes.find(c => c.id === id);
+  return craneConfig?.moveTableInitialPosition || [0, 3, -10];
+}, [id]);
+
+
+
   // Zustand 讀取狀態
   const currentMoveTableLocalOffset = useCraneStore(state => state.getCraneState(id).currentMoveTableLocalOffset);
   const targetMoveTableLocalOffset = useCraneStore(state => state.getCraneState(id).targetMoveTableLocalOffset);
@@ -43,7 +52,10 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
   const [moveTableRef, moveTableApi] = useBox(() => ({
     type: 'Kinematic',
     mass: 0,
-    position: [0, 3, -10], // 初始位置，稍後會在 useFrame 中更新 // 要另外讀取 craneWorldPosition
+    // position: [0, 3, -10], // 初始位置，稍後會在 useFrame 中更新 // 要另外讀取 craneWorldPosition
+    position: moveTableInitialPosition, // 初始位置，稍後會在 useFrame 中更新 // 要另外讀取 craneWorldPosition
+
+
     args: moveTableLocalProps.args,
     material: 'craneTable',
     userData: { id: `movePlate-${id}`, args: moveTableLocalProps.args },
