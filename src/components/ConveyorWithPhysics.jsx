@@ -26,6 +26,23 @@ function getRotatedSize(size, rotation) {
   return rotatedSize.toArray()
 }
 
+function getRotatedSizeNew(size, rotation) {
+  const originalSize = new THREE.Vector3(...size);
+  const box = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(), originalSize);
+
+  // 使用 Quaternion 準確處理任意角度旋轉
+  const euler = new THREE.Euler(...rotation, 'XYZ');
+  const quaternion = new THREE.Quaternion().setFromEuler(euler);
+  const matrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion);
+
+  box.applyMatrix4(matrix);
+
+  const rotatedSize = new THREE.Vector3();
+  box.getSize(rotatedSize);
+  return rotatedSize.toArray();
+}
+
+
 function getRotatedVector(vector, rotation) {
   const vec = new THREE.Vector3(...vector)
   const euler = new THREE.Euler(...rotation, 'XYZ') // 用 XYZ 順序套用旋轉
@@ -85,7 +102,7 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
 
 
 
-
+ 
 
 
   return (
@@ -111,7 +128,9 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
         // console.log('worldQuaternion: ', worldQuaternion.toArray())
 
          let sizeArray = size.toArray()
-         sizeArray = getRotatedSize(sizeArray, rotation)
+        //  sizeArray = getRotatedSize(sizeArray, rotation)
+         sizeArray = getRotatedSizeNew(sizeArray, rotation)
+         
          const radius = (sizeArray[0] + sizeArray[1]) / 4
          const length = sizeArray[2]
 
@@ -130,7 +149,8 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
             equip_position={position}
             roller_position={worldPosition.toArray()}
             rotation={worldQuaternion}
-            size={size.toArray()}
+            // size={size.toArray()}
+            size={sizeArray}
             rotate={rotate}
             radius={radius}
             length={length}
