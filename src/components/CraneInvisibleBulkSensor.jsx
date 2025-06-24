@@ -136,8 +136,8 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
       {/* 為了調試，渲染 Bulk Sensor 的物理碰撞箱 */}
       {bulkSensorLocalProps && (
         <mesh ref={bulkSensorRef}>
-          <boxGeometry args={bulkSensorLocalProps.args} />
-          <meshBasicMaterial color="red" wireframe opacity={0.5} transparent />
+          {/* <boxGeometry args={bulkSensorLocalProps.args} />
+          <meshBasicMaterial color="red" wireframe opacity={0.5} transparent /> */}
         </mesh>
       )}
     </>
