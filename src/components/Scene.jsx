@@ -11,6 +11,7 @@ import ShelfData from '../data/ShelfData';
 import Shelf from './Shelf';
 import Crane from './Crane'; // 引入 Crane 組件
 import CraneData from '../data/CraneData'; // 引入 Crane 資料
+import ShelveMultiInstances from './ShelveMultiInstances'; // 引入多實例貨架組件
 
 
 export default function Scene() {
@@ -64,7 +65,7 @@ export default function Scene() {
         />
       ))}
 
-
+      {/* <ShelveMultiInstances /> 現在只渲染這一個組件 */}
 
       {CraneData.cranes.map((s) => (
         <Crane
