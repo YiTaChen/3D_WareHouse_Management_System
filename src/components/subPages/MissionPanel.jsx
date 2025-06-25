@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useMissionStore } from '../../stores/missionStore';
 import { cranePickupMission, crane001InboundMission , crane002InboundMission, crane003InboundMission
-  ,crane001_OutboundMission, crane002_OutboundMission, crane003_OutboundMission
+  ,crane001_OutboundMission, crane002_OutboundMission, crane003_OutboundMission, inboundTemplateFunction,
+  crane001InboundMissionParamTemplate , crane002InboundMissionParamTemplate, crane003InboundMissionParamTemplate
+  ,crane001_OutboundMissionTemplate, crane002_OutboundMissionTemplate, crane003_OutboundMissionTemplate
+  ,outboundTemplateFunction
+
 } from '..//../missions/craneMissionData';
 
 import { useBoxStore } from '../../stores/boxStore';
 import { useCraneStore } from '../../stores/craneStore';
+
+
 
 
 const MissionPanel = () => {
@@ -20,7 +26,10 @@ const MissionPanel = () => {
     const craneRefs = useCraneStore(state => state.craneRefs);
     const craneStates = useCraneStore(state => state.craneStates);
     const getMoveTableRef = useCraneStore(state => state.getMoveTableRef);
-  
+
+
+    const addSingleBox = useBoxStore((state) => state.handleAddSingleBox);
+
     // 取得所有 Crane ID (合併兩個來源的 key)
     const craneIds = Array.from(
       new Set([
@@ -34,6 +43,136 @@ const MissionPanel = () => {
   // 預設選擇第一個 Crane 和 Box
     const [selectedCraneId, setSelectedCraneId] = useState(craneIds[0] || '');
     const [selectedBoxId, setSelectedBoxId] = useState(boxIds[0] || '');
+
+
+ const getPortPosition = (portName, direction) => {
+
+
+    if (direction === 'inbound' ) {
+      
+       switch (portName) {
+      case 'Port1':
+        return [-8, 4, -8];
+     
+      case 'Port3':
+        return [-8, 4, 2];
+      case 'Port4':
+        return [-8, 4, 8];
+      
+      default:
+        return [0, 0, 0]; // 預設值
+    }
+  } else {
+
+    switch (portName) {
+      
+      case 'Port2':
+          return [6, 5, -8];
+        case 'Port3':
+          return [6, 5, 2];
+      
+        case 'Port5':
+          return [6, 5, 4];
+        default:
+          return [0, 0, 0]; // 預設值
+      }
+
+    }
+      
+
+   
+
+  };
+
+
+
+
+     const addSingleBoxWithData = () => {
+        const allContent = {};
+        let positionArr = getPortPosition(selectedPort, selectedDirection);
+
+        const boxData = {
+          id: `box-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          content: allContent,
+          position: [positionArr[0], positionArr[1], positionArr[2]],
+        };
+      
+        addSingleBox(boxData.id, boxData);
+      };
+      
+
+    // 新增的 state for Direction 和 Port
+    const [selectedDirection, setSelectedDirection] = useState('inbound');
+    const [selectedPort, setSelectedPort] = useState('Port1');
+
+    // 定義 Port 的選項
+    const portOptions = {
+        inbound: ["Port1", "Port3", "Port4"],
+        outbound: ["Port2", "Port3", "Port5"]
+    };
+
+    // 當 Direction 改變時，更新 Port 的選項和預設值
+    useEffect(() => {
+        const availablePorts = portOptions[selectedDirection] || [];
+        setSelectedPort(availablePorts[0] || '');
+    }, [selectedDirection]);
+
+
+   
+
+
+  const dynamicSetMission = () => {
+    let newMission = null
+
+    let missionTemplate = null;
+
+    if (selectedDirection === 'inbound') {
+
+      switch (selectedPort) {
+        case 'Port1':   
+          missionTemplate = crane001InboundMissionParamTemplate;
+          break;
+        case 'Port2':
+          missionTemplate = crane002InboundMissionParamTemplate;
+          break;
+        case 'Port3':
+          missionTemplate = crane003InboundMissionParamTemplate;
+          break;
+        default:
+          console.warn('未定義的 Port');
+      }
+    } else if (selectedDirection === 'outbound') {
+      switch (selectedPort) {
+        case 'Port2':
+          missionTemplate = crane001_OutboundMission;
+          break;
+        case 'Port3':
+          missionTemplate = crane002_OutboundMission;
+          break;
+          case 'Port5':
+            missionTemplate = crane003_OutboundMission;
+            break;
+          default:
+            console.warn('未定義的 Port');
+        }
+
+
+
+
+
+
+
+      }
+
+
+
+
+    
+    
+
+
+  }
+
 
 
   const injectMissionParams = (missionTemplate, injectedParams) => {
@@ -89,19 +228,118 @@ const MissionPanel = () => {
       },
     });
 
-    const customMission22 = injectMissionParams(crane003_OutboundMission, {
-      craneName: 'crane003',
 
-      boxIds: {
-        step3: selectedBoxId,
-        step6: selectedBoxId,
-      },
-    });
+
+
+    // const customMission01_in = injectMissionParams(crane001InboundMission, {
+    //   craneName: 'crane001',
+
+    //   boxIds: {
+    //     step3: selectedBoxId,
+    //     step6: selectedBoxId,
+    //   },
+    // });
+
+
+
+    const customMission01_in = () => {
+      crane001InboundMissionParamTemplate.boxId = selectedBoxId;
+      // console.log('boxId', selectedBoxId);
+      const jsonStr =  inboundTemplateFunction(crane001InboundMissionParamTemplate)
+      return jsonStr
+    }
+
+    const customMission02_in = () => {
+      crane002InboundMissionParamTemplate.boxId = selectedBoxId;
+      const jsonStr =  inboundTemplateFunction(crane002InboundMissionParamTemplate)
+      return jsonStr
+    };
+
+    const customMission03_in = () => {
+      crane003InboundMissionParamTemplate.boxId = selectedBoxId;
+      const jsonStr =  inboundTemplateFunction(crane003InboundMissionParamTemplate)
+      return jsonStr
+    };
+
+
+    const customMission01_out = () => {
+      crane001_OutboundMissionTemplate.boxId = selectedBoxId;
+      const jsonStr =  outboundTemplateFunction(crane001_OutboundMissionTemplate)
+      return jsonStr
+    };
+
+    const customMission02_out = () => {
+      crane002_OutboundMissionTemplate.boxId = selectedBoxId;
+      const jsonStr =  outboundTemplateFunction(crane002_OutboundMissionTemplate)
+      return jsonStr
+    };
+
+    const customMission03_out = () => {
+      crane003_OutboundMissionTemplate.boxId = selectedBoxId;
+      const jsonStr =  outboundTemplateFunction(crane003_OutboundMissionTemplate)
+      return jsonStr
+    };
+  ;
+
+    // const customMission03_out = injectMissionParams(crane003_OutboundMission, {
+    //   craneName: 'crane003',
+
+    //   boxIds: {
+    //     step3: selectedBoxId,
+    //     step6: selectedBoxId,
+    //   },
+    // });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   return (
     <div style={{ padding: '1rem', background: '#eee', borderRadius: 8 }}>
+
+    <div style={{ marginBottom: 10 }}>
+        <label>
+          Select Direction:&nbsp;
+          <select
+            value={selectedDirection}
+            onChange={e => setSelectedDirection(e.target.value)}
+          >
+            <option value="inbound">inbound</option>
+            <option value="outbound">outbound</option>
+          </select>
+        </label>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <label>
+          Select Port:&nbsp;
+          <select
+            value={selectedPort}
+            onChange={e => setSelectedPort(e.target.value)}
+          >
+            {/* 根據 selectedDirection 動態渲染選項 */}
+            {portOptions[selectedDirection]?.map(port => (
+              <option key={port} value={port}>
+                {port}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+
+      <button onClick={addSingleBoxWithData}>Add Box</button>
+
       <div style={{ marginBottom: 10 }}>
         <label>
           Select Crane:&nbsp;
@@ -139,9 +377,41 @@ const MissionPanel = () => {
       <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission22)))}>
 
 
+      {/* <button onClick={() => dynamicSetMission()}> */}
+
+
         
         Load Mission
       </button>
+
+<br />
+<br />
+
+             <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_in())))}> Load Mission in 01  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_in())))}> Load Mission in 02  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_in())))}> Load Mission in 03  </button>
+
+
+<br />
+<br />
+
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_out())))}> Load Mission out 01  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_out())))}> Load Mission out 02  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_out())))}> Load Mission out 03  </button>
+
+
+<br />
+<br />
       <button onClick={runMission} disabled={!mission}>
         Run Mission
       </button>

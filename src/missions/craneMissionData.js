@@ -268,8 +268,9 @@ export const stepFunctions = {
 
 
 
-
-  const inboundTemplateFunction = ({
+ 
+  export const inboundTemplateFunction = ({
+    boxId = '',
     missionName = 'Crane001 Inbound Mission',
     craneId = 'crane001',
     boxDropInitPosition = [-8, 4, -8],
@@ -388,7 +389,7 @@ export const stepFunctions = {
               id: 'step3',
               name: 'Wait Box to conv3',
               functionKey: 'checkBoxOnEquipment',
-              params: { boxId: '', equipmentId: conv3rd },
+              params: { boxId: boxId, equipmentId: conv3rd },
               status: 'pending',
             },
             {
@@ -446,7 +447,7 @@ export const stepFunctions = {
               id: 'step3',
               name: 'Binding box',
               functionKey: 'craneBindingBox',
-              params: { craneId: craneId, boxId: '' },
+              params: { craneId: craneId, boxId: boxId },
               status: 'pending',
             },
             {
@@ -504,7 +505,7 @@ export const stepFunctions = {
               id: 'step3',
               name: 'Unbind box',
               functionKey: 'craneUnBindingBox',
-              params: { craneId: craneId, boxId: '' },
+              params: { craneId: craneId, boxId: boxId },
               status: 'pending',
             },
             {
@@ -541,12 +542,36 @@ export const stepFunctions = {
       ],
     };
 };
+
+
+export const crane001InboundMissionParamTemplate  = {
+  boxId : '',
+    missionName : 'Crane001 Inbound Mission',
+    craneId : 'crane001',
+    boxDropInitPosition : [-8, 4, -8],
+    startPort : 'Port1',
+    convPortToCrane : [-4, 0, -6],
+    conv1st : 'conv1',
+    conv2nd : 'conv2',
+    conv3rd : 'conv3',
+    convIsTakeLeft : true,
+    shelfIsTakeLeft : true,
+    initCranePosition : [-1, 3, -6],
+    craneSpeed : 6,
+    tableSpeed : 1,
+    shelfPosition : [6, 5, -8],
+
+    forceUseShelfIsTakeLeft : false
+
+  }
+
   
 
-export const crane001InboundMission =  inboundTemplateFunction();
+export const crane001InboundMission =  inboundTemplateFunction(crane001InboundMissionParamTemplate);
 
 
-const crane002InboundMissionParamTemplate = {
+export const crane002InboundMissionParamTemplate = {
+  boxId : '',
   missionName : 'Crane002 Inbound Mission',
   craneId : 'crane002',
   boxDropInitPosition : [-8, 4, 2],
@@ -563,6 +588,7 @@ const crane002InboundMissionParamTemplate = {
 }
 
 export const crane002InboundMission = inboundTemplateFunction({
+  boxId: '',
   missionName : 'Crane002 Inbound Mission',
   craneId : 'crane002',
   boxDropInitPosition : [-8, 4, 2],
@@ -577,7 +603,8 @@ export const crane002InboundMission = inboundTemplateFunction({
   shelfPosition: [6, 5, 2],
 });
 
-const crane003InboundMissionParamTemplate = {
+export const crane003InboundMissionParamTemplate = {
+  boxId : '',
   missionName : 'Crane003 Inbound Mission',
   craneId : 'crane003',
   boxDropInitPosition : [-8, 4, 8],
@@ -593,6 +620,7 @@ const crane003InboundMissionParamTemplate = {
 };
 
 export const crane003InboundMission = inboundTemplateFunction({
+  boxId : '',
   missionName : 'Crane003 Inbound Mission',
   craneId : 'crane003',
   boxDropInitPosition : [-8, 4, 8],
@@ -610,7 +638,8 @@ export const crane003InboundMission = inboundTemplateFunction({
 
 
 
-  const outboundTemplateFunction = ({
+ export const outboundTemplateFunction = ({
+    boxId = '',
     missionName = 'Crane001 Inbound Mission',
     craneId = 'crane001',
     boxDropInitPosition = [-8, 4, -4],
@@ -751,7 +780,7 @@ export const crane003InboundMission = inboundTemplateFunction({
               id: 'step3',
               name: 'Binding box',
               functionKey: 'craneBindingBox',
-              params: { craneId: craneId, boxId: '' },
+              params: { craneId: craneId, boxId: boxId },
               status: 'pending',
             },
             {
@@ -813,7 +842,7 @@ export const crane003InboundMission = inboundTemplateFunction({
               id: 'step3',
               name: 'Unbind box',
               functionKey: 'craneUnBindingBox',
-              params: { craneId: craneId, boxId: '' },
+              params: { craneId: craneId, boxId: boxId },
               status: 'pending',
             },
             {
@@ -898,7 +927,7 @@ export const crane003InboundMission = inboundTemplateFunction({
               id: 'step6',
               name: 'Wait Box to exit port',
               functionKey: 'checkBoxOnEquipment',
-              params: { boxId: '', equipmentId: conv6th },
+              params: { boxId: boxId, equipmentId: conv6th },
               status: 'pending',
             },
 
@@ -948,7 +977,7 @@ export const crane003InboundMission = inboundTemplateFunction({
 };
 
 
-const crane001_OutboundMissionTemplate = {
+export const crane001_OutboundMissionTemplate = {
   missionName: 'Crane001 Outbound Mission',
   craneId: 'crane001',
   boxDropInitPosition: [-8, 4, -4],
@@ -973,7 +1002,8 @@ const crane001_OutboundMissionTemplate = {
 export const crane001_OutboundMission = outboundTemplateFunction(crane001_OutboundMissionTemplate);
 
 
-const crane002_OutboundMissionTemplate = {
+export const crane002_OutboundMissionTemplate = {
+  boxId: '',
   missionName: 'Crane002 Outbound Mission',
   craneId: 'crane002',
   boxDropInitPosition: [-8, 4, 2],
@@ -1000,7 +1030,8 @@ export const crane002_OutboundMission = outboundTemplateFunction(crane002_Outbou
 
 
 
-const crane003_OutboundMissionTemplate = {
+export const crane003_OutboundMissionTemplate = {
+  boxId: '',
   missionName: 'Crane003 Outbound Mission',
   craneId: 'crane003',
   boxDropInitPosition: [-8, 4, 8],

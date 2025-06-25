@@ -24,10 +24,10 @@ const TabContent4 = () => (
   <BoxControlPanel tabId={4} />
 );
 
-const TabContent5 = () => (
-  // <MissionPanel tabId={5} />
-  <MissionHighLevelPanel tabId={5} />
-);
+// const TabContent5 = () => (
+//   // <MissionPanel tabId={5} />
+//   <MissionHighLevelPanel tabId={5} />
+// );
 
 const TabContent6 = () => (
   // <MissionPanel tabId={5} />
@@ -123,8 +123,8 @@ export default function SubPanel( {setShowSubPanel}) {
         return <TabContent3 />;
       case 'tab4':
         return <TabContent4 />;
-      case 'tab5':
-        return <TabContent5 />;
+      // case 'tab5':
+      //   return <TabContent5 />;
       case 'tab6':
         return <TabContent6 />;
 
@@ -191,9 +191,9 @@ export default function SubPanel( {setShowSubPanel}) {
         <TabButton isActive={activeTab === 'tab4'} onClick={() => setActiveTab('tab4')}>
           Box Control Test
         </TabButton>
-        <TabButton isActive={activeTab === 'tab5'} onClick={() => setActiveTab('tab5')}>
+        {/* <TabButton isActive={activeTab === 'tab5'} onClick={() => setActiveTab('tab5')}>
           Mission High Level Test
-        </TabButton>
+        </TabButton> */}
         <TabButton isActive={activeTab === 'tab6'} onClick={() => setActiveTab('tab6')}>
           Mission Test
         </TabButton>
