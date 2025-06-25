@@ -57,11 +57,11 @@ export const layoutData = {
     { id: 'conv13', position: [-4, 2, 8], rotation: [0, r180, 0] , type: 'straight'},
     { id: 'conv14', position: [-6, 2, 8], rotation: [0, r90, 0], type: 'turn' },
    
-    // { id: 'conv16', position: [-6, 1.67, 9.1], rotation: [ 0.18 * Math.PI, r90, 0] , type: 'slope'},
-    // { id: 'conv17', position: [-6, 0.71, 10.6], rotation: [ 0.18 * Math.PI, r90, 0], type: 'slope' },
+    { id: 'conv16', position: [-6, 1.67, 9.1], rotation: [ 0.18 * Math.PI, r90, 0] , type: 'slope'},
+    { id: 'conv17', position: [-6, 0.71, 10.6], rotation: [ 0.18 * Math.PI, r90, 0], type: 'slope' },
     
-    { id: 'conv16', position: [-6, 1.2, 9.1], rotation: [ 0.18 * Math.PI, r90, 0] , type: 'slope'},
-    { id: 'conv17', position: [-6, 0.2, 10.6], rotation: [ 0.18 * Math.PI, r90, 0], type: 'slope' }, //test slope only 
+    // { id: 'conv16', position: [-6, 1.2, 9.1], rotation: [ 0.18 * Math.PI, r90, 0] , type: 'slope'},
+    // { id: 'conv17', position: [-6, 0.2, 10.6], rotation: [ 0.18 * Math.PI, r90, 0], type: 'slope' }, //test slope only 
 
     // { id: 'conv17', position: [-6, 0.71, 10.6], rotation: [ 0, r270,  1/2* Math.PI] },
     
