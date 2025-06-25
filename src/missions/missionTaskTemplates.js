@@ -26,7 +26,7 @@ export const taskTemplates = {
     { name: 'Box arrive at crane pickup point', template: stepTemplates.BOX_ARRIVE_ON_CONVEYOR }, // Box 停在輸送帶上，等待 Crane
   ],
   PICK_FROM_CONVEYOR: [
-    { name: 'Crane move to conveyor pickup point', template: stepTemplates.MOVE_CRANE_TO_TARGET }, // Crane 移動到取貨輸送帶旁
+    { name: 'Crane move to conveyor pickup point', template: stepTemplates.MOVE_CRANE_TO }, // Crane 移動到取貨輸送帶旁
     { name: 'extend platform to take box from conveyor', template: stepTemplates.MOVE_CRANE_TABLE_TO, overrides: { speed: 1 } },
     { name: 'upward to take box from conveyor', template: stepTemplates.MOVE_CRANE_TABLE_TO, overrides: { speed: 1 } },
     { name: 'Binding box', template: stepTemplates.CRANE_BIND_BOX },

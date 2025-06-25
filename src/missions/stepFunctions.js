@@ -1,7 +1,7 @@
 
 import { useCraneStore } from '../stores/craneStore';
 import { useBoxStore } from '../stores/boxStore';
-import { ConveyorData } from '../data/ConveyorData';
+import { ConveyorData } from '../data/layoutData';
 
 /**
  * 等待 Crane 完成其移動。

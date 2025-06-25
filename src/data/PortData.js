@@ -1,7 +1,5 @@
 
 
-
-
 export const PortData = {
   // 入庫埠定義
   inboundPorts: {
