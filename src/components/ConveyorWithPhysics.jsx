@@ -100,48 +100,9 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
   }, [clonedScene, id]);
 
 
-    // 取得未旋轉前 roller 的原始尺寸，只需計算一次
-   
-    // const { oriLength, oriRadius } = useMemo(() => {
-    //     if (rollers.length === 0) {
-    //     return { oriLength: 0, oriRadius: 0 };
-    //     }
-    //     const firstRoller = rollers[0];
-
-    //     // 1. 取得幾何體
-    //     const geometry = firstRoller.geometry;
-
-    //     // 2. 如果幾何體還沒有 bounding box，就計算一個
-    //     if (!geometry.boundingBox) {
-    //       geometry.computeBoundingBox();
-    //     }
-
-    //     // 3. 取得 bounding box 的尺寸
-    //     const size = new THREE.Vector3();
-    //     geometry.boundingBox.getSize(size);
-
-    //     // 4. 將尺寸應用 roller 的本地 scale
-    //     size.multiply(firstRoller.scale);
-    //     const sizeArray = size.toArray();
-
-    //     // 5. 計算半徑和長度
-    //     const radius = (sizeArray[0] + sizeArray[2]) / 4;
-    //     const length = sizeArray[1];
-
-    //     // 可以在這裡印出原始尺寸來驗證
-    //     console.log('Original Roller Geometry Size:', sizeArray);
-
-    //     return { oriLength: length, oriRadius: radius };
-    //   }, [rollers]);
-
-    // 可以在此處使用 oriLength 和 oriRadius，例如：
-    // console.log('Original Roller Length:', oriLength);
-    // console.log('Original Roller Radius:', oriRadius);
-
-
       //  if (rollers.length === 0) {
         
-        
+        // 計算原始的尺寸，只需計算一次
         const firstRoller = rollers[0];
 
         // 1. 取得幾何體
