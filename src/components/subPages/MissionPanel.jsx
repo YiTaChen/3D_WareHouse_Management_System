@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMissionStore } from '../../stores/missionStore';
-import { cranePickupMission, crane001InboundMission , crane002InboundMission} from '..//../missions/craneMissionData';
+import { cranePickupMission, crane001InboundMission , crane002InboundMission, crane003InboundMission} from '..//../missions/craneMissionData';
 
 import { useBoxStore } from '../../stores/boxStore';
 import { useCraneStore } from '../../stores/craneStore';
@@ -87,9 +87,9 @@ const MissionPanel = () => {
       },
     });
 
-    const customMission22 = injectMissionParams(crane002InboundMission, {
-      craneName: 'crane002',
-      
+    const customMission22 = injectMissionParams(crane003InboundMission, {
+      craneName: 'crane003',
+
       boxIds: {
         step3: selectedBoxId,
       },

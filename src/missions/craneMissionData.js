@@ -264,276 +264,276 @@ export const stepFunctions = {
 
 
   const inboundTemplateFunction = ({
-  missionName = 'Crane001 Inbound Mission',
-  craneId = 'crane001',
-  boxDropInitPosition = [-8, 4, -8],
-  startPort = 'Port1',
-  convPortToCrane = [-4, 0, -6],
-  conv1st = 'conv1',
-  conv2nd = 'conv2',
-  conv3rd = 'conv3',
-  convIsTakeLeft = true,
-  shelfIsTakeLeft = true,
-  initCranePosition = [-1, 3, -6],
-  craneSpeed = 6,
-  tableSpeed = 1,
-  shelfPosition = [-0, 2, -6],
+    missionName = 'Crane001 Inbound Mission',
+    craneId = 'crane001',
+    boxDropInitPosition = [-8, 4, -8],
+    startPort = 'Port1',
+    convPortToCrane = [-4, 0, -6],
+    conv1st = 'conv1',
+    conv2nd = 'conv2',
+    conv3rd = 'conv3',
+    convIsTakeLeft = true,
+    shelfIsTakeLeft = true,
+    initCranePosition = [-1, 3, -6],
+    craneSpeed = 6,
+    tableSpeed = 1,
+    shelfPosition = [6, 5, -8],
 
-  forceUseShelfIsTakeLeft = false
+    forceUseShelfIsTakeLeft = false
 
-} = {}) => {
-  const upOffset = 0.3;
-  const sideOffset = 2;
+  } = {}) => {
+    const upOffset = 0.3;
+    const sideOffset = 2;
 
-  const missionID = missionName.trim();
+    const missionID = missionName.trim();
 
-  if (forceUseShelfIsTakeLeft) {
+    if (forceUseShelfIsTakeLeft) {
 
-      // 如果強制使用 shelfIsTakeLeft，則忽略傳入 postion
+        // 如果強制使用 shelfIsTakeLeft，則忽略傳入 postion
 
-  }
-  else {
-      // 如果沒有強制使用 shelfIsTakeLeft，則根據 shelfPosition 決定
-    switch (shelfPosition[2]) {
-    case -8:
-      shelfIsTakeLeft = true; // -8 位置強制使用左側
-      break;
-    case -4:
-      shelfIsTakeLeft = false; // -4 位置強制使用右側
-      break;
-    case -2:
-      shelfIsTakeLeft = true; // -2 位置強制使用左側
-      break;
-    case 2:
-      shelfIsTakeLeft = false; // 2 位置強制使用右
-      break;
-    case 4:
-      shelfIsTakeLeft = true; // -4 位置強制使用左側
-      break;
-    default:
-      shelfIsTakeLeft = true; // 預設值為左側
     }
-  }
+    else {
+        // 如果沒有強制使用 shelfIsTakeLeft，則根據 shelfPosition 決定
+      switch (shelfPosition[2]) {
+      case -8:
+        shelfIsTakeLeft = true; // -8 位置強制使用左側
+        break;
+      case -4:
+        shelfIsTakeLeft = false; // -4 位置強制使用右側
+        break;
+      case -2:
+        shelfIsTakeLeft = true; // -2 位置強制使用左側
+        break;
+      case 2:
+        shelfIsTakeLeft = false; // 2 位置強制使用右
+        break;
+      case 4:
+        shelfIsTakeLeft = true; // -4 位置強制使用左側
+        break;
+      default:
+        shelfIsTakeLeft = true; // 預設值為左側
+      }
+    }
 
 
-   const movePlateShelfUpOffset = [0, upOffset, 0];
-   const movePlateShelfDownOffset = [0, 0, 0];
-   const movePlateShelfExtendOffset = shelfIsTakeLeft ? [0, 0, -sideOffset] : [0, 0, sideOffset];
-  const movePlateShelfExtendAndUpOffset = shelfIsTakeLeft ? [0, upOffset, -sideOffset] : [0, upOffset, sideOffset];
+    const movePlateShelfUpOffset = [0, upOffset, 0];
+    const movePlateShelfDownOffset = [0, 0, 0];
+    const movePlateShelfExtendOffset = shelfIsTakeLeft ? [0, 0, -sideOffset] : [0, 0, sideOffset];
+    const movePlateShelfExtendAndUpOffset = shelfIsTakeLeft ? [0, upOffset, -sideOffset] : [0, upOffset, sideOffset];
 
 
 
 
-  const movePlatePortUpOffset = [0, upOffset, 0];
-  const movePlatePortDownOffset = [0, 0, 0];
-  const movePlatePortExtendOffset = convIsTakeLeft ? [0, 0, -sideOffset] : [0, 0, sideOffset];
-  const movePlatePortExtendAndUpOffset = convIsTakeLeft ? [0, upOffset, -sideOffset] : [0, upOffset, sideOffset];
+    const movePlatePortUpOffset = [0, upOffset, 0];
+    const movePlatePortDownOffset = [0, 0, 0];
+    const movePlatePortExtendOffset = convIsTakeLeft ? [0, 0, -sideOffset] : [0, 0, sideOffset];
+    const movePlatePortExtendAndUpOffset = convIsTakeLeft ? [0, upOffset, -sideOffset] : [0, upOffset, sideOffset];
 
-  let craneShelfPosition = [0,0,0];
-  craneShelfPosition[0] = shelfPosition[0];
-  craneShelfPosition[1] = shelfPosition[1];
+    let craneShelfPosition = [0,0,0];
+    craneShelfPosition[0] = shelfPosition[0];
+    craneShelfPosition[1] = shelfPosition[1];
 
-  switch (shelfPosition[2]) {
-    case -8:
-    case -4:
-      craneShelfPosition[2] = -6; 
-      break; // -8 和 -4 位置使用 -6
-    case -2:
-    case 2:
-      craneShelfPosition[2] = -0;
-      break;
-    case 4:
-      craneShelfPosition[2] = 6;
-      break;
-    default:
-      craneShelfPosition[2] = 0; // 預設值
-  }
+    switch (shelfPosition[2]) {
+      case -8:
+      case -4:
+        craneShelfPosition[2] = -6; 
+        break; // -8 和 -4 位置使用 -6
+      case -2:
+      case 2:
+        craneShelfPosition[2] = -0;
+        break;
+      case 4:
+        craneShelfPosition[2] = 6;
+        break;
+      default:
+        craneShelfPosition[2] = 0; // 預設值
+    }
 
-  // const craneShelfPosition = shelfPosition || [-2, 2, -6];
+    // const craneShelfPosition = shelfPosition || [-2, 2, -6];
 
 
-  return {
-    id: missionID.replace(/\s+/g, ''),
-    name: missionName,
-    currentTaskIndex: 0,
-    status: 'pending',
-    tasks: [
-      {
-        id: 'task1',
-        name: '1. Port to Crane',
-        currentStepIndex: 0,
-        status: 'pending',
-        steps: [
-          {
-            id: 'step1',
-            name: 'conv1 conveyor rotate',
-            functionKey: 'startConveyorRotate',
-            params: { conveyorId: conv1st },
-            status: 'pending',
-          },
-          {
-            id: 'step2',
-            name: 'conv2 conveyor rotate',
-            functionKey: 'startConveyorRotate',
-            params: { conveyorId: conv2nd },
-            status: 'pending',
-          },
-          {
-            id: 'step3',
-            name: 'Wait Box to conv3',
-            functionKey: 'checkBoxOnEquipment',
-            params: { boxId: '', equipmentId: conv3rd },
-            status: 'pending',
-          },
-          {
-            id: 'step4',
-            name: 'conv1 conveyor stop rotate',
-            functionKey: 'stopConveyorRotate',
-            params: { conveyorId: conv1st },
-            status: 'pending',
-          },
-          {
-            id: 'step5',
-            name: 'conv2 conveyor stop rotate',
-            functionKey: 'stopConveyorRotate',
-            params: { conveyorId: conv2nd },
-            status: 'pending',
-          },
-        ],
-      },
-      {
-        id: 'task2',
-        name: '2. Crane move to port',
-        currentStepIndex: 0,
-        status: 'pending',
-        steps: [
-          {
-            id: 'step1',
-            name: 'Crane move',
-            functionKey: 'moveCrane',
-            params: { craneName: craneId, targetPosition: convPortToCrane, speed: craneSpeed },
-            status: 'pending',
-          },
-        ],
-      },
-      {
-        id: 'task3',
-        name: '3. Take Box',
-        currentStepIndex: 0,
-        status: 'pending',
-        steps: [
-          {
-            id: 'step1',
-            name: 'extend platform',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlatePortExtendOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-          {
-            id: 'step2',
-            name: 'upward to take box',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlatePortExtendAndUpOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-          {
-            id: 'step3',
-            name: 'Binding box',
-            functionKey: 'craneBindingBox',
-            params: { craneId: craneId, boxId: '' },
-            status: 'pending',
-          },
-          {
-            id: 'step4',
-            name: 'collect platform',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlatePortUpOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-          {
-            id: 'step5',
-            name: 'downward to original position',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlatePortDownOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-        ],
-      },
-      {
-        id: 'task4',
-        name: '4. Crane move to Shelf',
-        currentStepIndex: 0,
-        status: 'pending',
-        steps: [
-          {
-            id: 'step1',
-            name: 'Crane move to shelf',
-            functionKey: 'moveCrane',
-            params: { craneName: craneId, targetPosition: craneShelfPosition, speed: craneSpeed }, // 保留原值
-            status: 'pending',
-          },
-        ],
-      },
-      {
-        id: 'task5',
-        name: '5. Put Box on Shelf',
-        currentStepIndex: 0,
-        status: 'pending',
-        steps: [
-          {
-            id: 'step1',
-            name: 'upward extend platform',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlateShelfUpOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-          {
-            id: 'step2',
-            name: 'extend platform to shelf',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlateShelfExtendAndUpOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-          {
-            id: 'step3',
-            name: 'Unbind box',
-            functionKey: 'craneUnBindingBox',
-            params: { craneId: craneId, boxId: '' },
-            status: 'pending',
-          },
-          {
-            id: 'step4',
-            name: 'downward platform',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlateShelfExtendOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-          {
-            id: 'step5',
-            name: 'collect platform',
-            functionKey: 'moveCraneTable',
-            params: { craneName: craneId, offset: movePlateShelfDownOffset, speed: tableSpeed },
-            status: 'pending',
-          },
-        ],
-      },
-      {
-        id: 'task6',
-        name: '6. Crane move to origin position',
-        currentStepIndex: 0,
-        status: 'pending',
-        steps: [
-          {
-            id: 'step1',
-            name: 'Crane move back',
-            functionKey: 'moveCrane',
-            params: { craneName: craneId, targetPosition: initCranePosition, speed: craneSpeed },
-            status: 'pending',
-          },
-        ],
-      },
-    ],
-  };
+    return {
+      id: missionID.replace(/\s+/g, ''),
+      name: missionName,
+      currentTaskIndex: 0,
+      status: 'pending',
+      tasks: [
+        {
+          id: 'task1',
+          name: '1. Port to Crane',
+          currentStepIndex: 0,
+          status: 'pending',
+          steps: [
+            {
+              id: 'step1',
+              name: 'conv1 conveyor rotate',
+              functionKey: 'startConveyorRotate',
+              params: { conveyorId: conv1st },
+              status: 'pending',
+            },
+            {
+              id: 'step2',
+              name: 'conv2 conveyor rotate',
+              functionKey: 'startConveyorRotate',
+              params: { conveyorId: conv2nd },
+              status: 'pending',
+            },
+            {
+              id: 'step3',
+              name: 'Wait Box to conv3',
+              functionKey: 'checkBoxOnEquipment',
+              params: { boxId: '', equipmentId: conv3rd },
+              status: 'pending',
+            },
+            {
+              id: 'step4',
+              name: 'conv1 conveyor stop rotate',
+              functionKey: 'stopConveyorRotate',
+              params: { conveyorId: conv1st },
+              status: 'pending',
+            },
+            {
+              id: 'step5',
+              name: 'conv2 conveyor stop rotate',
+              functionKey: 'stopConveyorRotate',
+              params: { conveyorId: conv2nd },
+              status: 'pending',
+            },
+          ],
+        },
+        {
+          id: 'task2',
+          name: '2. Crane move to port',
+          currentStepIndex: 0,
+          status: 'pending',
+          steps: [
+            {
+              id: 'step1',
+              name: 'Crane move',
+              functionKey: 'moveCrane',
+              params: { craneName: craneId, targetPosition: convPortToCrane, speed: craneSpeed },
+              status: 'pending',
+            },
+          ],
+        },
+        {
+          id: 'task3',
+          name: '3. Take Box',
+          currentStepIndex: 0,
+          status: 'pending',
+          steps: [
+            {
+              id: 'step1',
+              name: 'extend platform',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlatePortExtendOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+            {
+              id: 'step2',
+              name: 'upward to take box',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlatePortExtendAndUpOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+            {
+              id: 'step3',
+              name: 'Binding box',
+              functionKey: 'craneBindingBox',
+              params: { craneId: craneId, boxId: '' },
+              status: 'pending',
+            },
+            {
+              id: 'step4',
+              name: 'collect platform',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlatePortUpOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+            {
+              id: 'step5',
+              name: 'downward to original position',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlatePortDownOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+          ],
+        },
+        {
+          id: 'task4',
+          name: '4. Crane move to Shelf',
+          currentStepIndex: 0,
+          status: 'pending',
+          steps: [
+            {
+              id: 'step1',
+              name: 'Crane move to shelf',
+              functionKey: 'moveCrane',
+              params: { craneName: craneId, targetPosition: craneShelfPosition, speed: craneSpeed }, // 保留原值
+              status: 'pending',
+            },
+          ],
+        },
+        {
+          id: 'task5',
+          name: '5. Put Box on Shelf',
+          currentStepIndex: 0,
+          status: 'pending',
+          steps: [
+            {
+              id: 'step1',
+              name: 'upward extend platform',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlateShelfUpOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+            {
+              id: 'step2',
+              name: 'extend platform to shelf',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlateShelfExtendAndUpOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+            {
+              id: 'step3',
+              name: 'Unbind box',
+              functionKey: 'craneUnBindingBox',
+              params: { craneId: craneId, boxId: '' },
+              status: 'pending',
+            },
+            {
+              id: 'step4',
+              name: 'downward platform',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlateShelfExtendOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+            {
+              id: 'step5',
+              name: 'collect platform',
+              functionKey: 'moveCraneTable',
+              params: { craneName: craneId, offset: movePlateShelfDownOffset, speed: tableSpeed },
+              status: 'pending',
+            },
+          ],
+        },
+        {
+          id: 'task6',
+          name: '6. Crane move to origin position',
+          currentStepIndex: 0,
+          status: 'pending',
+          steps: [
+            {
+              id: 'step1',
+              name: 'Crane move back',
+              functionKey: 'moveCrane',
+              params: { craneName: craneId, targetPosition: initCranePosition, speed: craneSpeed },
+              status: 'pending',
+            },
+          ],
+        },
+      ],
+    };
 };
   
 
@@ -552,6 +552,7 @@ const crane002InboundMissionParamTemplate = {
   convIsTakeLeft : false,
   shelfIsTakeLeft : true,
   initCranePosition : [-1, 3, 0],
+  shelfPosition: [6, 5, 2],
   
 }
 
@@ -559,7 +560,7 @@ export const crane002InboundMission = inboundTemplateFunction({
   missionName : 'Crane002 Inbound Mission',
   craneId : 'crane002',
   boxDropInitPosition : [-8, 4, 2],
-  startPort : 'Port2',
+  startPort : 'Port3',
   convPortToCrane : [-4, 0, 0],
   conv1st : 'conv7',
   conv2nd : 'conv8',
@@ -567,8 +568,58 @@ export const crane002InboundMission = inboundTemplateFunction({
   convIsTakeLeft : false,
   shelfIsTakeLeft : true,
   initCranePosition : [-1, 3, 0],
-  shelfPosition: [6, 6, 2],
+  shelfPosition: [6, 5, 2],
 });
+
+const crane003InboundMissionParamTemplate = {
+  missionName : 'Crane003 Inbound Mission',
+  craneId : 'crane003',
+  boxDropInitPosition : [-8, 4, 8],
+  startPort : 'Port4',
+  convPortToCrane : [-4, 0, 6],
+  conv1st : 'conv10',
+  conv2nd : 'conv11',
+  conv3rd : 'conv12',
+  convIsTakeLeft : false,
+  shelfIsTakeLeft : true,
+  initCranePosition : [-1, 3, 6],
+  shelfPosition: [6, 5, 4],
+};
+
+export const crane003InboundMission = inboundTemplateFunction({
+  missionName : 'Crane003 Inbound Mission',
+  craneId : 'crane003',
+  boxDropInitPosition : [-8, 4, 8],
+  startPort : 'Port4',
+  convPortToCrane : [-4, 0, 6],
+  conv1st : 'conv10',
+  conv2nd : 'conv11',
+  conv3rd : 'conv12',
+  convIsTakeLeft : false,
+  shelfIsTakeLeft : true,
+  initCranePosition : [-1, 3, 6],
+  shelfPosition: [6, 5, 4],
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
