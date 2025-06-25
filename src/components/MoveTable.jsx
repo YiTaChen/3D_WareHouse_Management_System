@@ -16,7 +16,7 @@ function getLocalBoundingBoxSize(mesh) {
 }
 
 export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }) {
-  const { scene } = useGLTF('/moveTable_ver1.gltf');
+  const { scene } = useGLTF('/moveTable_ver2.gltf');
 
   // 取出 movePlate Mesh 與碰撞體尺寸
   const { moveTableMesh, moveTableLocalProps } = useMemo(() => {
