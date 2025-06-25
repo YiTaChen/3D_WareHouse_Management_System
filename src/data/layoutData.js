@@ -30,22 +30,20 @@
 //   ]
 // }
 
-const r90 = - Math.PI / 2;
-const r180 = -Math.PI /2;
-const r270 = Math.PI /2;
+const r90 = -Math.PI / 2;
+const r180 = -Math.PI;
+const r270 = Math.PI / 2;
 
-export const layoutData ={
-
-  
+export const layoutData = {
 
   conveyors: [
 
     { id: 'conv1', position: [-8, 0, -8], rotation: [0, 0, 0] , type: 'straight'},
     { id: 'conv2', position: [-6, 0, -8], rotation: [0, 0, 0] , type: 'straight'},
     { id: 'conv3', position: [-4, 0, -8], rotation: [0, 0, 0] , type: 'straight'},
-    { id: 'conv4', position: [-8, 0, -4], rotation: [0, 0, 0] , type: 'straight'},
-    { id: 'conv5', position: [-6, 0, -4], rotation: [0, 0, 0] , type: 'straight'},
-    { id: 'conv6', position: [-4, 0, -4], rotation: [0, 0, 0] , type: 'straight'},
+    { id: 'conv4', position: [-8, 0, -4], rotation: [0, r180, 0] , type: 'straight'},
+    { id: 'conv5', position: [-6, 0, -4], rotation: [0, r180, 0] , type: 'straight'},
+    { id: 'conv6', position: [-4, 0, -4], rotation: [0, r180, 0] , type: 'straight'},
     
     { id: 'conv7', position: [-8, 0, 2], rotation: [0, 0, 0] , type: 'straight'},
     { id: 'conv8', position: [-6, 0, 2], rotation: [0, 0, 0] , type: 'straight'},
@@ -56,15 +54,19 @@ export const layoutData ={
     { id: 'conv12', position: [-4, 0, 8], rotation: [0, 0, 0] , type: 'straight'},
 
 
-    { id: 'conv13', position: [-4, 2, 8], rotation: [0, 0, 0] , type: 'straight'},
-    { id: 'conv14', position: [-6, 2, 8], rotation: [0, r270, 0], type: 'turn' },
-    { id: 'conv16', position: [-6, 1.67, 9.1], rotation: [ 0.18 * Math.PI, r270, 0] , type: 'slope'},
-    { id: 'conv17', position: [-6, 0.71, 10.6], rotation: [ 0.18 * Math.PI, r270, 0], type: 'slope' },
+    { id: 'conv13', position: [-4, 2, 8], rotation: [0, r180, 0] , type: 'straight'},
+    { id: 'conv14', position: [-6, 2, 8], rotation: [0, r90, 0], type: 'turn' },
+   
+    // { id: 'conv16', position: [-6, 1.67, 9.1], rotation: [ 0.18 * Math.PI, r90, 0] , type: 'slope'},
+    // { id: 'conv17', position: [-6, 0.71, 10.6], rotation: [ 0.18 * Math.PI, r90, 0], type: 'slope' },
     
+    { id: 'conv16', position: [-6, 1.2, 9.1], rotation: [ 0.18 * Math.PI, r90, 0] , type: 'slope'},
+    { id: 'conv17', position: [-6, 0.2, 10.6], rotation: [ 0.18 * Math.PI, r90, 0], type: 'slope' }, //test slope only 
+
     // { id: 'conv17', position: [-6, 0.71, 10.6], rotation: [ 0, r270,  1/2* Math.PI] },
     
-    { id: 'conv18', position: [-6, 0, 13.0], rotation: [ 0, r270, 0] , type: 'straight'},
-    { id: 'conv19', position: [-6, 0, 15.0], rotation: [ 0, r270, 0] , type: 'straight'},
+    { id: 'conv18', position: [-6, 0, 13.0], rotation: [ 0, r90, 0] , type: 'straight'},
+    { id: 'conv19', position: [-6, 0, 15.0], rotation: [ 0, r90, 0] , type: 'straight'},
     
  
   ]
