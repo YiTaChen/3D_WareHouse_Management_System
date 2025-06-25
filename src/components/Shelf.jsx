@@ -84,7 +84,7 @@ export default function Shelf({ id, modelPath, position, rotation }) {
   useEffect(() => {
     if (shelfParts.table && shelfParts.table.material) {
       shelfParts.table.material.transparent = true;
-      shelfParts.table.material.opacity = 0.7;
+      shelfParts.table.material.opacity = 0.5;
       shelfParts.table.material.needsUpdate = false;
     }
   }, [shelfParts.table]);
@@ -94,8 +94,8 @@ export default function Shelf({ id, modelPath, position, rotation }) {
   useEffect(() => {
     shelfParts.legs.forEach(leg => {
       if (leg && leg.material) {
-        leg.material.transparent = false;
-        leg.material.opacity = 1; // 設定腿部透明度，與桌面相同
+        leg.material.transparent = true;
+        leg.material.opacity = 0.2; // 設定腿部透明度，與桌面相同
         leg.material.needsUpdate = false;
       }
     });

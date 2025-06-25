@@ -160,7 +160,7 @@ export default function App() {
 
       <Canvas shadows camera={{ position: [-35, 22, 24], fov: 35 }}>
         <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+        <directionalLight position={[10, 10, -5]} intensity={1} castShadow />
         <OrbitControls />
         <Physics
           // gravity={[0, -9.81, 0]}
