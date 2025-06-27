@@ -6,10 +6,11 @@ import { cranePickupMission, crane001InboundMission , crane002InboundMission, cr
   ,crane001_OutboundMissionTemplate, crane002_OutboundMissionTemplate, crane003_OutboundMissionTemplate
   ,outboundTemplateFunction
 
-} from '..//../missions/craneMissionData';
+} from '../../missions/craneMissionData';
 
 import { useBoxStore } from '../../stores/boxStore';
 import { useCraneStore } from '../../stores/craneStore';
+import { useBoxEquipStore } from '../../stores/boxEquipStore';
 
 
 
@@ -30,6 +31,15 @@ const MissionPanel = () => {
 
     const addSingleBox = useBoxStore((state) => state.handleAddSingleBox);
 
+
+  const getAllShelfIds = useBoxEquipStore((state) => state.getAllShelfId);
+
+
+
+   // 新增的 state 來儲存所有有 Box 的 Shelf ID
+  const [shelfIds, setShelfIds] = useState([]);
+  const [selectedShelfId, setSelectedShelfId] = useState('');
+
     // 取得所有 Crane ID (合併兩個來源的 key)
     const craneIds = Array.from(
       new Set([
@@ -43,6 +53,19 @@ const MissionPanel = () => {
   // 預設選擇第一個 Crane 和 Box
     const [selectedCraneId, setSelectedCraneId] = useState(craneIds[0] || '');
     const [selectedBoxId, setSelectedBoxId] = useState(boxIds[0] || '');
+
+    // 使用 useEffect 來更新 Shelf ID 列表
+  useEffect(() => {
+    // 獲取當前所有有 Box 的 Shelf ID
+    const allShelfIds = getAllShelfIds();
+    setShelfIds(allShelfIds);
+
+    // 如果目前沒有選定的 shelf，就預設選擇第一個
+    if (allShelfIds.length > 0 && !selectedShelfId) {
+      setSelectedShelfId(allShelfIds[0]);
+    }
+  }, [getAllShelfIds]); // 依賴 getAllShelfIds，當其更新時觸發
+
 
 
  const getPortPosition = (portName, direction) => {
@@ -79,8 +102,6 @@ const MissionPanel = () => {
 
     }
       
-
-   
 
   };
 
@@ -157,19 +178,7 @@ const MissionPanel = () => {
         }
 
 
-
-
-
-
-
       }
-
-
-
-
-    
-    
-
 
   }
 
@@ -242,40 +251,85 @@ const MissionPanel = () => {
 
 
 
+
+
+    const getPortConveyorName = (portName) => {
+
+       switch (portName) {
+          case 'Port1':
+            return 'conv1';
+
+          case 'Port2':
+            return 'conv4';
+        
+          case 'Port3':
+            return 'conv7';
+          case 'Port4':
+            return 'conv10';
+        
+          case 'Port5':
+            return 'conv19';
+          
+            default:
+              return ''; // 預設值
+        
+       }
+
+  };
+
+
+  const getBoxIdByEquip = useBoxEquipStore((state) => state.getBoxIdbyEquipId);
+
+
     const customMission01_in = () => {
-      crane001InboundMissionParamTemplate.boxId = selectedBoxId;
+
+      // crane001InboundMissionParamTemplate.boxId = selectedBoxId;
+      
+
+      // const equipName = getPortConveyorName('Port1'); 
+      // const boxid11 = getEquipmentForBox(equipName);
+
+      // console.log('boxid11', boxid11);
+      // console.log('getPortConveyorName', equipName);
+
+      crane001InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port1'));
+
       // console.log('boxId', selectedBoxId);
       const jsonStr =  inboundTemplateFunction(crane001InboundMissionParamTemplate)
       return jsonStr
     }
 
     const customMission02_in = () => {
-      crane002InboundMissionParamTemplate.boxId = selectedBoxId;
+      crane002InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port3'));
       const jsonStr =  inboundTemplateFunction(crane002InboundMissionParamTemplate)
       return jsonStr
     };
 
     const customMission03_in = () => {
-      crane003InboundMissionParamTemplate.boxId = selectedBoxId;
+      crane003InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port4'));
       const jsonStr =  inboundTemplateFunction(crane003InboundMissionParamTemplate)
       return jsonStr
     };
 
 
+
+    // selectedShelfId
+
     const customMission01_out = () => {
-      crane001_OutboundMissionTemplate.boxId = selectedBoxId;
+      // crane001_OutboundMissionTemplate.boxId = selectedBoxId;
+      crane001_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
       const jsonStr =  outboundTemplateFunction(crane001_OutboundMissionTemplate)
       return jsonStr
     };
 
     const customMission02_out = () => {
-      crane002_OutboundMissionTemplate.boxId = selectedBoxId;
+      crane002_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
       const jsonStr =  outboundTemplateFunction(crane002_OutboundMissionTemplate)
       return jsonStr
     };
 
     const customMission03_out = () => {
-      crane003_OutboundMissionTemplate.boxId = selectedBoxId;
+      crane003_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
       const jsonStr =  outboundTemplateFunction(crane003_OutboundMissionTemplate)
       return jsonStr
     };
@@ -307,6 +361,9 @@ const MissionPanel = () => {
   return (
     <div style={{ padding: '1rem', background: '#eee', borderRadius: 8 }}>
 
+
+
+
     <div style={{ marginBottom: 10 }}>
         <label>
           Select Direction:&nbsp;
@@ -320,7 +377,11 @@ const MissionPanel = () => {
         </label>
       </div>
 
-      <div style={{ marginBottom: 10 }}>
+
+
+     {(selectedDirection === 'inbound')? 
+     <>
+     <div style={{ marginBottom: 10 }}>
         <label>
           Select Port:&nbsp;
           <select
@@ -339,8 +400,39 @@ const MissionPanel = () => {
 
 
       <button onClick={addSingleBoxWithData}>Add Box</button>
+      </> 
+      : <>
+        <div style={{ marginBottom: 10 }}>
+        <label>
+          Select Shelf:&nbsp;
+          <select
+            value={selectedShelfId}
+            onChange={e => setSelectedShelfId(e.target.value)}
+          >
+            {shelfIds.length > 0 ? (
+              shelfIds.map(id => (
+                <option key={id} value={id}>
+                  {id}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>No shelves with boxes</option>
+            )}
+          </select>
+        </label>
+      </div>
+      </>}
 
-      <div style={{ marginBottom: 10 }}>
+      
+
+
+
+
+      
+
+
+
+      {/* <div style={{ marginBottom: 10 }}>
         <label>
           Select Crane:&nbsp;
           <select
@@ -354,9 +446,9 @@ const MissionPanel = () => {
             ))}
           </select>
         </label>
-      </div>
+      </div> */}
 
-      <div style={{ marginBottom: 10 }}>
+      {/* <div style={{ marginBottom: 10 }}>
         <label>
           Select Box:&nbsp;
           <select
@@ -371,47 +463,81 @@ const MissionPanel = () => {
           </select>
         </label>
       </div>
-      <h3>Mission Control Panel</h3>
+ */}
+
+
+
+      <h3>Select One InBound Mission</h3>
+
+
+
+        <div style={{
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
+    gap: '12px',
+    marginBottom: '1rem',
+    maxWidth: 800,
+  }} >
       {/* <button onClick={() => setMission(JSON.parse(JSON.stringify(cranePickupMission)))}> */}
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission22)))}>
-
-
-      {/* <button onClick={() => dynamicSetMission()}> */}
-
-
-        
+      {/* <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission22)))}>
+     
         Load Mission
       </button>
 
 <br />
+<br /> */}
+
+             <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_in())))}> Load Mission at Port1  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_in())))}> Load Mission at Port3  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_in())))}> Load Mission at Port4  </button>
+
+{/* 
 <br />
+<br /> */}
 
-             <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_in())))}> Load Mission in 01  </button>
+{/* 
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_out())))}> Load Mission outBound to Port2   </button>
 
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_in())))}> Load Mission in 02  </button>
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_out())))}> Load Mission outBound to Port3  </button>
 
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_in())))}> Load Mission in 03  </button>
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_out())))}> Load Mission outBound to Port5  </button>
+     */}
 
+
+     <h4>or Select OutBound Mission</h4>
+     </div>
+     <div style={{
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
+    gap: '5px',
+    // marginBottom: '0.5rem',
+    maxWidth: 800,
+  }} >
+
+
+  <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_out())))}> Load Mission outBound to Port2   </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_out())))}> Load Mission outBound to Port3  </button>
+
+
+      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_out())))}> Load Mission outBound to Port5  </button>
+    
+
+    
+  </div>
 
 <br />
 <br />
-
-
-
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_out())))}> Load Mission out 01  </button>
-
-
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_out())))}> Load Mission out 02  </button>
-
-
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_out())))}> Load Mission out 03  </button>
-
-
-<br />
-<br />
+<h3>Start Selected Mission</h3>
       <button onClick={runMission} disabled={!mission}>
         Run Mission
       </button>
