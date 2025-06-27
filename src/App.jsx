@@ -14,6 +14,7 @@ import SubPanel from './components/Subpanel'
 import { useCraneStore } from './stores/craneStore'; 
 import CraneBindingLogic from './components/CraneBindingLogic';
 import BoxBindingUpdater from './components/BoxBindingUpdater';
+import SubPanelProduction from './components/SubPanelProduction.jsx';
 
 
 export default function App() {
@@ -93,12 +94,30 @@ export default function App() {
   }
 
   const [showSubPanel, setShowSubPanel] = useState(false);
+
+   const [showEngineerSubPanel, setShowEngineerSubPanel] = useState(false);
+
   const craneIds = Object.keys(useCraneStore(state => state.craneStates));
 
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}> 
+       {/* <div
+       style={{
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        zIndex: 10, // 確保它在 <Canvas> 之上
+        background: 'rgba(255, 255, 255, 0.8)', // 增加背景色和透明度
+        padding: '20px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 增加陰影
+        maxWidth: '300px', // 限制最大寬度
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px' // 增加間距
+      }}>     
+       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}> 
         <button onClick={handleAddRandomBox}>Add Box</button>
       </div>
      
@@ -153,10 +172,35 @@ export default function App() {
           </div>
         )}
 
-      {showSubPanel? 
-      <SubPanel  setShowSubPanel={setShowSubPanel}/> : 
-      <button onClick={()=> setShowSubPanel(true)}>Show Sub-Panel</button>
+        </div> */}
+
+<div
+  // style={{
+  //       position: 'absolute',
+  //       top: 20,
+  //       left: 20,
+  //       zIndex: 10, // 確保它在 <Canvas> 之上
+  //       background: 'rgba(255, 255, 255, 0.8)', // 增加背景色和透明度
+  //       padding: '20px',
+  //       borderRadius: '10px',
+  //       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 增加陰影
+  //       maxWidth: '300px', // 限制最大寬度
+  //       display: 'flex',
+  //       flexDirection: 'column',
+  //       gap: '15px' // 增加間距
+  //     }}
+      >
+    {showSubPanel? 
+      <SubPanelProduction  setShowSubPanel={setShowSubPanel}/> : 
+      <button style={{marginRight: '20px', marginLeft:  '20px' , backgroundColor:'lightgreen' }} onClick={()=> setShowSubPanel(true)}>Show Main Function Panel</button>
       } 
+      {showEngineerSubPanel?  
+      <SubPanel  setShowEngineerSubPanel={setShowEngineerSubPanel}/> : 
+      <button style={{marginRight: '20px', marginLeft:  '20px', backgroundColor:'lightblue' }} onClick={()=> setShowEngineerSubPanel(true)}>Show Engineer Testing Panel</button>
+      } 
+
+</div>
+    
 
       <Canvas shadows camera={{ position: [-35, 22, 24], fov: 35 }}>
         <ambientLight intensity={0.5} />
