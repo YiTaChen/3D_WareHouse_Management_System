@@ -6,10 +6,11 @@ import ObjectBindingTest from './subPages/ObjectBindingTest';
 import BoxControlPanel from './subPages/BoxControlPanel';
 import MissionPanel from './subPages/MissionPanel.jsx';
 import MissionHighLevelPanel from './subPages/MissionHighLevelPanel.jsx';
+import ConveyorControlPanel from './subPages/ConveyorControlPanel.jsx';
 
 // 這裡我們只是 placeholders
 const TabContent1 = () => (
-  <BoxCreate tabId={1} />
+  <ConveyorControlPanel tabId={1} />
 );
 
 const TabContent2 = () => (
@@ -29,14 +30,10 @@ const TabContent4 = () => (
 //   <MissionHighLevelPanel tabId={5} />
 // );
 
-const TabContent6 = () => (
-  // <MissionPanel tabId={5} />
-  <MissionPanel tabId={6} />
-);
 
 // 你可以在這裡定義更多的 TabContentX 元件
 
-export default function SubPanel( {setShowSubPanel}) {
+export default function SubPanel( {setShowEngineerSubPanel}) {
 
     const panelRef = useRef(null);
 
@@ -125,8 +122,7 @@ export default function SubPanel( {setShowSubPanel}) {
         return <TabContent4 />;
       // case 'tab5':
       //   return <TabContent5 />;
-      case 'tab6':
-        return <TabContent6 />;
+ 
 
       // 這裡可以新增更多 case
       default:
@@ -154,7 +150,7 @@ export default function SubPanel( {setShowSubPanel}) {
       {/* 分頁標籤 */}
 
 
-       <div><button onClick={()=> setShowSubPanel(false)}>Close SubPanel</button>
+       <div><button style={{backgroundColor:'lightblue' }} onClick={()=> setShowEngineerSubPanel(false)}>Close Engineer Testing Panel</button>
         <br />
         <label > this tab can be dragged </label>
         </div>
@@ -180,23 +176,21 @@ export default function SubPanel( {setShowSubPanel}) {
        
 
         <TabButton isActive={activeTab === 'tab1'} onClick={() => setActiveTab('tab1')}>
-          Add New Box
+          Conveyor Control Test
         </TabButton>
         <TabButton isActive={activeTab === 'tab2'} onClick={() => setActiveTab('tab2')}>
-          Inventory information
+          Crane Control Test
         </TabButton>
         <TabButton isActive={activeTab === 'tab3'} onClick={() => setActiveTab('tab3')}>
-          Sensor Status
+          Crane And Box Binding Test
         </TabButton>
         <TabButton isActive={activeTab === 'tab4'} onClick={() => setActiveTab('tab4')}>
-          Box Control Test
+          Box Property Control Test
         </TabButton>
         {/* <TabButton isActive={activeTab === 'tab5'} onClick={() => setActiveTab('tab5')}>
           Mission High Level Test
         </TabButton> */}
-        <TabButton isActive={activeTab === 'tab6'} onClick={() => setActiveTab('tab6')}>
-          Mission Test
-        </TabButton>
+     
         {/* 在這裡新增更多 TabButton */}
       </div>
 
