@@ -15,33 +15,28 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"\u7acb\u65b9\u9ad4",
-			"scale":[
-				1.5,
-				1.5,
-				2
-			]
+			"name":"RightBottonFrame"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"LightBrown",
+			"name":"ConveyorGreen.008",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
-					0.8040000200271606,
-					0.5199999809265137,
-					0.25,
+					0.004212020896375179,
+					0.5145299434661865,
+					0.9015465974807739,
 					1
 				],
 				"metallicFactor":0,
-				"roughnessFactor":0.4000000059604645
+				"roughnessFactor":0.5
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"\u7acb\u65b9\u9ad4",
+			"name":"\u7acb\u65b9\u9ad4.008",
 			"primitives":[
 				{
 					"attributes":{
@@ -61,14 +56,14 @@
 			"componentType":5126,
 			"count":24,
 			"max":[
-				1,
-				1,
-				1
+				0.5,
+				0.5,
+				0.5
 			],
 			"min":[
-				-1,
-				-1,
-				-1
+				-0.5,
+				-0.5,
+				-0.5
 			],
 			"type":"VEC3"
 		},
@@ -120,7 +115,7 @@
 	"buffers":[
 		{
 			"byteLength":840,
-			"uri":"box.bin"
+			"uri":"box_ver1.bin"
 		}
 	]
 }

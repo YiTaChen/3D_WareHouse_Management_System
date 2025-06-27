@@ -3,16 +3,18 @@ import { create } from 'zustand';
 import * as THREE from 'three';
 
 
-// const initialBoxesData = {
-//   'box-001': { id: 'box-001', name: 'Red Box', content: 'Fragile Item' },
-//   'box-002': { id: 'box-002', name: 'Blue Box', content: 'Heavy Machinery' },
+const initialBoxesData = {
+  // 'box-001': { id: 'box-001', name: 'Red Box', content: 'Fragile Item', position: [0, 5, 0] },
+  // 'box-002': { id: 'box-002', name: 'Blue Box', content: 'Heavy Machinery' },
   
-// };
+};
 
 
 export const useBoxStore = create((set, get) => ({
   boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
   boxRefs: {}, // 儲存每個 Box 物理體的 React Ref
+
+  boxesData: initialBoxesData, // 初始化 Box 資料
 
   isBoxBound: (boxId) => {
   const boundMoveTable = get().boxBoundToMoveplate[boxId];

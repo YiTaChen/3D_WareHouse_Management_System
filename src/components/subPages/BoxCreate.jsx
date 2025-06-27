@@ -38,7 +38,7 @@ export default function BoxCreate({ tabId }) {
 
   items.forEach((item) => {
     if (!item.product) return; // 忽略沒選產品的列
-    console.log("itemddddm");
+    // console.log("itemddddm");
     const product = ProductList.ProductList.find(p => p.id === item.product);
     if (!product) return;
 

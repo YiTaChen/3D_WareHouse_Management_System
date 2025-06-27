@@ -69,10 +69,10 @@ for (let z = -8; z <= 8; z += 2) {
   if (zPassNumber.has(z)) continue; // 跳過 z = 0 的層
 
 
-  for (let j = 0; j < 4; j++) {
-      for (let i = 0; i < 10; i++) {
+  for (let j = 0; j < 3; j++) {
+      for (let i = 0; i < 6; i++) {
         shelves.push({
-          id: `shelf${String(count + 5).padStart(3, '0')}`, // shelf005 ~ shelf009
+          id: `shelf${String(count + 1).padStart(3, '0')}`, // shelf005 ~ shelf009
           position: [i*2 + 2, ( 2 * j ) , z ],
           rotation: [0, 0, 0],
         });
