@@ -52,5 +52,37 @@ export const useBoxEquipStore = create(
     getEquipmentForBox: (boxId) => {
       return get().boxCollisionStatus[boxId] || null;
     },
+
+
+
+    /**
+     * 根據 Equipment ID 取得與其關聯的 Box ID。
+     * @param {string} equipId - 要查詢的 Equipment ID
+     * @returns {string | null} 關聯的 Box ID，如果沒有則返回 null
+     */
+    getBoxIdbyEquipId: (equipId) => {
+      const { boxCollisionStatus } = get();
+      // 遍歷所有 Box 的碰撞狀態，找到值與 equipId 相符的 key (boxId)
+      const boxId = Object.keys(boxCollisionStatus).find(
+        (key) => boxCollisionStatus[key] === equipId
+      );
+      return boxId || null;
+    },
+
+    /**
+     * 列出所有有 Box 存在的 Shelf ID。
+     * Shelf ID 都是以 'shelf' 為開頭。
+     * @returns {string[]} 所有有 Box 的 Shelf ID 陣列
+     */
+    getAllShelfId: () => {
+      const { boxCollisionStatus } = get();
+      const shelfIds = Object.values(boxCollisionStatus).filter(
+        (equipId) => typeof equipId === 'string' && equipId.startsWith('shelf')
+      );
+      // 使用 Set 來確保 Shelf ID 不重複
+      return Array.from(new Set(shelfIds));
+    },
+
+    
   }))
 );
