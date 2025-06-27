@@ -9,9 +9,11 @@ import ConveyorWithPhysics from './ConveyorWithPhysics'
 import { useConveyorStore } from '../stores/conveyorStore.js'
 import ShelfData from '../data/ShelfData'; 
 import Shelf from './Shelf';
+import ShelfBatch from './Shelf'; // 引入貨架批次渲染組件
 import Crane from './Crane'; // 引入 Crane 組件
 import CraneData from '../data/CraneData'; // 引入 Crane 資料
 import ShelveMultiInstances from './ShelveMultiInstances'; // 引入多實例貨架組件
+import { QuickShelfBatch, VisualCullingShelfBatch } from './Shelf';
 
 
 export default function Scene() {
@@ -55,7 +57,7 @@ export default function Scene() {
         ))} */} 
 
 
-      {ShelfData.shelves.map((s) => (
+      {/* {ShelfData.shelves.map((s) => (
         <Shelf
           key={s.id}
           id={s.id}
@@ -63,7 +65,16 @@ export default function Scene() {
           position={s.position}
           rotation={s.rotation}
         />
-      ))}
+      ))} */}
+
+        {/* <QuickShelfBatch shelves={ShelfData.shelves} /> */}
+
+      {/* <PerformanceShelfBatch shelves={ShelfData.shelves} /> */}
+
+      {/* <ShelfBatch shelves={ShelfData.shelves} /> */}
+
+
+        <VisualCullingShelfBatch shelves={ShelfData.shelves} />
 
       {/* <ShelveMultiInstances /> 現在只渲染這一個組件 */}
 
