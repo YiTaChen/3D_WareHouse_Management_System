@@ -4,7 +4,7 @@ const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
 
 const app = express();
-const port = 3002;
+const port = process.env.PORT || 3002;
 
 // 用 dotenv 讀取設定
 const sequelize = new Sequelize(
