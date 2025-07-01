@@ -25,6 +25,23 @@ router.get('/', async (req, res) => {
   }
 });
 
+// boxPositions/map
+router.get('/map', async (req, res) => {
+  try {
+    const all = await BoxPosition.findAll();
+    const map = {};
+    all.forEach(p => {
+      map[p.box_id] = {
+        id: p.box_id,
+        position: [p.position_x, p.position_y, p.position_z],
+      };
+    });
+    res.json(map);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Read by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -117,6 +134,8 @@ router.post('/box/:boxId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 
 // // PUT /box/:boxId - 替換某個 box 的位置
