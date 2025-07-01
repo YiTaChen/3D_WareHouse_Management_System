@@ -3,6 +3,7 @@
 const express = require('express');
 // const { Sequelize, DataTypes } = require('sequelize');
 const { sequelize, Test1 } = require('./models');
+const { FORCE } = require('sequelize/lib/index-hints');
 
 
 const app = express();
@@ -12,8 +13,15 @@ const port = process.env.PORT || process.env.PORT_LOCAL || 3002;
 app.use(express.json());
 
 // 可在這裡引入 routes
-app.use('/test1', require('./routes/test1'));
+app.use('/test1', require('./routes/test1Routes'));
 
+
+app.use('/boxes', require('./routes/boxesRoutes'));
+app.use('/items', require('./routes/itemsRoutes'));
+app.use('/boxPositions', require('./routes/boxPositionRoutes'));
+app.use('/boxContents', require('./routes/boxContentRoutes'));
+
+app.use('/boxInventory', require('./routes/boxInventoryRoutes'));
 
 
 app.get('/', (req, res) => {
@@ -25,7 +33,9 @@ app.get('/', (req, res) => {
 sequelize.authenticate()
   .then(() => {
     console.log('資料庫連線成功');
-    return sequelize.sync(); // 可改成 sync({ alter: true })
+    return sequelize.sync({alter: true}); // 可改成 sync({ alter: true })
+    // return sequelize.sync({force: true}); // 強制更新
+    
   })
   .then(() => {
     console.log('資料表同步完成');
