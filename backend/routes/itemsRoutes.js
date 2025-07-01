@@ -45,6 +45,51 @@ router.delete('/:id', async (req, res) => {
   res.json({ message: 'Item deleted' });
 });
 
+
+
+// GET /items/categories - 列出所有不同 category
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = await Item.findAll({
+      attributes: ['category'],
+      group: ['category'],
+    });
+    res.json(categories.map(c => c.category));
+
+    // const [results] = await sequelize.query('SELECT DISTINCT category FROM items');
+    // res.json(results.map(r => r.category));
+
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// GET /items/category/:category/ - 根據 category 取得資料
+router.get('/category/:category', async (req, res) => {
+  try {
+    const items = await Item.findAll({
+      where: { category: req.params.category }
+    });
+    res.json(items);
+
+    const category = req.params.category;
+
+    // const [results] = await sequelize.query(
+    //   'SELECT * FROM items WHERE category = :category',
+    //   {
+    //     replacements: { category },
+    //   }
+    // );
+
+    // res.json(results);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
 
 
