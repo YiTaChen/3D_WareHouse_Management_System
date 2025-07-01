@@ -6,6 +6,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const app = express();
 const port = process.env.PORT || process.env.PORT_LOCAL || 3002;
 
+
 let dbConfig = {};
 
 if (process.env.DB_ENV === 'local') {
