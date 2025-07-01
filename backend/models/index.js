@@ -1,5 +1,6 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const Test1Model = require('./test1')
+const { Sequelize } = require('sequelize');
+// const Test1Model = require('./test1')
+
 
 
 require('dotenv').config();
@@ -49,16 +50,34 @@ const sequelize = new Sequelize(
 );
 
 
-const Test1 = Test1Model(sequelize, DataTypes);
+// const Test1 = Test1Model(sequelize, DataTypes);
+
+const Test1 = require('./test1')(sequelize);
+
+const Box = require('./Box')(sequelize);
+const Item = require('./Item')(sequelize);
+const BoxPosition = require('./BoxPosition')(sequelize);
+const BoxContent = require('./BoxContent')(sequelize);
 
 
+Box.hasOne(BoxPosition, { foreignKey: 'box_id', onDelete: 'CASCADE' });
+BoxPosition.belongsTo(Box, { foreignKey: 'box_id' });
 
+Box.hasMany(BoxContent, { foreignKey: 'box_id', onDelete: 'CASCADE' });
+BoxContent.belongsTo(Box, { foreignKey: 'box_id' });
+
+Item.hasMany(BoxContent, { foreignKey: 'item_id', onDelete: 'CASCADE' });
+BoxContent.belongsTo(Item, { foreignKey: 'item_id' });
 
 
 
 module.exports = {
     sequelize,
     Test1   ,
+    Box,
+    Item,
+    BoxPosition,
+    BoxContent,
 
 };
 
