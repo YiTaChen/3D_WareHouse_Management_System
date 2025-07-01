@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Physics, Debug } from '@react-three/cannon' 
@@ -17,6 +17,7 @@ import BoxBindingUpdater from './components/BoxBindingUpdater';
 import SubPanelProduction from './components/SubPanelProduction.jsx';
 
 
+
 export default function App() {
   const addBox = useBoxStore((state) => state.addBox)
   const boxesData = useBoxStore(state => state.boxesData);
@@ -27,16 +28,24 @@ export default function App() {
   const currentSelectedConveyorState = conveyorStates[selectedConveyorId] || { rotate: false, speed: -20 };
   const setBoxesData = useBoxStore(state => state.setBoxesData); 
 
-  const initialBoxesSetup = React.useRef({});
-  const hasInitializedBoxes = React.useRef(false);
-  React.useEffect(() => {
-    if (!hasInitializedBoxes.current) {
-      Object.values(initialBoxesSetup.current).forEach(box => {
-        addBox(box.id, box); 
-      });
-      hasInitializedBoxes.current = true;
-    }
-  }, [addBox]);
+  const fetchBoxesData = useBoxStore(state => state.fetchBoxesData);
+
+  // const initialBoxesSetup = React.useRef({});
+  // const hasInitializedBoxes = React.useRef(false);
+  // React.useEffect(() => {
+  //   if (!hasInitializedBoxes.current) {
+  //     Object.values(initialBoxesSetup.current).forEach(box => {
+  //       addBox(box.id, box); 
+  //     });
+  //     hasInitializedBoxes.current = true;
+  //   }
+  // }, [addBox]);
+
+  // 使用 useEffect 在元件首次渲染時發送 API 請求
+    useEffect(() => {
+      fetchBoxesData();
+    }, [fetchBoxesData]); 
+
 
   const handleAddRandomBox = () => {
     const newBoxId = `box-${Date.now()}`; 
@@ -102,93 +111,10 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-       {/* <div
-       style={{
-        position: 'absolute',
-        top: 20,
-        left: 20,
-        zIndex: 10, // 確保它在 <Canvas> 之上
-        background: 'rgba(255, 255, 255, 0.8)', // 增加背景色和透明度
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 增加陰影
-        maxWidth: '300px', // 限制最大寬度
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px' // 增加間距
-      }}>     
-       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}> 
-        <button onClick={handleAddRandomBox}>Add Box</button>
-      </div>
      
-          <div>
-          <label htmlFor="conveyor-select">Select Conveyor: </label>
-          <select
-            id="conveyor-select"
-            value={selectedConveyorId}
-            onChange={(e) => {
-              setSelectedConveyorId(e.target.value);
-              setIndividualInputValue(0 - (conveyorStates[e.target.value]?.speed || -20));
-            }}
-            className="border px-2 py-1 mx-2"
-          >
-            {layoutData.conveyors.map(conv => (
-              <option key={conv.id} value={conv.id}>
-                {conv.id}
-              </option>
-            ))}
-          </select>
-        </div>
-
-            {selectedConveyorId && ( 
-          <div style={{ marginTop: '10px' }}>
-            <button onClick={handleIndividualRotateToggle}>
-              {currentSelectedConveyorState.rotate ? 'Stop Roller' : 'Activate Roller'} ({selectedConveyorId})
-            </button>
-            <div style={{ marginTop: '5px' }}>
-              <label htmlFor="individual_roller_speed">Roller Speed ({selectedConveyorId}): </label>
-              <input
-                type="number"
-                id="individual_roller_speed"
-                placeholder={0 - currentSelectedConveyorState.speed} 
-                step="0.1"
-                value={individualInputValue} 
-                onChange={(e) => setIndividualInputValue(e.target.value)}
-                className="border px-2 py-1 mx-2"
-              />
-              <button onClick={handleIndividualSpeedUpdate} className="bg-blue-500 text-white px-3 py-1 rounded">
-                Update Speed
-              </button>
-            </div>
-
-              <div>
-                <button onClick={handleAllConveyorsIsRotateToggle} className="bg-green-500 text-white px-3 py-1 rounded mx-2">
-                  Activate All Conveyors
-                </button>
-                <button onClick={handleAllConveyorsNotRotateToggle} className="bg-red-500 text-white px-3 py-1 rounded mx-2">
-                  Stop All Conveyors
-                </button>
-              </div>
-          </div>
-        )}
-
-        </div> */}
 
 <div
-  // style={{
-  //       position: 'absolute',
-  //       top: 20,
-  //       left: 20,
-  //       zIndex: 10, // 確保它在 <Canvas> 之上
-  //       background: 'rgba(255, 255, 255, 0.8)', // 增加背景色和透明度
-  //       padding: '20px',
-  //       borderRadius: '10px',
-  //       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 增加陰影
-  //       maxWidth: '300px', // 限制最大寬度
-  //       display: 'flex',
-  //       flexDirection: 'column',
-  //       gap: '15px' // 增加間距
-  //     }}
+  
       >
     {showSubPanel? 
       <SubPanelProduction  setShowSubPanel={setShowSubPanel}/> : 

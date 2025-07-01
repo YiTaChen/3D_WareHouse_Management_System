@@ -3,23 +3,45 @@ import { create } from 'zustand';
 import * as THREE from 'three';
 
 
-const initialBoxesData = {
-  // 'box-001': { id: 'box-001', name: 'Red Box', content: 'Fragile Item', position: [0, 5, 0] },
-  // 'box-002': { id: 'box-002', name: 'Blue Box', content: 'Heavy Machinery' },
+// const initialBoxesData = {
+//   // 'box-001': { id: 'box-001', name: 'Generic Box', content: 'Fragile Item', position: [0, 5, 0] },
+//   // 'box-002': { id: 'box-002', name: 'Generic Box', content: 'Heavy Machinery', position: [-8, 5, 0] },
   
-};
+//   'box-001': { id: 'box-001', position: [0, 5, 0] },
+//   'box-002': { id: 'box-002', position: [-8, 5, 0] },
+
+
+// };
 
 
 export const useBoxStore = create((set, get) => ({
   boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
   boxRefs: {}, // 儲存每個 Box 物理體的 React Ref
 
-  boxesData: initialBoxesData, // 初始化 Box 資料
+  // boxesData: initialBoxesData, // 初始化 Box 資料
+
+
+  // 新增一個非同步函式來從 API 取得 Box 資料
+  fetchBoxesData: async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:3002/boxPositions/map'); // api
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      set({ boxesData: data }); // 更新 store 中的 boxesData
+    } catch (error) {
+      console.error("Failed to fetch box data:", error);
+      // 可以考慮在這裡設定一個錯誤狀態
+    }
+  },
+
+
 
   isBoxBound: (boxId) => {
-  const boundMoveTable = get().boxBoundToMoveplate[boxId];
-  return !!boundMoveTable;
-},
+    const boundMoveTable = get().boxBoundToMoveplate[boxId];
+    return !!boundMoveTable;
+  },
   // 初始化或設定多個 Box 資料
   setBoxesData: (id, data) => {
     set((state) => ({
@@ -28,6 +50,10 @@ export const useBoxStore = create((set, get) => ({
         [id]: data, // 使用 id 作為 key
       },
     }));
+  },
+
+  setAllBoxesData: (boxesObj) => {
+    set({ boxesData: boxesObj });
   },
 
   // 設置 Box 的物理體 Ref（移除重複定義）
@@ -66,7 +92,7 @@ export const useBoxStore = create((set, get) => ({
 
 
   addBox: (id = Date.now(), data) => {
-    // console.log(`Adding box with id: ${id}`, data);
+    console.log(`Adding box with id: ${id}`, data);
     set((state) => ({
       boxesData: {
         ...state.boxesData,
