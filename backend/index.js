@@ -4,19 +4,49 @@ const express = require('express');
 const { Sequelize, DataTypes } = require('sequelize');
 
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || process.env.PORT_LOCAL || 3002;
 
-// 用 dotenv 讀取設定
+let dbConfig = {};
+
+if (process.env.DB_ENV === 'local') {
+        dbConfig = {
+            host: process.env.PG_HOST_LOCAL,
+            port: process.env.PG_PORT_LOCAL,
+            database: process.env.PG_DATABASE_LOCAL,
+            username: process.env.PG_USER_LOCAL,
+            password: process.env.PG_PASSWORD_LOCAL,
+            dialect: process.env.PG_DIALECT_LOCAL || 'postgres',
+    };
+
+    } 
+    else if (process.env.DB_ENV === 'cloud') 
+    {
+        dbConfig = {
+            host: process.env.PG_HOST,
+            port: process.env.PG_PORT,
+            database: process.env.PG_DATABASE,
+            username: process.env.PG_USER,
+            password: process.env.PG_PASSWORD,
+            dialect: process.env.PG_DIALECT || 'postgres',
+        }
+    }
+    else {
+    throw new Error('find no DB_ENV setting matched,  pls check .env setting');
+    }
+
+
+// 用 Sequelize 連接 PostgreSQL 資料庫
 const sequelize = new Sequelize(
-  process.env.PG_DATABASE,
-  process.env.PG_USER,
-  process.env.PG_PASSWORD,
-  {
-    host: process.env.PG_HOST,
-    dialect: 'postgres',
-    port: process.env.PG_PORT,
+  dbConfig.database,
+    dbConfig.username,
+    dbConfig.password,
+    {
+    host: dbConfig.host,
+    port: dbConfig.port,
     logging: false,
-  }
+    dialect: dbConfig.dialect,
+    }
+  
 );
 
 
