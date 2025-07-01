@@ -1,6 +1,10 @@
 // require('dotenv').config();
 
 const express = require('express');
+
+const cors = require('cors');  // 引入 CORS 中介軟體
+
+
 // const { Sequelize, DataTypes } = require('sequelize');
 const { sequelize, Test1 } = require('./models');
 const { FORCE } = require('sequelize/lib/index-hints');
@@ -11,6 +15,14 @@ const port = process.env.PORT || process.env.PORT_LOCAL || 3002;
 
 
 app.use(express.json());
+
+app.use(cors());  // 使用 CORS 中介軟體，允許跨域
+
+/*
+app.use(cors({
+  origin: 'http://localhost:5173' // 你的前端應用程式的來源
+}));
+*/
 
 // 可在這裡引入 routes
 app.use('/test1', require('./routes/test1Routes'));
