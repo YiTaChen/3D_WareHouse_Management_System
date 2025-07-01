@@ -66,6 +66,7 @@ export const useBoxStore = create((set, get) => ({
 
 
   addBox: (id = Date.now(), data) => {
+    // console.log(`Adding box with id: ${id}`, data);
     set((state) => ({
       boxesData: {
         ...state.boxesData,
