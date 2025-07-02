@@ -57,7 +57,7 @@ export default function Box({ id, initialPosition }) {
 
   useEffect(() => {
     if (boxBodyRef.current && boxBodyApi) {
-      console.log(`Setting box ref for ${id}:`, boxBodyRef.current);
+      // console.log(`Setting box ref for ${id}:`, boxBodyRef.current);
       const fullRef = {
         ref: boxBodyRef,
         api: boxBodyApi,

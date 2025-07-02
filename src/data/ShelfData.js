@@ -23,41 +23,6 @@
 // export default ShelfData;
 
 
-
-
-// const shelves = [];
-
-// let count = 0;
-
-
-
-// for (let z = -8; z <= 8; z += 2) {
-//   const zPassNumber = new Set([-6, 0, 6, 8]);
-//   if (zPassNumber.has(z)) continue; // 跳過 z = 0 的層
-
-
-//   for (let j = 0; j < 5; j++) {
-//       for (let i = 0; i < 20; i++) {
-//         shelves.push({
-//           id: `shelf${String(count + 5).padStart(3, '0')}`, // shelf005 ~ shelf009
-//           position: [i*2 + 2, ( 2 * j ) , z ],
-//           rotation: [0, 0, 0],
-//         });
-//         count++;
-//       }
-//   }
-// }
-
-// export const ShelfData = {
-//   shelves,
-// };
-
-// export default ShelfData;
-
-
-
-
-
 const shelves = [];
 
 let count = 0;

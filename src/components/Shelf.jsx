@@ -141,8 +141,12 @@ function Shelf({
       const boxId = e.body.userData?.appId;
       if (boxId) {
         setShelfSensorDetected(id, 'BulkSensorDetected', true);
+
+        // clear last collision with equipment (normally crane)
         clearBoxCollision(boxId);
+        // set new collision with equipment
         setBoxCollidingWithEquipment(boxId, id);
+        
         
         // 🎯 可選：當 box 碰撞時顯示調試信息
         if (!isVisuallyVisible) {
