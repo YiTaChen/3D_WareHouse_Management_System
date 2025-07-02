@@ -15,6 +15,7 @@ import { useCraneStore } from './stores/craneStore';
 import CraneBindingLogic from './components/CraneBindingLogic';
 import BoxBindingUpdater from './components/BoxBindingUpdater';
 import SubPanelProduction from './components/SubPanelProduction.jsx';
+import { useProductStore } from './stores/productStore';
 
 
 
@@ -45,6 +46,15 @@ export default function App() {
     useEffect(() => {
       fetchBoxesData();
     }, [fetchBoxesData]); 
+
+
+
+    const fetchProductsAndCategories = useProductStore(state => state.fetchProductsAndCategories);
+
+     // 在組件首次渲染時載入產品資料
+      useEffect(() => {
+        fetchProductsAndCategories();
+      }, [fetchProductsAndCategories]); // 確保只在函式變化時執行（通常只執行一次）
 
 
   const handleAddRandomBox = () => {
