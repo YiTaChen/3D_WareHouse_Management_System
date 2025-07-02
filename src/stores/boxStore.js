@@ -26,11 +26,12 @@ export const useBoxStore = create((set, get) => ({
   // 新增一個非同步函式來從 API 取得 Box 資料
   fetchBoxesData: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/boxPositions/map`); // api
+      const response = await fetch(`${API_BASE_URL}/boxPositions/mapFullData`); // api
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      // console.log("Fetched box data:", data);
       set({ boxesData: data }); // 更新 store 中的 boxesData
     } catch (error) {
       console.error("Failed to fetch box data:", error);
@@ -79,6 +80,25 @@ export const useBoxStore = create((set, get) => ({
     }
   },
 
+
+  updateBoxContentToServer: async (boxId, contentObj) => {
+    try {
+      const entries = Object.values(contentObj);
+      for (const item of entries) {
+        await fetch(`${API_BASE_URL}/boxContents`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            box_id: boxId,
+            item_id: item.id,
+            quantity: item.quantity,
+          }),
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update box content:', error);
+    }
+  },
 
 
 
@@ -140,13 +160,16 @@ export const useBoxStore = create((set, get) => ({
 
   addBox: async (id = Date.now(), data) => {
     // console.log(`Adding box with id: ${id}`, data.position, ", x: ",data.position[0], ", y: ", data.position[1], ", z: ", data.position[2]);
-    
+    // console.log("Box data to be added:", data);
+    // console.log("Box data content to be added:", data.content);
     try{
 
        await get().addBoxInitDataToServer(id); // 新增 Box 初始資料到伺服器
        await get().updateBoxInitPositionServer(id, data.position);
 
-
+        if (data.content) {
+          await get().updateBoxContentToServer(id, data.content);
+        }
 
        set((state) => ({
           boxesData: {
