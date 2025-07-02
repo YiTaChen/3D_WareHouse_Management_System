@@ -269,7 +269,7 @@ export const stepFunctions = {
         const updateBoxPos = useBoxStore.getState().updateBoxCurrentPositionServer;
 
         if (!updateBoxPos) {
-            console.warn('[craneBindingBox] 無法取得 clearBoxBoundToMoveplate');
+            console.warn('[updateBoxPos] 無法取得 updateBoxCurrentPositionServer');
             return false;
         }
 
@@ -284,6 +284,27 @@ export const stepFunctions = {
 
     },
 
+
+
+    removeBoxCurrentPositionServerHandler: async ({ boxId }) => {
+
+        const removeBoxPos = useBoxStore.getState().softDeleteOneBoxData;
+
+        if (!removeBoxPos) {
+            console.warn('[removeBoxPos] 無法取得 softDeleteOneBoxData');
+            return false;
+        }
+
+        // 執行
+        removeBoxPos(boxId);
+
+        // 模擬等待：固定等待 1 秒
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        return true;
+   
+
+    },
 
 
   }
@@ -969,6 +990,18 @@ export const crane003InboundMission = inboundTemplateFunction({
               params: { boxId: boxId },
               status: 'pending',
             },
+
+
+            {
+              id: 'step6.6',
+              name: 'remove box from init position at server',
+              functionKey: 'removeBoxCurrentPositionServerHandler',
+              params: { boxId: boxId },
+              status: 'pending',
+            },
+
+            
+
 
             {
               id: 'step7',
