@@ -70,7 +70,9 @@ export default function BoxControlPanel() {
 
   const formatContent = (content) => {
     if (content == null) return 'N/A';
+    // console.log('Content is an object:', content);
     if (typeof content === 'object') {
+
       try {
         return JSON.stringify(content, null, 2);
       } catch {
