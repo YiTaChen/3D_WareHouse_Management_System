@@ -40,6 +40,49 @@ export const useBoxStore = create((set, get) => ({
 
 
 
+  // only remove all the box, mark at db  (soft delete)
+  softDeleteAllBoxesData: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/boxes/all/remove`); // api
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+    } catch (error) {
+      console.error("Failed to fetch box data:", error);
+  
+    }
+  },
+
+
+
+  // only remove 1 box, mark at db  (soft delete)
+  softDeleteOneBoxData: async (boxId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/boxes/${boxId}/remove`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            box_id: boxId,
+          }),
+        });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+    } catch (error) {
+      console.error("Failed to fetch box data:", error);
+  
+    }
+  },
+
+
+
+
+
   isBoxBound: (boxId) => {
     const boundMoveTable = get().boxBoundToMoveplate[boxId];
     return !!boundMoveTable;
@@ -96,7 +139,7 @@ export const useBoxStore = create((set, get) => ({
   
 
   addBox: async (id = Date.now(), data) => {
-    console.log(`Adding box with id: ${id}`, data.position, ", x: ",data.position[0], ", y: ", data.position[1], ", z: ", data.position[2]);
+    // console.log(`Adding box with id: ${id}`, data.position, ", x: ",data.position[0], ", y: ", data.position[1], ", z: ", data.position[2]);
     
     try{
 
@@ -181,7 +224,7 @@ export const useBoxStore = create((set, get) => ({
       }
 
       const updated = await response.json();
-      console.log(` Box ${boxId} 位置已更新:`, updated);
+      // console.log(` Box ${boxId} 位置已更新:`, updated);
     } catch (err) {
       console.error(` 更新 box ${boxId} 位置失敗:`, err.message);
     }
@@ -241,7 +284,7 @@ export const useBoxStore = create((set, get) => ({
       }
 
       const updated = await response.json();
-      console.log(` Box ${boxId} 已新增:`, updated);
+      // console.log(` Box ${boxId} 已新增:`, updated);
     } catch (err) {
       console.error(` 新增 box ${boxId} 失敗:`, err.message);
     }
