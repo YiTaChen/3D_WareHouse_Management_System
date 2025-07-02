@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { BoxPosition, Box } = require('../models');
+const { Box, BoxPosition, BoxContent, Item } = require('../models');
 
 
 
@@ -50,6 +50,77 @@ router.get('/map', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// GET /mapFullData - Get complete data for all Boxes in a map format
+router.get('/mapFullData', async (req, res) => {
+  try {
+    const boxes = await Box.findAll({
+      where: { isRemoved: false }, // Only get boxes that are not soft-deleted
+      include: [
+        {
+          model: BoxPosition,
+          // required: true, // You can make this true if a box must always have a position
+        },
+        {
+          model: BoxContent,
+          where: { isContentDelete: false },
+          required: false, // LEFT JOIN for box content
+          include: [
+            {
+              model: Item,
+              required: false, // LEFT JOIN for item details
+            },
+          ],
+        },
+      ],
+    });
+
+    const mapFullData = {}; // Initialize an empty object to store the mapped data
+
+    boxes.forEach(box => {
+      const boxData = {
+        id: box.box_id,
+        position: box.BoxPosition
+          ? [box.BoxPosition.position_x, box.BoxPosition.position_y, box.BoxPosition.position_z]
+          : [0, 0, 0], // Default position if not found
+        content: {}, // Initialize content for this box
+      };
+
+      if (box.BoxContents && box.BoxContents.length > 0) {
+        for (const content of box.BoxContents) {
+          boxData.content[content.item_id] = {
+            id: content.item_id,
+            name: content.Item?.item_name || '',
+            category: content.Item?.category || '',
+            quantity: content.quantity,
+          };
+        }
+      } else {
+        // If the box has no content, represent it as an "empty box"
+        boxData.content = {
+          empty: {
+            id: 'empty',
+            name: 'empty box',
+            category: 'N/A',
+            quantity: 0,
+          },
+        };
+      }
+      
+      // Add the constructed boxData to the map using box_id as the key
+      mapFullData[box.box_id] = boxData;
+    });
+
+    res.json(mapFullData); // Return the mapped object
+  } catch (err) {
+    console.error("Error fetching all full box data in map format:", err);
+    res.status(500).json({ error: 'Failed to retrieve all full box data in map format', details: err.message });
+  }
+});
+
+
+
 
 // Read by ID
 router.get('/:id', async (req, res) => {
