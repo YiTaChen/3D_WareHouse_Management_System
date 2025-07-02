@@ -12,6 +12,8 @@ import { useBoxStore } from '../../stores/boxStore';
 import { useCraneStore } from '../../stores/craneStore';
 import { useBoxEquipStore } from '../../stores/boxEquipStore';
 
+import { useShelfStore } from '../../stores/shelfStore'; // 假設你有一個工具函數來獲取貨架位置
+
 
 
 
@@ -33,6 +35,8 @@ const MissionPanel = () => {
 
 
   const getAllShelfIds = useBoxEquipStore((state) => state.getAllShelfId);
+
+    const getShelfPosition = useShelfStore((state) => state.getShelfPosition); // 使用自定義的工具函數來獲取貨架位置
 
 
 
@@ -312,24 +316,31 @@ const MissionPanel = () => {
     };
 
 
-
+    
     // selectedShelfId
 
     const customMission01_out = () => {
       // crane001_OutboundMissionTemplate.boxId = selectedBoxId;
       crane001_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
+      // console.log("selectedShelfId: ", selectedShelfId)
+      // console.log( "shelf position: " ,getShelfPosition(selectedShelfId))
+
+      crane001_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
+
       const jsonStr =  outboundTemplateFunction(crane001_OutboundMissionTemplate)
       return jsonStr
     };
 
     const customMission02_out = () => {
       crane002_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
+      crane001_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
       const jsonStr =  outboundTemplateFunction(crane002_OutboundMissionTemplate)
       return jsonStr
     };
 
     const customMission03_out = () => {
       crane003_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
+      crane001_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
       const jsonStr =  outboundTemplateFunction(crane003_OutboundMissionTemplate)
       return jsonStr
     };

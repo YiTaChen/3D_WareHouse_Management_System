@@ -2,6 +2,9 @@ import { create } from 'zustand';
 // 假設你有一個 ShelfData.js 包含貨架的配置
 // import ShelfData from '../data/ShelfData'; // 如果有需要，可以引入貨架數據
 
+import ShelfData from '../data/ShelfData'; 
+
+
 const initializeShelfStates = () => {
   const shelfStates = {};
   // 這裡可以根據你的 ShelfData 來初始化多個貨架的狀態
@@ -50,4 +53,18 @@ export const useShelfStore = create((set, get) => ({
    * @returns {object} 包含感應器狀態的物件
    */
   getShelfState: (id) => get().shelfStates[id],
+
+
+  getShelfPosition: (shelfID) => {
+    // 從 ShelfData.shelves 陣列中尋找匹配的貨架
+    const shelf = ShelfData.shelves.find(s => s.id === shelfID);
+    let position = [0, 0, 0]; // 預設位置
+    if (shelf && shelf.position) {
+      position = [shelf.position[0], shelf.position[1]+3, shelf.position[2]];
+    }
+    // console.log('getShelfPosition', shelfID, shelf.position);
+
+    return shelf ? position : undefined;
+  },
+
 }));
