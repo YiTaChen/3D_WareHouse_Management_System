@@ -22,6 +22,27 @@ router.get('/', async (req, res) => {
   res.json(items);
 });
 
+
+
+// GET /items/categories - 列出所有不同 category
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = await Item.findAll({
+      attributes: ['category'],
+      group: ['category'],
+    });
+    res.json(categories.map(c => c.category));
+
+    // const [results] = await sequelize.query('SELECT DISTINCT category FROM items');
+    // res.json(results.map(r => r.category));
+
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Read one
 router.get('/:id', async (req, res) => {
   const item = await Item.findByPk(req.params.id);
@@ -45,25 +66,6 @@ router.delete('/:id', async (req, res) => {
   res.json({ message: 'Item deleted' });
 });
 
-
-
-// GET /items/categories - 列出所有不同 category
-router.get('/categories', async (req, res) => {
-  try {
-    const categories = await Item.findAll({
-      attributes: ['category'],
-      group: ['category'],
-    });
-    res.json(categories.map(c => c.category));
-
-    // const [results] = await sequelize.query('SELECT DISTINCT category FROM items');
-    // res.json(results.map(r => r.category));
-
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 // GET /items/category/:category/ - 根據 category 取得資料
