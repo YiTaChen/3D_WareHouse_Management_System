@@ -67,4 +67,77 @@ export const useShelfStore = create((set, get) => ({
     return shelf ? position : undefined;
   },
 
+
+
+
+  /**
+   * 取得所有符合條件的空貨架列表。
+   * 條件：
+   * 1. 貨架的 z 座標為 -8 或 -6。
+   * 2. 貨架的 BulkSensorDetected 狀態為 false (表示是空的)。
+   * @returns {Array<object>} 符合條件的貨架物件列表，每個物件包含 id 和 position。
+   */
+  getEmptyShelfListPort1: () => {
+      const allShelves = ShelfData.shelves;
+      const currentShelfStates = get().shelfStates; // 取得當前 store 中的貨架狀態
+
+      const emptyShelves = allShelves.filter(shelf => {
+        const shelfId = shelf.id;
+        const shelfZPosition = shelf.position[2];
+
+        // 條件 1: 檢查 z 座標
+        const isCorrectZ = (shelfZPosition === -8 || shelfZPosition === -4);
+
+        // 條件 2: 檢查 shelfStates 中的感測器狀態
+        // 如果 shelfId 在 currentShelfStates 中有定義，並且其 BulkSensorDetected 為 false
+        // 或者如果 shelfId 尚未在 shelfStates 中被初始化（這表示它預設是空的）
+        const shelfState = currentShelfStates[shelfId];
+        const isBulkSensorDetectedFalse = shelfState ? !shelfState.BulkSensorDetected : true;
+
+        return isCorrectZ && isBulkSensorDetectedFalse;
+      }).map(shelf => ({
+        // 返回符合條件貨架的 id 和調整過位置（如果需要的話，這裡保持與 getShelfPosition 一致）
+        id: shelf.id,
+        position: [shelf.position[0], shelf.position[1] + 3, shelf.position[2]], // 保持與 getShelfPosition 的高度調整一致
+      }));
+
+      return emptyShelves;
+  },
+
+    /**
+     * 取得所有符合條件的空貨架列表。
+     * @param {Array<number>} allowedZPositions - 允許的 Z 座標列表 (例如 [-8, -4])
+     * @returns {Array<object>} 符合條件的貨架物件列表，每個物件包含 id 和 position。
+     */
+    getEmptyShelfListByZ: (allowedZPositions) => {
+        const allShelves = ShelfData.shelves;
+        const currentShelfStates = get().shelfStates;
+
+        const emptyShelves = allShelves.filter(shelf => {
+          const shelfId = shelf.id;
+          const shelfZPosition = shelf.position[2];
+
+          // 條件 1: 檢查 z 座標是否在允許列表中
+          const isCorrectZ = allowedZPositions.includes(shelfZPosition);
+
+          // 條件 2: 檢查 shelfStates 中的感測器狀態
+          const shelfState = currentShelfStates[shelfId];
+          const isBulkSensorDetectedFalse = shelfState ? !shelfState.BulkSensorDetected : true;
+
+          return isCorrectZ && isBulkSensorDetectedFalse;
+        }).map(shelf => ({
+          id: shelf.id,
+          position: [shelf.position[0], shelf.position[1] + 3, shelf.position[2]],
+        }));
+
+        return emptyShelves;
+    },
+    
+
 }));
+
+
+
+
+
+
