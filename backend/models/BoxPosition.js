@@ -11,9 +11,9 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    position_x: DataTypes.INTEGER,
-    position_y: DataTypes.INTEGER,
-    position_z: DataTypes.INTEGER,
+    position_x: DataTypes.FLOAT,
+    position_y: DataTypes.FLOAT,
+    position_z: DataTypes.FLOAT,
   }, {
     tableName: 'boxPosition',
     timestamps: false,
