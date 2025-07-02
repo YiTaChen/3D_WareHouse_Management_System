@@ -66,6 +66,24 @@ router.patch('/:id/remove', async (req, res) => {
   }
 });
 
+
+// Soft delete all Boxes (set isRemoved to true for all)
+router.patch('/all/remove', async (req, res) => {
+  try {
+    const [updatedCount] = await Box.update(
+      { isRemoved: true },
+      { where: {} } // 空的 where 條件表示更新所有記錄
+    );
+    res.json({ message: `Successfully soft-deleted ${updatedCount} boxes.` });
+  } catch (err) {
+    console.error("Error soft-deleting all boxes:", err);
+    res.status(500).json({ error: 'Failed to soft-delete all boxes.', details: err.message });
+  }
+});
+
+
+
+
 module.exports = router;
 
 
