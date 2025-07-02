@@ -71,4 +71,22 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+
+// GET /boxContents/box/:boxId - get content by boxId
+router.get('/box/:boxId', async (req, res) => {
+  try {
+    const contents = await BoxContent.findAll({
+      where: {
+        box_id: req.params.boxId,
+        isContentDelete: false,
+      },
+    });
+    res.json(contents);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 module.exports = router;
