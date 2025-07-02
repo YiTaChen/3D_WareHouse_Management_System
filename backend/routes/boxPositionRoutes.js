@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { BoxPosition } = require('../models');
+const { BoxPosition, Box } = require('../models');
 
 
 
@@ -28,7 +28,16 @@ router.get('/', async (req, res) => {
 // boxPositions/map
 router.get('/map', async (req, res) => {
   try {
-    const all = await BoxPosition.findAll();
+    const all = await BoxPosition.findAll(
+      {
+          include: {
+            model: Box,
+            where: { isRemoved: false }, 
+            attributes: [], // 不需要回傳 box 的欄位，只作為過濾
+            required: true
+          }
+      }
+    );
     const map = {};
     all.forEach(p => {
       map[p.box_id] = {
@@ -135,27 +144,6 @@ router.post('/box/:boxId', async (req, res) => {
   }
 });
 
-
-
-
-// // PUT /box/:boxId - 替換某個 box 的位置
-// router.put('/box/:boxId', async (req, res) => {
-//   try {
-//     const [updated] = await BoxPosition.update(req.body, {
-//       where: { box_id: req.params.boxId },
-//     });
-//     if (updated) {
-//       const updatedPosition = await BoxPosition.findOne({
-//         where: { box_id: req.params.boxId },
-//       });
-//       res.json(updatedPosition);
-//     } else {
-//       res.status(404).json({ error: 'BoxPosition not found' });
-//     }
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// });
 
 
 // PATCH /box/:boxId - 僅更新 position_x, position_y, position_z 任一欄位
