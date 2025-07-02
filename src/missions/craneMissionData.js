@@ -264,6 +264,28 @@ export const stepFunctions = {
 
 
 
+    updateBoxCurrentPositionServerHandler: async ({ boxId }) => {
+
+        const updateBoxPos = useBoxStore.getState().updateBoxCurrentPositionServer;
+
+        if (!updateBoxPos) {
+            console.warn('[craneBindingBox] 無法取得 clearBoxBoundToMoveplate');
+            return false;
+        }
+
+        // 執行
+        updateBoxPos(boxId);
+
+        // 模擬等待：固定等待 1 秒
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        return true;
+   
+
+    },
+
+
+
   }
 
 
@@ -522,6 +544,13 @@ export const stepFunctions = {
               params: { craneName: craneId, offset: movePlateShelfDownOffset, speed: tableSpeed },
               status: 'pending',
             },
+            {
+              id: 'step6',
+              name: 'update box position to server',
+              functionKey: 'updateBoxCurrentPositionServerHandler',
+              params: { boxId: boxId },
+              status: 'pending',
+            },
           ],
         },
         {
@@ -539,6 +568,7 @@ export const stepFunctions = {
             },
           ],
         },
+        
       ],
     };
 };
@@ -673,6 +703,7 @@ export const crane003InboundMission = inboundTemplateFunction({
     }
     else {
         // 如果沒有強制使用 shelfIsTakeLeft，則根據 shelfPosition 決定
+        // console.log(' before shelfPosition', shelfPosition[2], 'shelfIsTakeLeft', shelfIsTakeLeft);
       switch (shelfPosition[2]) {
       case -8:
         shelfIsTakeLeft = true; // -8 位置強制使用左側
@@ -693,7 +724,7 @@ export const crane003InboundMission = inboundTemplateFunction({
         shelfIsTakeLeft = true; // 預設值為左側
       }
     }
-
+// console.log('after shelfPosition', shelfPosition[2], 'shelfIsTakeLeft', shelfIsTakeLeft);
 
     const movePlateShelfUpOffset = [0, upOffset, 0];
     const movePlateShelfDownOffset = [0, 0, 0];
@@ -931,6 +962,13 @@ export const crane003InboundMission = inboundTemplateFunction({
               status: 'pending',
             },
 
+            {
+              id: 'step6.5',
+              name: 'update box position to server',
+              functionKey: 'updateBoxCurrentPositionServerHandler',
+              params: { boxId: boxId },
+              status: 'pending',
+            },
 
             {
               id: 'step7',

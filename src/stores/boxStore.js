@@ -2,6 +2,8 @@
 import { create } from 'zustand';
 import * as THREE from 'three';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 // const initialBoxesData = {
 //   // 'box-001': { id: 'box-001', name: 'Generic Box', content: 'Fragile Item', position: [0, 5, 0] },
@@ -24,7 +26,7 @@ export const useBoxStore = create((set, get) => ({
   // 新增一個非同步函式來從 API 取得 Box 資料
   fetchBoxesData: async () => {
     try {
-      const response = await fetch('http://127.0.0.1:3002/boxPositions/map'); // api
+      const response = await fetch(`${API_BASE_URL}/boxPositions/map`); // api
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -84,21 +86,38 @@ export const useBoxStore = create((set, get) => ({
       content: randomContent,
       position: [0, 3, 0],
     };
+
+    
+
     addBox(newBoxId, newBoxData);
   },
 
 
   
 
+  addBox: async (id = Date.now(), data) => {
+    console.log(`Adding box with id: ${id}`, data.position, ", x: ",data.position[0], ", y: ", data.position[1], ", z: ", data.position[2]);
+    
+    try{
 
-  addBox: (id = Date.now(), data) => {
-    console.log(`Adding box with id: ${id}`, data);
-    set((state) => ({
-      boxesData: {
-        ...state.boxesData,
-        [id]: data,
-      },
-    }));
+       await get().addBoxInitDataToServer(id); // 新增 Box 初始資料到伺服器
+       await get().updateBoxInitPositionServer(id, data.position);
+
+
+
+       set((state) => ({
+          boxesData: {
+            ...state.boxesData,
+            [id]: data,
+          },
+        }));
+
+    } catch (err) {
+      console.error("在 addBox 過程中發生錯誤:", err.message);
+      
+    }
+    
+    
   },
 
   removeBox: (boxId) => set((state) => {
@@ -136,6 +155,99 @@ export const useBoxStore = create((set, get) => ({
   }
   return null;
 },
+
+
+
+
+  // create box position data when box is added
+  updateBoxInitPositionServer: async (boxId, pos) => {
+   
+    try {
+      const response = await fetch(`${API_BASE_URL}/boxPositions/box/${boxId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          position_x: pos[0],
+          position_y: pos[1],
+          position_z: pos[2],
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || '更新失敗');
+      }
+
+      const updated = await response.json();
+      console.log(` Box ${boxId} 位置已更新:`, updated);
+    } catch (err) {
+      console.error(` 更新 box ${boxId} 位置失敗:`, err.message);
+    }
+  },
+
+  // update box position data when box moving is finished 
+  updateBoxCurrentPositionServer: async (boxId) => {
+    const pos = get().getBoxWorldPosition(boxId); // [x, y, z]
+    if (!pos) {
+      console.warn(`無法取得 ${boxId} 的位置`);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/boxPositions/box/${boxId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          position_x: pos[0],
+          position_y: pos[1]+0.5, // 調整 y 軸位置，避免 Box 進入地板
+          position_z: pos[2],
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || '更新失敗');
+      }
+
+      const updated = await response.json();
+      console.log(` Box ${boxId} 位置已更新:`, updated);
+    } catch (err) {
+      console.error(` 更新 box ${boxId} 位置失敗:`, err.message);
+    }
+  },
+
+
+
+  addBoxInitDataToServer: async (boxId) => {
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/boxes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          box_id: boxId,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || '更新失敗');
+      }
+
+      const updated = await response.json();
+      console.log(` Box ${boxId} 已新增:`, updated);
+    } catch (err) {
+      console.error(` 新增 box ${boxId} 失敗:`, err.message);
+    }
+  },
+
+
 
   // 檢查 Box 是否處於睡眠狀態
   // 使用物理引擎的 velocity 屬性來判斷
