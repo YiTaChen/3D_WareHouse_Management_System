@@ -16,6 +16,8 @@ import CraneBindingLogic from './components/CraneBindingLogic';
 import BoxBindingUpdater from './components/BoxBindingUpdater';
 import SubPanelProduction from './components/SubPanelProduction.jsx';
 import { useProductStore } from './stores/productStore';
+import { useUIStore } from './stores/uiStore'; 
+import HighlightSpot from './components/effect/HighlightSpot'; // 引入高亮元件
 
 
 
@@ -30,6 +32,9 @@ export default function App() {
   const setBoxesData = useBoxStore(state => state.setBoxesData); 
 
   const fetchBoxesData = useBoxStore(state => state.fetchBoxesData);
+
+  // 從 uiStore 中獲取 highlightPosition
+  const highlightPosition = useUIStore(state => state.highlightPosition); 
 
   // const initialBoxesSetup = React.useRef({});
   // const hasInitializedBoxes = React.useRef(false);
@@ -167,6 +172,11 @@ export default function App() {
             ))}
 
           {/* </Debug> */}
+
+
+            {/* HighlightSpot 直接從 uiStore 獲取 highlightPosition */}
+             {highlightPosition && <HighlightSpot position={highlightPosition} />}
+
         </Physics>
       </Canvas>
     </div>

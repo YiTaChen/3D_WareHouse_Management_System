@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useBoxStore } from '../../stores/boxStore'; // 引入你的 boxStore
 
+
+
+import { useUIStore } from '../../stores/uiStore'; 
+
+
 // 定義表格列頭的類型和是否可排序
 const columns = [
   { id: 'checkBoxPosition', label: '', sortable: false, type: 'button' },
@@ -25,6 +30,18 @@ export default function Inventory() {
   const inventoryError = useBoxStore((state) => state.inventoryError);
  
     // console.log('Inventory Data:', inventoryData); // 確認庫存數據結構
+
+   
+
+    // 從 uiStore 中獲取 setHighlightPosition Action
+    const setHighlightPosition = useUIStore((state) => state.setHighlightPosition);
+
+
+
+   // 處理點擊 "Check Box Position" 按鈕
+  const handleCheckBoxPosition = (position) => {
+    setHighlightPosition(position); // 直接呼叫 Store 中的 Action
+  };
 
   // 排序狀態
   const [sortColumn, setSortColumn] = useState(null);
@@ -83,6 +100,8 @@ export default function Inventory() {
   return (
     <div style={{ padding: '20px', overflowX: 'auto' }}>
       <h2>Current Inventory</h2>
+ 
+
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
@@ -113,7 +132,11 @@ export default function Inventory() {
                 sortedInventoryData.map((row, index) => (
                 <tr key={index}>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                    <button onClick={() => console.log('Check box position for:', row.box_id)}>Check Box Position</button>
+                    <button onClick={
+                        () => handleCheckBoxPosition([row.x, row.y, row.z])
+
+
+                    }>Check Box Position</button>
                     </td>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.box_id}</td>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.shelf_id}</td>
