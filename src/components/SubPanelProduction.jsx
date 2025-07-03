@@ -6,6 +6,7 @@ import ObjectBindingTest from './subPages/ObjectBindingTest';
 import BoxControlPanel from './subPages/BoxControlPanel';
 import MissionPanel from './subPages/MissionPanel.jsx';
 import MissionHighLevelPanel from './subPages/MissionHighLevelPanel.jsx';
+import Inventory from './subPages/Inventory.jsx';
 
 // 這裡我們只是 placeholders
 const TabContent1 = () => (
@@ -17,7 +18,7 @@ const TabContent2 = () => (
 );
 
 const TabContent3 = () => (
-  <div> under Construction ...  </div>
+  <div> <Inventory tabId={3} />  </div>
 );
 
 
