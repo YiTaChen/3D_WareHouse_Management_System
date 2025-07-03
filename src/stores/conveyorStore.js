@@ -169,4 +169,81 @@ export const useConveyorStore = create((set, get) => ({
   // rollerSpeed: -20, // Default speed for the roller
   // setRotate: (value) => set({ rotate: value }),
   // setRollerSpeed: (value) => set({ rollerSpeed: value }),
+
+
+  // // Corrected setConveyorRotateSpeedNagetive function
+  // setConveyorRotateSpeedPasitive: async ({ conveyorId }) => {
+  //     console.log(`aaa [setConveyorRotateSpeedPasitive] Attempting to stop conveyor ${conveyorId} rotation`);
+      
+  //     // If conveyorId is 'pass', do not execute stop logic
+  //     if (conveyorId !== 'pass') { // Using strict inequality for robustness
+  //         // Get setConveyorSpeed directly from 'get()'
+  //         const setSpeedFn = get().setConveyorSpeed; // <--- This is the correct way
+
+  //         console.log(`bbbb [setConveyorRotateSpeedPasitive] Preparing to stop conveyor ${conveyorId} rotation`);
+
+  //         if (!setSpeedFn) {
+  //             console.warn('[setSpeedFn] Could not get setConveyorSpeed function.');
+  //             return false;
+  //         }
+
+  //         const currentConveyorState = get().conveyorStates[conveyorId];
+  //         if (!currentConveyorState) {
+  //             console.warn(`[setConveyorRotateSpeedPasitive] No state found for conveyor ${conveyorId}.`);
+  //             return false;
+  //         }
+
+  //         // Calculate negative speed
+  //         const positiveSpeed =  0- Math.abs(currentConveyorState.speed);
+
+  //         console.log(` setConveyorRotateSpeedPasitive: new speed for ${conveyorId} is ${positiveSpeed} `);
+
+  //         // Execute speed setting
+  //         setSpeedFn(conveyorId, positiveSpeed);
+  //     }
+      
+  //     // Simulate waiting: wait for 1 second
+  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  //     return true;
+  // },
+
+  // // Corrected setConveyorRotateSpeedNagetive function
+  // setConveyorRotateSpeedNagetive: async ({ conveyorId }) => {
+  //     console.log(`aaa [setConveyorRotateSpeedNagetive] Attempting to stop conveyor ${conveyorId} rotation`);
+      
+  //     // If conveyorId is 'pass', do not execute stop logic
+  //     if (conveyorId !== 'pass') { // Using strict inequality for robustness
+  //         // Get setConveyorSpeed directly from 'get()'
+  //         const setSpeedFn = get().setConveyorSpeed; // <--- This is the correct way
+
+  //         console.log(`bbbb [setConveyorRotateSpeedNagetive] Preparing to stop conveyor ${conveyorId} rotation`);
+
+  //         if (!setSpeedFn) {
+  //             console.warn('[setSpeedFn] Could not get setConveyorSpeed function.');
+  //             return false;
+  //         }
+
+  //         const currentConveyorState = get().conveyorStates[conveyorId];
+  //         if (!currentConveyorState) {
+  //             console.warn(`[setConveyorRotateSpeedNagetive] No state found for conveyor ${conveyorId}.`);
+  //             return false;
+  //         }
+
+  //         // Calculate negative speed
+  //         const nagetiveSpeed =  Math.abs(currentConveyorState.speed);
+
+  //         console.log(` setConveyorRotateSpeedNagetive: new speed for ${conveyorId} is ${nagetiveSpeed} `);
+
+  //         // Execute speed setting
+  //         setSpeedFn(conveyorId, nagetiveSpeed);
+  //     }
+      
+  //     // Simulate waiting: wait for 1 second
+  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  //     return true;
+  // },
+
+
 }));

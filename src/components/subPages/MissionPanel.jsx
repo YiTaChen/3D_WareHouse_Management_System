@@ -4,7 +4,7 @@ import { cranePickupMission, crane001InboundMission , crane002InboundMission, cr
   ,crane001_OutboundMission, crane002_OutboundMission, crane003_OutboundMission, inboundTemplateFunction,
   crane001InboundMissionParamTemplate , crane002InboundMissionParamTemplate, crane003InboundMissionParamTemplate
   ,crane001_OutboundMissionTemplate, crane002_OutboundMissionTemplate, crane003_OutboundMissionTemplate
-  ,outboundTemplateFunction
+  ,outboundTemplateFunction, inboundTemplateFunctionForCrane2, outboundTemplateFunctionForCrane2
 
 } from '../../missions/craneMissionData';
 
@@ -351,7 +351,7 @@ const MissionPanel = () => {
     const customMission02_in = () => {
       crane002InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port3'));
       crane002InboundMissionParamTemplate.shelfPosition = getShelfPosition(selectedInboundShelfId);
-      const jsonStr =  inboundTemplateFunction(crane002InboundMissionParamTemplate)
+      const jsonStr =  inboundTemplateFunctionForCrane2(crane002InboundMissionParamTemplate)
       return jsonStr
     };
 
@@ -381,7 +381,7 @@ const MissionPanel = () => {
     const customMission02_out = () => {
       crane002_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
       crane002_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
-      const jsonStr =  outboundTemplateFunction(crane002_OutboundMissionTemplate)
+      const jsonStr =  outboundTemplateFunctionForCrane2(crane002_OutboundMissionTemplate)
       return jsonStr
     };
 
