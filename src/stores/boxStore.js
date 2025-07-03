@@ -2,6 +2,8 @@
 import { create } from 'zustand';
 import * as THREE from 'three';
 
+import { useBoxEquipStore } from './boxEquipStore'; // 引入 useBoxEquipStore
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
@@ -20,10 +22,12 @@ export const useBoxStore = create((set, get) => ({
   boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
   boxRefs: {}, // 儲存每個 Box 物理體的 React Ref
 
+  inventoryData: [], // 新增：用於儲存扁平化的庫存數據
+
   // boxesData: initialBoxesData, // 初始化 Box 資料
 
 
-  // 新增一個非同步函式來從 API 取得 Box 資料
+  // 新增一個非同步函式來從 API 取得 initial Boxes 資料
   fetchBoxesData: async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/boxPositions/mapFullData`); // api
@@ -38,6 +42,81 @@ export const useBoxStore = create((set, get) => ({
       // 可以考慮在這裡設定一個錯誤狀態
     }
   },
+
+
+    getInventoryDataAll: async () => {
+        set({ isLoadingInventory: true, inventoryError: null }); // 設定載入狀態
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/boxInventory/fullData`); // 使用 /boxes/fullData API
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const allBoxesData = await response.json();
+
+          const flatInventory = []; // 用於儲存扁平化的庫存數據
+
+          const boxEquipStatus = useBoxEquipStore.getState().boxCollisionStatus;
+
+
+          allBoxesData.forEach(box => {
+            if (box.isRemoved) {
+              return; // 跳過已移除的 Box
+            }
+
+            const boxId = box.id;
+            const position = box.position;
+            // 從 boxEquipStatus 中獲取 Box 對應的 Shelf ID
+            // 如果沒有或不是以 'shelf' 開頭，則為 null
+            const shelfId = boxEquipStatus[boxId] && boxEquipStatus[boxId].startsWith('shelf')
+                          ? boxEquipStatus[boxId]
+                          : null;
+
+            // 根據需求：若 boxId 沒有對應的 shelf ID，則不顯示在表格中
+            if (!shelfId) {
+                return; // 跳過沒有 Shelf ID 的 Box
+            }
+
+            const isBoxEmpty = box.content && box.content.empty;
+
+            if (isBoxEmpty) {
+              flatInventory.push({
+                box_id: boxId,
+                shelf_id: shelfId, // 加入 shelf_id
+                item_id: 'empty',
+                item_name: 'empty box',
+                quantity: 0,
+                x: position[0],
+                y: position[1],
+                z: position[2],
+              });
+            } else {
+              for (const itemId in box.content) {
+                const itemContent = box.content[itemId];
+                flatInventory.push({
+                  box_id: boxId,
+                  shelf_id: shelfId, // 加入 shelf_id
+                  item_id: itemContent.id,
+                  item_name: itemContent.name,
+                  quantity: itemContent.quantity,
+                  x: position[0],
+                  y: position[1],
+                  z: position[2],
+                });
+              }
+            }
+          });
+          set({ inventoryData: flatInventory, isLoadingInventory: false });
+        } catch (error) {
+          console.error("Failed to fetch inventory data:", error);
+          set({ inventoryError: error.message, isLoadingInventory: false, inventoryData: [] });
+        }
+      },
+
+      isLoadingInventory: false, // 載入狀態
+      inventoryError: null, // 錯誤狀態
+
+
 
 
 
