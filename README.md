@@ -103,6 +103,7 @@ future features :
 # High-level architecture diagrams.
 
 
+
 Frontend-backend interaction and database requirements.
 
 Box position and add new Boxes.
@@ -112,6 +113,11 @@ Get all equipments location and status.
 Get dynamic position of all items. 
 
 Get all inventory data.
+
+
+
+![arch diagrams](./demo_resource_for_readme/struture111.png)
+
 
 
 # Database Schema Design
