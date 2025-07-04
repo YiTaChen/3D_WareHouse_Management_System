@@ -47,21 +47,24 @@ Links to an external site.
     
 # 4. Technology Stack:
 
-3D model for WebPage: Three.js.
+    Tech use:
 
-Frontend: React.js
+	3D model for WebPage: Three.js.
 
-Backend: Express 
+	Frontend: React.js
 
-DataBase: PostgreSQL
+	Backend: Express
 
-Cloud deploy usage: 
+  	DataBase: PostgreSQL
 
-Frontend: Firebase
 
-Backend: Render
+    Cloud deploy usage: 
 
-DataBase: cloud DB provides by Render
+	Frontend: Firebase
+
+	Backend: Render
+
+	DataBase: cloud DB provides by Render
 
 
 # 5. Features to be Implemented:
