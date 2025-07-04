@@ -4,7 +4,7 @@
     
 ![Demo](./demo_resource_for_readme/warehouse_new.gif)
 
-**Latest version:** 0.3  
+**Latest version:** 0.8  
 👉 Try it yourself: [Live Demo on Firebase](https://r3f-gravity-apply-test.firebaseapp.com)
 
 
