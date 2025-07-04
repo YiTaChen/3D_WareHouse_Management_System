@@ -2,7 +2,7 @@
 
     3D Warehouse Management Web System (3D-WMS)
     
-![Demo](./demo_resource_for_readme/3d_demo-3.gif)
+![Demo](./demo_resource_for_readme/warehouse_new.gif)
 
 **Latest version:** 0.3  
 👉 Try it yourself: [Live Demo on Firebase](https://r3f-gravity-apply-test.firebaseapp.com)
