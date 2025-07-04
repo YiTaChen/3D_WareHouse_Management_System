@@ -83,17 +83,29 @@ Get all inventory data.
 
 Box APIs		
 Method	Endpoint	                Description
+
 POST	/boxes	                    Create a new box
+
 GET	    /boxes	                    Get all boxes
+
 GET	    /boxes/:id	                Get a box by box_id
+
 PUT	    /boxes/:id	                Update a box by box_id
+
 DELETE	/boxes/:id	                Delete a box by box_id
-PATCH	/boxes/:id/remove	        Soft-delete a box (set isRemoved = true)
+
+PATCH	/boxes/:id/remove	        Soft-delete a box (set is
+Removed = true)
 PATCH	/boxes/all/remove	        Soft-delete all boxes
+
 GET	    /boxes/:boxId/full	        Get full box data (position and contents)
+
 GET	    /boxes/fullData	            Get full data of all boxes
+
 PUT	    /boxes/:boxId/position	    Update box position by box_id
+
 PUT	    /boxes/:boxId/content/:itemId	Update specific item in a box
+
 
 
 BoxContent APIs
