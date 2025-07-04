@@ -80,53 +80,61 @@ Get all inventory data.
 
 
 # API Contract
-“Only example”
 
-Add box: 
-Request: 
-POST /api/boxes
-{
-  "position": [0, 3, 0],
-  "size": [1, 1, 1]
-}
-
-Response:  {
-  "id": "box123",
-  "position": [0, 3, 0],
-  "size": [1, 1, 1],
-  "status": "created"
-}
+Box APIs		
+Method	Endpoint	                Description
+POST	/boxes	                    Create a new box
+GET	    /boxes	                    Get all boxes
+GET	    /boxes/:id	                Get a box by box_id
+PUT	    /boxes/:id	                Update a box by box_id
+DELETE	/boxes/:id	                Delete a box by box_id
+PATCH	/boxes/:id/remove	        Soft-delete a box (set isRemoved = true)
+PATCH	/boxes/all/remove	        Soft-delete all boxes
+GET	    /boxes/:boxId/full	        Get full box data (position and contents)
+GET	    /boxes/fullData	            Get full data of all boxes
+PUT	    /boxes/:boxId/position	    Update box position by box_id
+PUT	    /boxes/:boxId/content/:itemId	Update specific item in a box
 
 
-b. Get layouts  
-
-Request:
-GET /api/layouts/current
-
-Response:
-{
-  "id": "layout001",
-  "conveyors": [
-    {"id": "conv1", "position": [-4,0,4], "rotation": [0, 1.57, 0]},
-    ...
-  ]
-}
+BoxContent APIs
+	
+Method	Endpoint	Description
+POST	/boxContents	Create a new box content record
+GET	/boxContents	Get all box contents
+GET	/boxContents/:id	Get a box content by boxContent_id
+PUT	/boxContents/:id	Update a box content by boxContent_id
+DELETE	/boxContents/:id	Delete a box content by boxContent_id
+GET	/boxContents/box/:boxId	Get all contents for a specific box (excluding deleted items)
 
 
-c. Change conveyor speed:
-Request: 
-POST /api/rollers/roller123/speed
-Content-Type: application/json
-{
-  "speed": 40
-}
 
-Response: 
-{
-  "rollerId": "roller123",
-  "speed": 40,
-  "status": "updated"
-}
+BoxPosition APIs
+
+Method	Endpoint	Description
+POST	/boxPositions	Create a new box position
+GET	/boxPositions	Get all box positions
+GET	/boxPositions/map	Get all valid box positions (excluding soft-deleted boxes)
+GET	/boxPositions/mapFullData	Get full data of all valid boxes in map format
+GET	/boxPositions/:id	Get a box position by boxPosition_id
+PUT	/boxPositions/:id	Update a box position by boxPosition_id
+DELETE	/boxPositions/:id	Delete a box position by boxPosition_id
+GET	/boxPositions/box/:boxId	Get position by box_id
+POST	/boxPositions/box/:boxId	Create position for a specific box (error if exists)
+PATCH	/boxPositions/box/:boxId	Partially update position fields (x/y/z) of a box
+
+
+
+Item APIs
+		
+Method	Endpoint	Description
+POST	/items	Create a new item
+GET	/items	Get all items
+GET	/items/categories	Get all distinct item categories
+GET	/items/category/:category	Get all items in a specific category
+GET	/items/:id	Get an item by item_id
+PUT	/items/:id	Update an item by item_id
+DELETE	/items/:id	Delete an item by item_id
+
 
 
 
