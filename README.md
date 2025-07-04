@@ -73,25 +73,31 @@ Inventory inbound and outbound process,
 
 Put inventory to different shelfs locations,
 
-Routing path algorithm, 
+Gravity systems
+
+Routing fix path algorithm, 
 
 The item collision system.
 
 
 Options: 
 
-    Gravity systems
+    Routing flexible path algorithm, 
     
  
 # 6. User Stories:
 
 Inventory inbound and outbound process
 
-Change inventory locations 
+create box content
 
 View the inventory contents
 
 
+future features : 
+
+	Change inventory locations 
+	
 
 
 # High-level architecture diagrams.
