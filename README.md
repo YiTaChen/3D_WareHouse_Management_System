@@ -109,43 +109,72 @@ PUT	    /boxes/:boxId/content/:itemId	Update specific item in a box
 
 
 BoxContent APIs
+
 	
 Method	Endpoint	Description
+
 POST	/boxContents	Create a new box content record
+
 GET	/boxContents	Get all box contents
+
 GET	/boxContents/:id	Get a box content by boxContent_id
+
 PUT	/boxContents/:id	Update a box content by boxContent_id
+
 DELETE	/boxContents/:id	Delete a box content by boxContent_id
+
 GET	/boxContents/box/:boxId	Get all contents for a specific box (excluding deleted items)
+
 
 
 
 BoxPosition APIs
 
+
 Method	Endpoint	Description
+
 POST	/boxPositions	Create a new box position
+
 GET	/boxPositions	Get all box positions
+
 GET	/boxPositions/map	Get all valid box positions (excluding soft-deleted boxes)
+
 GET	/boxPositions/mapFullData	Get full data of all valid boxes in map format
+
 GET	/boxPositions/:id	Get a box position by boxPosition_id
+
 PUT	/boxPositions/:id	Update a box position by boxPosition_id
+
 DELETE	/boxPositions/:id	Delete a box position by boxPosition_id
+
 GET	/boxPositions/box/:boxId	Get position by box_id
+
 POST	/boxPositions/box/:boxId	Create position for a specific box (error if exists)
+
 PATCH	/boxPositions/box/:boxId	Partially update position fields (x/y/z) of a box
 
 
 
+
 Item APIs
+
 		
 Method	Endpoint	Description
+
 POST	/items	Create a new item
+
 GET	/items	Get all items
+
 GET	/items/categories	Get all distinct item categories
+
 GET	/items/category/:category	Get all items in a specific category
+
 GET	/items/:id	Get an item by item_id
+
 PUT	/items/:id	Update an item by item_id
+
 DELETE	/items/:id	Delete an item by item_id
+
 
 
 
