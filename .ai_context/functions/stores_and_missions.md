@@ -219,16 +219,27 @@ Used by:
 Files:
 
 - `src/components/subPages/MissionPanel.jsx`
+- `src/missions/builders/missionBuilder.js`
+- `src/missions/runtime/missionRunner.js`
+- `src/missions/adapters/stepFunctions.js`
 - `src/stores/missionStore.js`
 - `src/missions/craneMissionData.js`
 
 `missionStore.js`
 
 - `setMission(mission)` stores selected mission.
-- `runMission()` starts execution.
-- `runCurrentTask()` executes task sequence.
-- `runCurrentStep()` executes each step.
-- Step execution looks up `craneMissionData.stepFunctions[functionKey]`.
+- `runMission()` starts execution through `missionRunner.runMission()`.
+- Store responsibility is Zustand state wiring only.
+- Production step functions are injected from `src/missions/adapters/stepFunctions.js`.
+
+`missionRunner.js`
+
+- `runMission(mission, stepFunctions, callbacks?)`
+  - Pure async mission/task/step sequencer.
+  - Mutates the provided mission object to preserve current runtime behavior.
+  - Calls `callbacks.onMissionChange(mission)` or `callbacks.onChange(mission)` after status/index changes.
+  - Stops on missing `functionKey`, false step result, or thrown step error.
+  - Covered by `npm run test:mission-runner`.
 
 `craneMissionData.js`
 
@@ -248,6 +259,51 @@ Mission templates:
 - Inbound templates for crane001/crane002/crane003.
 - Outbound templates for crane001/crane002/crane003.
 - `cranePickupMission`.
+
+`stepFunctions.js`
+
+- Production side-effect adapters for mission runner steps.
+- Imports Zustand stores and calls crane/conveyor/box actions.
+- Exports function keys consumed by mission templates:
+  - `moveCrane`
+  - `moveCraneTable`
+  - `craneBindingBox`
+  - `craneUnBindingBox`
+  - `startConveyorRotate`
+  - `stopConveyorRotate`
+  - `setConveyorRotateSpeedPositive`
+  - `setConveyorRotateSpeedNagetive`
+  - `setConveyorRotateSpeed`
+  - `checkBoxOnEquipment`
+  - `updateBoxCurrentPositionServerHandler`
+  - `removeBoxCurrentPositionServerHandler`
+
+Important boundary:
+
+- `craneMissionData.js` should contain mission/template logic only.
+- Side effects belong in `src/missions/adapters/stepFunctions.js`.
+
+`missionBuilder.js`
+
+- `buildInboundMission({ portId, boxId, shelfPosition })`
+  - Thin wrapper around existing inbound template functions.
+  - Preserves current production port mapping and crane2-specific template behavior.
+- `buildOutboundMission({ portId, boxId, shelfPosition })`
+  - Thin wrapper around existing outbound template functions.
+  - Deep-clones param templates before merging runtime box/shelf params.
+
+`missionBuilderCore.js`
+
+- `createMissionBuilders({ inboundMissionConfigs, outboundMissionConfigs, cloneTemplate? })`
+  - Pure injectable builder core.
+  - Covered by `missionBuilderCore.test.js` with Node built-in tests.
+  - Does not import `craneMissionData.js` or Zustand stores.
+
+Important behavior:
+
+- `MissionPanel.jsx` should delegate mission object creation to `missionBuilder.js`.
+- Do not mutate exported template objects from `craneMissionData.js` in UI code.
+- Use `npm run test:mission-builder` for the focused builder test suite.
 
 ## Advanced mission flow
 

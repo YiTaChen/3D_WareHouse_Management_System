@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useMissionStore } from '../../stores/missionStore';
-import { cranePickupMission, crane001InboundMission , crane002InboundMission, crane003InboundMission
-  ,crane001_OutboundMission, crane002_OutboundMission, crane003_OutboundMission, inboundTemplateFunction,
-  crane001InboundMissionParamTemplate , crane002InboundMissionParamTemplate, crane003InboundMissionParamTemplate
-  ,crane001_OutboundMissionTemplate, crane002_OutboundMissionTemplate, crane003_OutboundMissionTemplate
-  ,outboundTemplateFunction, inboundTemplateFunctionForCrane2, outboundTemplateFunctionForCrane2
-
-} from '../../missions/craneMissionData';
-
 import { useBoxStore } from '../../stores/boxStore';
-import { useCraneStore } from '../../stores/craneStore';
 import { useBoxEquipStore } from '../../stores/boxEquipStore';
 
 import { useShelfStore } from '../../stores/shelfStore'; // 假設你有一個工具函數來獲取貨架位置
+import { buildInboundMission, buildOutboundMission } from '../../missions/builders/missionBuilder';
+import {
+  getInboundShelfZPositions,
+  getPortConveyorId,
+  getPortSpawnPosition,
+  portOptionsByDirection,
+} from '../../missions/config/portConfigs';
 
 
 
@@ -21,15 +19,6 @@ const MissionPanel = () => {
   const mission = useMissionStore((s) => s.mission);
   const setMission = useMissionStore((s) => s.setMission);
   const runMission = useMissionStore((s) => s.runMission);
-
-
-
-  const boxesData = useBoxStore(state => state.boxesData);
-    const getBoxRef = useBoxStore(state => state.getBoxRef);
-    const craneRefs = useCraneStore(state => state.craneRefs);
-    const craneStates = useCraneStore(state => state.craneStates);
-    const getMoveTableRef = useCraneStore(state => state.getMoveTableRef);
-
 
     const addSingleBox = useBoxStore((state) => state.handleAddSingleBox);
 
@@ -50,26 +39,6 @@ const MissionPanel = () => {
   const [inboundEmptyShelfList, setInboundEmptyShelfList] = useState([]);
   const [selectedInboundShelfId, setSelectedInboundShelfId] = useState(''); // Inbound 選定的空貨架 ID
 
-
-
-    // 取得所有 Crane ID (合併兩個來源的 key)
-    const craneIds = Array.from(
-      new Set([
-        ...Object.keys(craneRefs || {}),
-        ...Object.keys(craneStates || {}),
-      ])
-    );
-  
-    // 取得所有 Box ID
-    const boxIds = Object.keys(boxesData || {});
-  // 預設選擇第一個 Crane 和 Box
-    const [selectedCraneId, setSelectedCraneId] = useState(craneIds[0] || '');
-    const [selectedBoxId, setSelectedBoxId] = useState(boxIds[0] || '');
-
-
-
-  
-
     // 使用 useEffect 來更新 Shelf ID 列表    for outbound mission
   useEffect(() => {
     // 獲取當前所有有 Box 的 Shelf ID
@@ -84,49 +53,9 @@ const MissionPanel = () => {
 
 
 
- const getPortPosition = (portName, direction) => {
-
-
-    if (direction === 'inbound' ) {
-      
-       switch (portName) {
-      case 'Port1':
-        return [-8, 4, -8];
-     
-      case 'Port3':
-        return [-8, 4, 2];
-      case 'Port4':
-        return [-8, 4, 8];
-      
-      default:
-        return [0, 0, 0]; // 預設值
-    }
-  } else {
-
-    switch (portName) {
-      
-      case 'Port2':
-          return [6, 5, -8];
-        case 'Port3':
-          return [6, 5, 2];
-      
-        case 'Port5':
-          return [6, 5, 4];
-        default:
-          return [0, 0, 0]; // 預設值
-      }
-
-    }
-      
-
-  };
-
-
-
-
      const addSingleBoxWithData = () => {
         const allContent = {};
-        let positionArr = getPortPosition(selectedPort, selectedDirection);
+        let positionArr = getPortSpawnPosition(selectedPort, selectedDirection);
 
         const boxData = {
           id: `box-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -142,80 +71,15 @@ const MissionPanel = () => {
     const [selectedDirection, setSelectedDirection] = useState('inbound');
     const [selectedPort, setSelectedPort] = useState('Port1');
 
-    // 定義 Port 的選項
-    const portOptions = {
-        inbound: ["Port1", "Port3", "Port4"],
-        outbound: ["Port2", "Port3", "Port5"]
-    };
-
     // 當 Direction 改變時，更新 Port 的選項和預設值
     useEffect(() => {
-        const availablePorts = portOptions[selectedDirection] || [];
+        const availablePorts = portOptionsByDirection[selectedDirection] || [];
         setSelectedPort(availablePorts[0] || '');
     }, [selectedDirection]);
 
-
-    
-
-
-
-  const dynamicSetMission = () => {
-    let newMission = null
-
-    let missionTemplate = null;
-
-    if (selectedDirection === 'inbound') {
-
-      switch (selectedPort) {
-        case 'Port1':   
-          missionTemplate = crane001InboundMissionParamTemplate;
-          break;
-        case 'Port2':
-          missionTemplate = crane002InboundMissionParamTemplate;
-          break;
-        case 'Port3':
-          missionTemplate = crane003InboundMissionParamTemplate;
-          break;
-        default:
-          console.warn('未定義的 Port');
-      }
-    } else if (selectedDirection === 'outbound') {
-      switch (selectedPort) {
-        case 'Port2':
-          missionTemplate = crane001_OutboundMission;
-          break;
-        case 'Port3':
-          missionTemplate = crane002_OutboundMission;
-          break;
-          case 'Port5':
-            missionTemplate = crane003_OutboundMission;
-            break;
-          default:
-            console.warn('未定義的 Port');
-        }
-
-
-      }
-
-  }
-
-
   // 在 selectedPort 或 getEmptyShelfListByZ 改變時更新 inboundEmptyShelfList for Inbound mission
   useEffect(() => {
-      let zPositions = [];
-      switch (selectedPort) {
-        case 'Port1':
-          zPositions = [-8, -4]; // 假設 Port1 對應 Z -8 和 -4
-          break;
-        case 'Port3':
-          zPositions = [-2, 2]; // 假設 Port3 對應 Z -2 和 2
-          break;
-        case 'Port4':
-          zPositions = [4]; // 假設 Port4 對應 Z 4
-          break;
-        default:
-          zPositions = [];
-      }
+      let zPositions = getInboundShelfZPositions(selectedPort);
       const emptyShelves = getEmptyShelfListByZ(zPositions);
       setInboundEmptyShelfList(emptyShelves);
 
@@ -230,189 +94,27 @@ const MissionPanel = () => {
 
 
 
-  const injectMissionParams = (missionTemplate, injectedParams) => {
-  const mission = JSON.parse(JSON.stringify(missionTemplate)); // 深拷貝避免污染原始模板
-
-  mission.tasks.forEach((task) => {
-      task.steps.forEach((step) => {
-        // 如果該 step 有需要被注入的欄位，就替換它
-        if (step.params?.craneName && injectedParams.craneName) {
-          step.params.craneName = injectedParams.craneName;
-        }
-
-        // 可選：針對特定功能替換 targetPosition
-        if (
-          step.functionKey === 'moveCrane' &&
-          injectedParams.targetPositions?.[task.id]
-        ) {
-          step.params.targetPosition = injectedParams.targetPositions[task.id];
-        }
-
-
-        // 注入 boxId 針對特定步驟或 step id
-      // if (
-      //   (step.functionKey === 'craneBindingBox' 
-      //     || step.functionKey === 'craneUnBindingBox') &&
-        
-      //   injectedParams.boxIds?.[step.id]
-      // ) 
-      // {
-      //   step.params.boxId = injectedParams.boxIds[step.id];
-      // }
-
-      step.params.boxId = injectedParams.boxIds[step.id];
-
-
-      });
-    });
-
-    return mission;
-  };
-
-
-
-   
-  const customMission = injectMissionParams(cranePickupMission, {
-      craneName: 'crane001',
-      targetPositions: {
-        task1: [-4, 0, -10],     // Crane move to port
-        task3: [-6, 3, -8],    // Crane move to shelf
-      },
-      boxIds: {
-        step3: selectedBoxId,
-      },
-    });
-
-
-
-
-    // const customMission01_in = injectMissionParams(crane001InboundMission, {
-    //   craneName: 'crane001',
-
-    //   boxIds: {
-    //     step3: selectedBoxId,
-    //     step6: selectedBoxId,
-    //   },
-    // });
-
-
-
-
-
-    const getPortConveyorName = (portName) => {
-
-       switch (portName) {
-          case 'Port1':
-            return 'conv1';
-
-          case 'Port2':
-            return 'conv4';
-        
-          case 'Port3':
-            return 'conv7';
-          case 'Port4':
-            return 'conv10';
-        
-          case 'Port5':
-            return 'conv19';
-          
-            default:
-              return ''; // 預設值
-        
-       }
-
-  };
-
-
   const getBoxIdByEquip = useBoxEquipStore((state) => state.getBoxIdbyEquipId);
 
+  const loadInboundMission = (portId) => {
+    const mission = buildInboundMission({
+      portId,
+      boxId: getBoxIdByEquip(getPortConveyorId(portId)),
+      shelfPosition: getShelfPosition(selectedInboundShelfId),
+    });
 
-    const customMission01_in = () => {
+    setMission(JSON.parse(JSON.stringify(mission)));
+  };
 
-      // crane001InboundMissionParamTemplate.boxId = selectedBoxId;
-      
+  const loadOutboundMission = (portId) => {
+    const mission = buildOutboundMission({
+      portId,
+      boxId: getBoxIdByEquip(selectedShelfId),
+      shelfPosition: getShelfPosition(selectedShelfId),
+    });
 
-      // const equipName = getPortConveyorName('Port1'); 
-      // const boxid11 = getEquipmentForBox(equipName);
-
-      // console.log('boxid11', boxid11);
-      // console.log('getPortConveyorName', equipName);
-
-      crane001InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port1'));
-
-
-      crane001InboundMissionParamTemplate.shelfPosition = getShelfPosition(selectedInboundShelfId);
-
-      // console.log('boxId', selectedBoxId);
-      const jsonStr =  inboundTemplateFunction(crane001InboundMissionParamTemplate)
-      return jsonStr
-    }
-
-    const customMission02_in = () => {
-      crane002InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port3'));
-      crane002InboundMissionParamTemplate.shelfPosition = getShelfPosition(selectedInboundShelfId);
-      const jsonStr =  inboundTemplateFunctionForCrane2(crane002InboundMissionParamTemplate)
-      return jsonStr
-    };
-
-    const customMission03_in = () => {
-      crane003InboundMissionParamTemplate.boxId = getBoxIdByEquip(getPortConveyorName('Port4'));
-      crane003InboundMissionParamTemplate.shelfPosition = getShelfPosition(selectedInboundShelfId);
-      const jsonStr =  inboundTemplateFunction(crane003InboundMissionParamTemplate)
-      return jsonStr
-    };
-
-
-    
-    // selectedShelfId
-
-    const customMission01_out = () => {
-      // crane001_OutboundMissionTemplate.boxId = selectedBoxId;
-      crane001_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
-      // console.log("selectedShelfId: ", selectedShelfId)
-      // console.log( "shelf position: " ,getShelfPosition(selectedShelfId))
-
-      crane001_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
-
-      const jsonStr =  outboundTemplateFunction(crane001_OutboundMissionTemplate)
-      return jsonStr
-    };
-
-    const customMission02_out = () => {
-      crane002_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
-      crane002_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
-      const jsonStr =  outboundTemplateFunctionForCrane2(crane002_OutboundMissionTemplate)
-      return jsonStr
-    };
-
-    const customMission03_out = () => {
-      crane003_OutboundMissionTemplate.boxId = getBoxIdByEquip(selectedShelfId);
-      crane003_OutboundMissionTemplate.shelfPosition = getShelfPosition(selectedShelfId);
-      const jsonStr =  outboundTemplateFunction(crane003_OutboundMissionTemplate)
-      return jsonStr
-    };
-  ;
-
-    // const customMission03_out = injectMissionParams(crane003_OutboundMission, {
-    //   craneName: 'crane003',
-
-    //   boxIds: {
-    //     step3: selectedBoxId,
-    //     step6: selectedBoxId,
-    //   },
-    // });
-
-
-
-
-
-
-
-
-
-
-
-
+    setMission(JSON.parse(JSON.stringify(mission)));
+  };
 
 
 
@@ -447,7 +149,7 @@ const MissionPanel = () => {
             onChange={e => setSelectedPort(e.target.value)}
           >
             {/* 根據 selectedDirection 動態渲染選項 */}
-            {portOptions[selectedDirection]?.map(port => (
+            {portOptionsByDirection[selectedDirection]?.map(port => (
               <option key={port} value={port}>
                 {port}
               </option>
@@ -567,13 +269,13 @@ const MissionPanel = () => {
 <br />
 <br /> */}
 
-             <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_in())))}> Load Mission at Port1  </button>
+             <button onClick={() => loadInboundMission('Port1')}> Load Mission at Port1  </button>
 
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_in())))}> Load Mission at Port3  </button>
+      <button onClick={() => loadInboundMission('Port3')}> Load Mission at Port3  </button>
 
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_in())))}> Load Mission at Port4  </button>
+      <button onClick={() => loadInboundMission('Port4')}> Load Mission at Port4  </button>
 
 {/* 
 <br />
@@ -602,13 +304,13 @@ const MissionPanel = () => {
   }} >
 
 
-  <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission01_out())))}> Load Mission outBound to Port2   </button>
+  <button onClick={() => loadOutboundMission('Port2')}> Load Mission outBound to Port2   </button>
 
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission02_out())))}> Load Mission outBound to Port3  </button>
+      <button onClick={() => loadOutboundMission('Port3')}> Load Mission outBound to Port3  </button>
 
 
-      <button onClick={() => setMission(JSON.parse(JSON.stringify(customMission03_out())))}> Load Mission outBound to Port5  </button>
+      <button onClick={() => loadOutboundMission('Port5')}> Load Mission outBound to Port5  </button>
     
 
     
@@ -643,6 +345,3 @@ const MissionPanel = () => {
 };
 
 export default MissionPanel;
-
-
-

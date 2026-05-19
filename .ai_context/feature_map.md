@@ -147,6 +147,12 @@ Risk:
 Files:
 
 - `src/components/subPages/MissionPanel.jsx`
+- `src/missions/builders/missionBuilder.js`
+- `src/missions/config/portConfigs.js`
+- `src/missions/config/routeConfigs.js`
+- `src/missions/config/shelfRules.js`
+- `src/missions/runtime/missionRunner.js`
+- `src/missions/adapters/stepFunctions.js`
 - `src/stores/missionStore.js`
 - `src/missions/craneMissionData.js`
 - `src/data/PortData.js`
@@ -158,9 +164,10 @@ Files:
 Flow:
 
 1. User selects inbound/outbound mission inputs.
-2. UI loads mission template.
-3. `missionStore.runMission()` runs tasks/steps.
-4. Each step calls `craneMissionData.stepFunctions[functionKey]`.
+2. UI resolves selected port/shelf/box context.
+3. `missionBuilder.js` builds a mission from the current production template functions without mutating exported template params.
+4. `missionStore.runMission()` injects production adapters from `src/missions/adapters/stepFunctions.js`.
+5. `missionRunner.runMission()` runs tasks/steps and reports state changes back to the store.
 
 Avoid confusion:
 

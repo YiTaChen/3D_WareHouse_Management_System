@@ -200,8 +200,13 @@ Model contract:
 `MissionPanel()`
 
 - Production mission UI.
-- Builds mission from templates in `craneMissionData.js`.
+- Gets port options/spawn positions from `src/missions/config/portConfigs.js`.
+- Builds production missions through `src/missions/builders/missionBuilder.js`.
+- The builder wraps existing templates in `craneMissionData.js` while avoiding UI-side mutation of exported template objects.
+- Focused builder tests run with `npm run test:mission-builder`.
 - Calls `missionStore.setMission()` and `missionStore.runMission()`.
+- Mission step sequencing now lives in `src/missions/runtime/missionRunner.js`; focused runner tests run with `npm run test:mission-runner`.
+- Production side-effect step adapters live in `src/missions/adapters/stepFunctions.js`.
 
 `ConveyorControlPanel()`
 

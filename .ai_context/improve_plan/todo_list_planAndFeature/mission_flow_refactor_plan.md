@@ -100,14 +100,14 @@ Goal: 把散在 UI/template 裡的固定對應移到 config。
 
 Tasks:
 
-- [ ] 新增 `src/missions/config/portConfigs.js`
+- [x] 新增 `src/missions/config/portConfigs.js`
   - include port id, direction, spawnPosition, craneId, conveyor path, pickup/drop conveyor.
-- [ ] 新增 `src/missions/config/routeConfigs.js`
+- [x] 新增 `src/missions/config/routeConfigs.js`
   - include inbound/outbound conveyor route arrays.
-- [ ] 新增 `src/missions/config/shelfRules.js`
+- [x] 新增 `src/missions/config/shelfRules.js`
   - include shelf z -> side rule and shelf z -> crane operating z rule.
-- [ ] 讓 `MissionPanel.jsx` 從 config 取得 port options。
-- [ ] 讓 `MissionPanel.jsx` 從 config 取得 add-box spawn position。
+- [x] 讓 `MissionPanel.jsx` 從 config 取得 port options。
+- [x] 讓 `MissionPanel.jsx` 從 config 取得 add-box spawn position。
 - [ ] 保留舊 template functions 先不刪，降低風險。
 
 Suggested tests:
@@ -123,25 +123,48 @@ Definition of done:
 - Add-box position still matches previous Port1/Port3/Port4 behavior.
 - Existing mission buttons still work.
 
+### Progress Notes
+
+#### 2026-05-19 - Phase 1, step 1
+
+- Created `src/missions/config/portConfigs.js` with current production port direction options, add-box spawn positions, inbound shelf z filters, conveyor ids, and crane ids.
+- Created `src/missions/config/routeConfigs.js` with current inbound/outbound conveyor route arrays and crane port positions for each production port.
+- Created `src/missions/config/shelfRules.js` with current shelf z -> platform side and shelf z -> crane operating z rules.
+- Updated `MissionPanel.jsx` to read port options, add-box spawn position, inbound empty-shelf z filters, and port conveyor ids from config.
+- Left existing mission template functions in place; no mission task/step generation behavior intentionally changed in this step.
+
+#### 2026-05-19 - Phase 1, step 2
+
+- Updated `craneMissionData.js` to use `getShelfIsTakeLeft()` and `getCraneOperatingZ()` from `src/missions/config/shelfRules.js`.
+- Removed duplicated shelf z switch blocks from inbound, inbound crane2, outbound, and outbound crane2 template functions.
+- Preserved existing fallback behavior: unknown shelf z still defaults to platform-left and crane operating z `0`.
+- Verification: `npm run build` passed after this step. `npm run lint` was also checked after step 1 and still fails on pre-existing repo-wide issues unrelated to this extraction, including backend CommonJS globals, unused variables, and existing React hook rule violations.
+
+Observed but intentionally not changed yet:
+
+- `dynamicSetMission()` in `MissionPanel.jsx` appears unused and has stale/inconsistent inbound port mapping.
+- `crane002InboundMissionParamTemplate.startPort` is `Port2`, while the exported/static mission and UI behavior use `Port3`.
+- `crane003_OutboundMissionTemplate.startPort` is `Port3`, while the UI labels that route as outbound to `Port5`; the actual exit conveyor remains `conv19`.
+
 ## Phase 2: Introduce Mission Builder
 
 Goal: UI stops mutating exported template objects directly.
 
 Tasks:
 
-- [ ] Add `buildInboundMission({ portId, shelfId, boxId, shelfPosition })`.
-- [ ] Add `buildOutboundMission({ portId, shelfId, boxId, shelfPosition })`.
-- [ ] Builder internally uses existing `inboundTemplateFunction` / `outboundTemplateFunction` first.
-- [ ] Replace `customMission01_in/out`, `customMission02_in/out`, `customMission03_in/out` with generic builder calls.
-- [ ] Avoid mutating `crane001InboundMissionParamTemplate` and similar exported objects in `MissionPanel.jsx`.
+- [x] Add `buildInboundMission({ portId, boxId, shelfPosition })`.
+- [x] Add `buildOutboundMission({ portId, boxId, shelfPosition })`.
+- [x] Builder internally uses existing `inboundTemplateFunction` / `outboundTemplateFunction` first.
+- [x] Replace `customMission01_in/out`, `customMission02_in/out`, `customMission03_in/out` with generic builder calls.
+- [x] Avoid mutating `crane001InboundMissionParamTemplate` and similar exported objects in `MissionPanel.jsx`.
 
 Suggested tests:
 
-- inbound Port1 builds a mission named `Crane001 Inbound Mission`.
-- inbound Port3 builds crane002 mission with `conv7`, `conv8`, `conv9`.
-- outbound Port2 builds crane001 mission ending at `conv4`.
-- outbound Port5 builds crane003 mission ending at `conv19`.
-- missing `boxId`, `portId`, or `shelfPosition` returns a clear error or throws a clear validation error.
+- [x] inbound builder maps configured inbound ports and injects runtime input.
+- [x] outbound builder maps configured outbound ports and injects runtime input.
+- [x] builder deep-clones the base template before calling template function.
+- [x] missing `boxId`, `portId`, or `shelfPosition` throws a clear validation error.
+- [x] unsupported inbound/outbound ports throw clear validation errors.
 
 Definition of done:
 
@@ -149,30 +172,80 @@ Definition of done:
 - No direct mutation of exported mission param templates remains in `MissionPanel.jsx`.
 - Builder tests pass.
 
+### Progress Notes
+
+#### 2026-05-19 - Phase 2, step 1
+
+- Added `src/missions/builders/missionBuilder.js`.
+- Added `buildInboundMission({ portId, boxId, shelfPosition })` and `buildOutboundMission({ portId, boxId, shelfPosition })`.
+- Builder preserves the current production mapping:
+  - inbound `Port1` -> crane001 + `inboundTemplateFunction`
+  - inbound `Port3` -> crane002 + `inboundTemplateFunctionForCrane2`
+  - inbound `Port4` -> crane003 + `inboundTemplateFunction`
+  - outbound `Port2` -> crane001 + `outboundTemplateFunction`
+  - outbound `Port3` -> crane002 + `outboundTemplateFunctionForCrane2`
+  - outbound `Port5` -> crane003 + `outboundTemplateFunction`
+- Builder deep-clones existing param templates and merges runtime `boxId` / `shelfPosition`, so `MissionPanel.jsx` no longer mutates imported template singletons.
+- Updated `MissionPanel.jsx` to call `loadInboundMission(portId)` and `loadOutboundMission(portId)`, delegating mission construction to the builder.
+- Removed unused local template injection code from `MissionPanel.jsx`.
+- Verification: `node --check src/missions/builders/missionBuilder.js` passed.
+- Verification: `npm run build` passed after integrating `MissionPanel.jsx` with the builder.
+- Subagent execution:
+  - Explorer subagent completed read-only Phase 2 plan/risk review.
+  - Worker subagent added `missionBuilder.js` and verified it with `node --check`.
+
+#### 2026-05-19 - Phase 2, step 2
+
+- Split builder pure logic into `src/missions/builders/missionBuilderCore.js`.
+- Kept `src/missions/builders/missionBuilder.js` as production wiring around existing `craneMissionData.js` templates/functions.
+- Added `src/missions/builders/missionBuilderCore.test.js` using Node's built-in `node:test`, so builder validation does not import `craneMissionData.js`, Zustand stores, or Vite runtime globals.
+- Added `npm run test:mission-builder`.
+- Verification: `npm run test:mission-builder` passed with 6 tests.
+- Verification: `node --check` passed for `missionBuilderCore.js` and `missionBuilderCore.test.js`.
+- Verification: `npm run build` passed after the core/test split.
+
 ## Phase 3: Extract Pure Mission Runner
 
 Goal: Mission execution can be tested without Zustand or 3D scene.
 
 Tasks:
 
-- [ ] Add `src/missions/runtime/missionRunner.js`.
-- [ ] Implement `runMission(mission, stepFunctions, callbacks?)`.
-- [ ] Move task/step sequencing logic out of `missionStore.js`.
-- [ ] Keep `missionStore.js` responsible for Zustand state only.
-- [ ] Allow injecting fake `stepFunctions` in tests.
+- [x] Add `src/missions/runtime/missionRunner.js`.
+- [x] Implement `runMission(mission, stepFunctions, callbacks?)`.
+- [x] Move task/step sequencing logic out of `missionStore.js`.
+- [x] Keep `missionStore.js` responsible for Zustand state only.
+- [x] Allow injecting fake `stepFunctions` in tests.
 
 Suggested tests:
 
-- Runs all steps in order.
-- Awaits async steps before moving to next step.
-- Stops on a step returning `false`.
-- Marks unknown `functionKey` as failed/error.
-- Updates task and mission status correctly.
+- [x] Runs all steps in order.
+- [x] Awaits async steps before moving to next step.
+- [x] Stops on a step returning `false`.
+- [x] Marks unknown `functionKey` as failed/error.
+- [x] Stops on thrown step errors.
+- [x] Updates task and mission status correctly.
 
 Definition of done:
 
 - `missionStore.js` no longer contains recursive task/step execution details.
 - Runner tests pass without rendering React.
+
+### Progress Notes
+
+#### 2026-05-19 - Phase 3, step 1
+
+- Added `src/missions/runtime/missionRunner.js`.
+- Added pure async `runMission(mission, stepFunctions, callbacks?)`.
+- Updated `src/stores/missionStore.js` to keep only Zustand state wiring and inject production `stepFunctions` from `craneMissionData.js`.
+- Removed task/step recursion from `missionStore.js`; status transitions and step sequencing now live in the runtime runner.
+- Added `src/missions/runtime/missionRunner.test.js` using Node's built-in `node:test`.
+- Added `npm run test:mission-runner`.
+- Verification: `npm run test:mission-runner` passed with 6 tests.
+- Verification: `npm run test:mission-builder` still passed with 6 tests.
+- Verification: `node --check src/missions/runtime/missionRunner.js` passed.
+- Verification: `npm run build` passed after runner extraction.
+- Subagent execution:
+  - Worker subagent implemented the runner/test/store wiring slice and ran focused validation before returning.
 
 ## Phase 4: Split Step Function Adapters
 
@@ -180,9 +253,9 @@ Goal: Separate action adapters from mission data/templates.
 
 Tasks:
 
-- [ ] Move `stepFunctions` out of `craneMissionData.js`.
-- [ ] Create `src/missions/adapters/stepFunctions.js`.
-- [ ] Keep function names compatible:
+- [x] Move `stepFunctions` out of `craneMissionData.js`.
+- [x] Create `src/missions/adapters/stepFunctions.js`.
+- [x] Keep function names compatible:
   - `moveCrane`
   - `moveCraneTable`
   - `craneBindingBox`
@@ -195,7 +268,7 @@ Tasks:
   - `checkBoxOnEquipment`
   - `updateBoxCurrentPositionServerHandler`
   - `removeBoxCurrentPositionServerHandler`
-- [ ] Update imports in `missionStore.js` or runner wiring.
+- [x] Update imports in `missionStore.js` or runner wiring.
 
 Suggested tests:
 
@@ -207,6 +280,22 @@ Definition of done:
 
 - `craneMissionData.js` contains mission/template logic only.
 - Side-effect step functions live in adapter module.
+
+### Progress Notes
+
+#### 2026-05-19 - Phase 4, step 1
+
+- Added `src/missions/adapters/stepFunctions.js`.
+- Moved production side-effect step functions and `checkBoxOnEquipment()` out of `src/missions/craneMissionData.js`.
+- Updated `src/stores/missionStore.js` to import production `stepFunctions` from `src/missions/adapters/stepFunctions.js`.
+- Kept existing function keys compatible with current mission templates.
+- `craneMissionData.js` now focuses on mission/template data and shelf-rule helpers.
+- Verification: `node --check src/missions/adapters/stepFunctions.js` passed.
+- Verification: `npm run test:mission-runner` passed with 6 tests.
+- Verification: `npm run test:mission-builder` passed with 6 tests.
+- Verification: `npm run build` passed after adapter extraction.
+- Subagent execution:
+  - Worker subagent moved the adapter code and ran focused validation before returning.
 
 ## Phase 5: Replace Large Template Functions With Task Builders
 
@@ -314,4 +403,3 @@ Useful verification:
 - Should invalid mission input throw errors or return `{ ok: false, error }`?
 - Should outbound soft-delete happen immediately after box reaches exit conveyor, or after all conveyors stop?
 - Should route config eventually be generated from conveyor graph data instead of static arrays?
-
