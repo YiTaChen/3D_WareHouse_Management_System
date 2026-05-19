@@ -10,7 +10,16 @@
    - mission flow
    - backend API
    - DB schema
-4. Open the relevant `functions/*.md` file.
+4. If the task is an improvement, refactor, TDD/testing effort, or todo-list item, read `improve_plan/todo_list.md` and the relevant file under `improve_plan/todo_list_planAndFeature/`.
+5. Open the relevant `functions/*.md` file.
+
+## Improve plan alignment
+
+- Treat `improve_plan/` as the shared communication baseline for planned improvements.
+- Before implementing a todo-list item, identify the matching plan document and follow its phase, task list, suggested tests, definition of done, and open questions.
+- If the requested change conflicts with an existing plan, explain the conflict before editing and either update the plan or document why the change intentionally diverges.
+- When completing or materially changing a planned item, update `improve_plan/todo_list.md` or the relevant plan file so later agents can continue from the latest state.
+- Keep implementation PRs/commits scoped to the smallest useful phase whenever possible.
 
 ## General rules
 
@@ -45,6 +54,7 @@ For mission changes:
   - `missionStore.js`
   - `craneMissionData.js`
 - Avoid advanced mission path unless specifically requested or repairing it.
+- For mission flow refactor/TDD work, use `improve_plan/todo_list_planAndFeature/mission_flow_refactor_plan.md` as the primary plan and tracking reference.
 
 ## Backend changes
 

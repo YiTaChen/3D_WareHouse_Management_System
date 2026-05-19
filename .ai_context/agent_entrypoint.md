@@ -7,7 +7,8 @@
 1. `repo_overview.md`
 2. `repo_structure.md`
 3. `known_risks.md`
-4. 依任務讀:
+4. 若任務涉及改善、重構、TDD、todo list 或長期規劃，先讀 `improve_plan/todo_list.md` 與相關 `improve_plan/todo_list_planAndFeature/*.md`。
+5. 依任務讀:
    - 改 UI/3D 場景: `functions/frontend.md`
    - 改 Zustand state/mission: `functions/stores_and_missions.md`
    - 改 API/DB: `api_routes.md`, `data_model.md`, `functions/backend.md`
@@ -22,6 +23,7 @@
 - 主要 mission flow 是 `MissionPanel.jsx` + `missionStore.js` + `craneMissionData.js`；advanced mission flow 有未修 bug。
 - GLTF 模型子物件名稱是邏輯依賴，改模型時要同步檢查 traversal 名稱。
 - 修改前先看 `known_risks.md`，裡面有會造成 build/runtime/API 問題的點。
+- 執行改善或重構時，必須以 `improve_plan/` 裡的 todo 與細部 plan 作為溝通、拆分、實作與追蹤基準；若偏離 plan，要在回覆中說明原因並同步更新 plan。
 
 常見任務入口:
 
