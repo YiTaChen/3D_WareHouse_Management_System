@@ -4,7 +4,7 @@
 
 ## Mission Flow Refactor
 
-- [ ] 拆分目前 hard-coded mission flow，逐步整理成 config + builder + runner + adapters 架構。
+- [x] 拆分目前 hard-coded mission flow，逐步整理成 config + builder + runner + adapters 架構。
   - Plan: `todo_list_planAndFeature/mission_flow_refactor_plan.md`
 - [x] 為 mission builder 補上 TDD 測試，先覆蓋 inbound / outbound 任務生成與 step 順序。
   - Plan: `todo_list_planAndFeature/mission_flow_refactor_plan.md`

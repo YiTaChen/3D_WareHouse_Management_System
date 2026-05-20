@@ -165,13 +165,13 @@ Flow:
 
 1. User selects inbound/outbound mission inputs.
 2. UI resolves selected port/shelf/box context.
-3. `missionBuilder.js` builds a mission from the current production template functions without mutating exported template params.
+3. `missionBuilder.js` builds a mission through the production task-builder factory without mutating exported template params.
 4. `missionStore.runMission()` injects production adapters from `src/missions/adapters/stepFunctions.js`.
 5. `missionRunner.runMission()` runs tasks/steps and reports state changes back to the store.
 
 Avoid confusion:
 
-- `missionAdvancedStore.js` and `stepFunctions.js` are a second/advanced path with known breakages.
+- The old advanced mission executor/templates were removed; mission UI should use the production builder + `missionStore` runner path.
 
 ## API / DB changes
 

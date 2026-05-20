@@ -12,22 +12,19 @@
    - 掛載 `MissionPanel` 作為 production 任務 UI。
 2. `src/components/subPages/MissionPanel.jsx`
    - 負責 UI 選項、port/shelf/box 查詢、mission template 選擇、參數注入。
-3. `src/missions/craneMissionData.js`
-   - 定義 `stepFunctions`。
-   - 定義 inbound / outbound template function。
-   - hard-code crane id、conveyor id、port position、shelf z 規則、task/step 順序。
-4. `src/stores/missionStore.js`
+3. `src/missions/builders/missionBuilder.js`
+   - 根據 port config 選擇 production param template 與 task-builder mission factory。
+4. `src/missions/builders/productionMissionFactory.js`
+   - 用 composable task builders 產生 inbound / outbound mission object。
+   - 保留 Crane002 conveyor speed sequence 等 production quirks。
+5. `src/stores/missionStore.js`
    - 按 `mission.tasks[].steps[]` 順序執行。
-   - 用 `step.functionKey` 查 `craneMissionData.stepFunctions`。
+   - 用 runtime runner 與 adapter `stepFunctions` 執行 side effects。
 
 另一套 advanced flow:
 
-- `src/components/subPages/MissionHighLevelPanel.jsx`
-- `src/stores/missionAdvancedStore.js`
-- `src/missions/missionTaskTemplates.js`
-- `src/missions/stepFunctions.js`
-
-目前 advanced flow 不是 production 入口，且已有已知破損風險。除非任務明確要求，不應優先改它。
+- `src/components/subPages/MissionHighLevelPanel.jsx` 已改接 production builder + `missionStore` runner。
+- 舊的 `missionAdvancedStore.js`、`missionTaskTemplates.js`、`src/missions/stepFunctions.js` 已移除，避免雙 mission 系統漂移。
 
 ## Hard-Code Inventory
 
@@ -108,7 +105,7 @@ Tasks:
   - include shelf z -> side rule and shelf z -> crane operating z rule.
 - [x] 讓 `MissionPanel.jsx` 從 config 取得 port options。
 - [x] 讓 `MissionPanel.jsx` 從 config 取得 add-box spawn position。
-- [ ] 保留舊 template functions 先不刪，降低風險。
+- [x] 保留舊 template functions 先不刪，降低風險。
 
 Suggested tests:
 
@@ -303,7 +300,7 @@ Goal: Make mission steps composable and easier to review.
 
 Tasks:
 
-- [ ] Add task builder helpers:
+- [x] Add task builder helpers:
   - `conveyorMoveUntilBoxArrives()`
   - `craneMoveTo()`
   - `cranePickFromConveyor()`
@@ -314,9 +311,9 @@ Tasks:
   - `updateBoxPosition()`
   - `softDeleteBoxAfterOutbound()`
   - `craneReturnHome()`
-- [ ] Rebuild inbound mission from task builders.
-- [ ] Rebuild outbound mission from task builders.
-- [ ] Compare generated mission shape with previous production missions.
+- [x] Rebuild inbound mission from task builders.
+- [x] Rebuild outbound mission from task builders.
+- [x] Compare generated mission shape with previous production missions.
 
 Suggested tests:
 
@@ -329,6 +326,23 @@ Definition of done:
 - Old huge inbound/outbound template functions are no longer the primary builder path.
 - New task builders cover all production mission buttons.
 
+### Progress Notes
+
+#### 2026-05-19 - Phase 5, step 1
+
+- Added `src/missions/builders/taskBuilders.js` with composable task/step helpers for conveyor movement, crane moves, crane pick/put operations, server position update, outbound soft delete, and crane return-home.
+- Added `src/missions/builders/productionMissionFactory.js`.
+- Updated `src/missions/builders/missionBuilder.js` so production inbound/outbound mission creation now uses the task-builder factory instead of calling the large legacy template functions directly.
+- Preserved production quirks intentionally:
+  - `Port3` inbound still uses the Crane002 positive-speed conveyor sequence.
+  - `Port3` outbound still uses the Crane002 negative-speed conveyor sequence, including `pass` conveyor ids where the adapter skips work.
+  - Outbound update + soft-delete still happen after exit arrival and before conveyor stop steps.
+- Kept legacy template functions in `src/missions/craneMissionData.js` as fixtures/reference data for this migration step.
+- Added `src/missions/builders/productionMissionFactory.test.js` to compare task ids, step ids, function keys, names, statuses, and important params between the new factory and the previous production template functions.
+- Added `npm run test:mission-production-factory`.
+- Verification: `npm run test:mission-production-factory` passed with 4 tests.
+- Verification: `npm run test:mission-builder`, `npm run test:mission-runner`, and `npm run build` passed after wiring production builder to the task-builder factory.
+
 ## Phase 6: Decide Advanced Flow Future
 
 Goal: Avoid two mission systems drifting forever.
@@ -340,14 +354,29 @@ Options:
 
 Tasks:
 
-- [ ] Confirm whether `MissionHighLevelPanel` is still desired.
-- [ ] If keeping it, make it call the same builder and runner as production flow.
-- [ ] If removing it, delete dead imports and update `.ai_context/known_risks.md`.
+- [x] Confirm whether `MissionHighLevelPanel` is still desired.
+- [x] If keeping it, make it call the same builder and runner as production flow.
+- [x] Delete dead advanced-flow imports/files and update `.ai_context/known_risks.md`.
 
 Definition of done:
 
 - Repo has one production mission architecture.
 - `.ai_context` documents the final path clearly.
+
+### Progress Notes
+
+#### 2026-05-19 - Phase 6, step 1
+
+- Kept `src/components/subPages/MissionHighLevelPanel.jsx`, but rewired it to use production `buildInboundMission()` / `buildOutboundMission()` and `useMissionStore().runMission()`.
+- Removed the old advanced mission executor and template files:
+  - `src/stores/missionAdvancedStore.js`
+  - `src/missions/missionTaskTemplates.js`
+  - `src/missions/stepFunctions.js`
+- Removed stale `MissionHighLevelPanel` imports/commented tab references from panel wrappers where the high-level panel was not active.
+- Updated `.ai_context/known_risks.md`, `.ai_context/repo_structure.md`, `.ai_context/feature_map.md`, and `.ai_context/functions/stores_and_missions.md` so future agents see one mission architecture.
+- Verification: `rg "missionAdvancedStore|missionTaskTemplates|missions/stepFunctions" src` returned no source references.
+- Verification: `npm run test:mission-builder`, `npm run test:mission-runner`, `npm run test:mission-production-factory`, and `npm run build` passed.
+- Verification: `npm run lint` still fails on pre-existing repo-wide issues, including backend CommonJS globals, unused variables, React hook rule violations, `useObjectBinding.js` undefined names, and existing store/config issues. No lint errors were reported in the new `taskBuilders.js`, `productionMissionFactory.js`, or `productionMissionFactory.test.js` files.
 
 ## TDD Strategy
 
@@ -377,19 +406,19 @@ Recommended test stack:
 
 Before editing:
 
-- [ ] Read `.ai_context/agent_entrypoint.md`.
-- [ ] Read `.ai_context/known_risks.md`.
-- [ ] Read this file.
-- [ ] Confirm current branch is not `main` unless explicitly requested.
-- [ ] Run `git status -sb`.
+- [x] Read `.ai_context/agent_entrypoint.md`.
+- [x] Read `.ai_context/known_risks.md`.
+- [x] Read this file.
+- [x] Confirm current branch is not `main` unless explicitly requested.
+- [x] Run `git status -sb`.
 
 For each phase:
 
-- [ ] Make a small scoped change.
-- [ ] Add or update tests for that scope.
-- [ ] Run relevant checks.
-- [ ] Update this checklist or `todo_list.md` if scope changes.
-- [ ] Do not silently modify unrelated files.
+- [x] Make a small scoped change.
+- [x] Add or update tests for that scope.
+- [x] Run relevant checks.
+- [x] Update this checklist or `todo_list.md` if scope changes.
+- [x] Do not silently modify unrelated files.
 
 Useful verification:
 

@@ -5,7 +5,6 @@ import CraneControlPanel  from './subPages/Test';
 import ObjectBindingTest from './subPages/ObjectBindingTest';
 import BoxControlPanel from './subPages/BoxControlPanel';
 import MissionPanel from './subPages/MissionPanel.jsx';
-import MissionHighLevelPanel from './subPages/MissionHighLevelPanel.jsx';
 import Inventory from './subPages/Inventory.jsx';
 
 // 這裡我們只是 placeholders

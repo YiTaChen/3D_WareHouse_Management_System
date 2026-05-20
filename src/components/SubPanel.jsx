@@ -5,7 +5,6 @@ import CraneControlPanel  from './subPages/Test';
 import ObjectBindingTest from './subPages/ObjectBindingTest';
 import BoxControlPanel from './subPages/BoxControlPanel';
 import MissionPanel from './subPages/MissionPanel.jsx';
-import MissionHighLevelPanel from './subPages/MissionHighLevelPanel.jsx';
 import ConveyorControlPanel from './subPages/ConveyorControlPanel.jsx';
 
 // 這裡我們只是 placeholders
@@ -24,12 +23,6 @@ const TabContent3 = () => (
 const TabContent4 = () => (
   <BoxControlPanel tabId={4} />
 );
-
-// const TabContent5 = () => (
-//   // <MissionPanel tabId={5} />
-//   <MissionHighLevelPanel tabId={5} />
-// );
-
 
 // 你可以在這裡定義更多的 TabContentX 元件
 
@@ -120,10 +113,6 @@ export default function SubPanel( {setShowEngineerSubPanel}) {
         return <TabContent3 />;
       case 'tab4':
         return <TabContent4 />;
-      // case 'tab5':
-      //   return <TabContent5 />;
- 
-
       // 這裡可以新增更多 case
       default:
         return <TabContent1 />;
@@ -187,10 +176,6 @@ export default function SubPanel( {setShowEngineerSubPanel}) {
         <TabButton isActive={activeTab === 'tab4'} onClick={() => setActiveTab('tab4')}>
           Box Property Control Test
         </TabButton>
-        {/* <TabButton isActive={activeTab === 'tab5'} onClick={() => setActiveTab('tab5')}>
-          Mission High Level Test
-        </TabButton> */}
-     
         {/* 在這裡新增更多 TabButton */}
       </div>
 

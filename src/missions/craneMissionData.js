@@ -1,5 +1,4 @@
-import { getCraneOperatingZ, getShelfIsTakeLeft } from './config/shelfRules';
-
+import { getCraneOperatingZ, getShelfIsTakeLeft } from './config/shelfRules.js';
 export const inboundTemplateFunction = ({
     boxId = '',
     missionName = 'Crane001 Inbound Mission',

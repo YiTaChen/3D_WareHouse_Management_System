@@ -52,7 +52,7 @@ Panel tab 頁面。
 - `BoxCreate.jsx`：建立 box 與 box content。
 - `Inventory.jsx`：庫存表格與定位。
 - `MissionPanel.jsx`：主要 inbound/outbound mission 控制。
-- `MissionHighLevelPanel.jsx`：advanced mission UI，目前不是主流程。
+- `MissionHighLevelPanel.jsx`：high-level mission UI，已改接 production mission builder + runner。
 - `ConveyorControlPanel.jsx`：工程用輸送帶控制。
 - `Test.jsx`：工程用吊車控制。
 - `BoxControlPanel.jsx`：box 物理與 soft delete 控制。
@@ -66,7 +66,7 @@ Zustand stores。
 - `conveyorStore.js`：conveyor rotate/speed/sensor/light state。
 - `craneStore.js`：crane 與 move table position/target/ref state。
 - `missionStore.js`：主要 mission runner。
-- `missionAdvancedStore.js`：advanced mission generator/executor，部分依賴已失效。
+- `missionStore.js`：production mission Zustand wiring，執行委派給 runtime runner。
 - `productStore.js`：items/categories API 與 product lookup。
 - `shelfStore.js`：shelf sensor state 與 shelf 查詢。
 - `boxEquipStore.js`：box -> equipment collision status。
@@ -89,9 +89,10 @@ Zustand stores。
 
 任務流程資料與 step functions。
 
-- `craneMissionData.js`：主要 production mission 使用的 stepFunctions 與 mission templates。
-- `missionTaskTemplates.js`：advanced mission templates。
-- `stepFunctions.js`：advanced mission 使用的 stepFunctions；目前有依賴不存在 function 的風險。
+- `craneMissionData.js`：legacy production mission template fixtures/reference data，仍用於比對測試與 param templates。
+- `builders/taskBuilders.js` / `builders/productionMissionFactory.js`：production mission task builders。
+- `adapters/stepFunctions.js`：production mission side-effect adapters。
+- `runtime/missionRunner.js`：production mission task/step runner。
 
 ## `src/hooks/`
 

@@ -51,9 +51,14 @@ For mission changes:
 
 - Main production path is:
   - `MissionPanel.jsx`
+  - `MissionHighLevelPanel.jsx`
+  - `missionBuilder.js`
+  - `productionMissionFactory.js`
+  - `taskBuilders.js`
   - `missionStore.js`
-  - `craneMissionData.js`
-- Avoid advanced mission path unless specifically requested or repairing it.
+  - `missionRunner.js`
+  - `src/missions/adapters/stepFunctions.js`
+- The old advanced mission executor/templates were removed; keep mission work on the shared production builder + runner path.
 - For mission flow refactor/TDD work, use `improve_plan/todo_list_planAndFeature/mission_flow_refactor_plan.md` as the primary plan and tracking reference.
 
 ## Backend changes

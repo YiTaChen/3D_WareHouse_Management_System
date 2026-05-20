@@ -69,10 +69,9 @@
   - Old/simplified: `src/stores/useBoxStore.js` plus `boxStore.impl.js`
   - Import carefully.
 
-- Two mission systems exist:
-  - Main: `MissionPanel.jsx` + `missionStore.js` + `craneMissionData.js`
-  - Advanced: `MissionHighLevelPanel.jsx` + `missionAdvancedStore.js` + `stepFunctions.js`
-  - Advanced path has known missing functions.
+- Mission execution now has one production runtime path:
+  - `MissionPanel.jsx` / `MissionHighLevelPanel.jsx` -> mission builder -> `missionStore.js` -> runtime runner -> adapter `stepFunctions`.
+  - The old advanced executor/templates were removed during the hard-code optimization work.
 
 - `useObjectBindingPosition.js` and `ObjectBindingTest.jsx` do not match.
   - Hook returns different names than UI expects.

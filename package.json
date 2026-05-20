@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:mission-builder": "node --test src/missions/builders/missionBuilderCore.test.js",
+    "test:mission-production-factory": "node --test src/missions/builders/productionMissionFactory.test.js",
     "test:mission-runner": "node --test src/missions/runtime/missionRunner.test.js",
     "preview": "vite preview"
   },

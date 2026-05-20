@@ -5,40 +5,46 @@ import {
   crane001_OutboundMissionTemplate,
   crane002_OutboundMissionTemplate,
   crane003_OutboundMissionTemplate,
-  inboundTemplateFunction,
-  inboundTemplateFunctionForCrane2,
-  outboundTemplateFunction,
-  outboundTemplateFunctionForCrane2,
 } from '../craneMissionData';
 import { createMissionBuilders } from './missionBuilderCore.js';
+import {
+  buildInboundProductionMission,
+  buildOutboundProductionMission,
+} from './productionMissionFactory.js';
 
 const inboundMissionConfigs = {
   Port1: {
     template: crane001InboundMissionParamTemplate,
-    templateFunction: inboundTemplateFunction,
+    templateFunction: buildInboundProductionMission,
   },
   Port3: {
     template: crane002InboundMissionParamTemplate,
-    templateFunction: inboundTemplateFunctionForCrane2,
+    templateFunction: (params) => buildInboundProductionMission({
+      ...params,
+      useCrane2ConveyorSequence: true,
+    }),
   },
   Port4: {
     template: crane003InboundMissionParamTemplate,
-    templateFunction: inboundTemplateFunction,
+    templateFunction: buildInboundProductionMission,
   },
 };
 
 const outboundMissionConfigs = {
   Port2: {
     template: crane001_OutboundMissionTemplate,
-    templateFunction: outboundTemplateFunction,
+    templateFunction: buildOutboundProductionMission,
   },
   Port3: {
     template: crane002_OutboundMissionTemplate,
-    templateFunction: outboundTemplateFunctionForCrane2,
+    templateFunction: (params) => buildOutboundProductionMission({
+      ...params,
+      useCrane2ConveyorSequence: true,
+    }),
   },
   Port5: {
     template: crane003_OutboundMissionTemplate,
-    templateFunction: outboundTemplateFunction,
+    templateFunction: buildOutboundProductionMission,
   },
 };
 

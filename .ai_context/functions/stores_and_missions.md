@@ -286,10 +286,10 @@ Important boundary:
 `missionBuilder.js`
 
 - `buildInboundMission({ portId, boxId, shelfPosition })`
-  - Thin wrapper around existing inbound template functions.
+  - Thin wrapper around production task-builder mission factory.
   - Preserves current production port mapping and crane2-specific template behavior.
 - `buildOutboundMission({ portId, boxId, shelfPosition })`
-  - Thin wrapper around existing outbound template functions.
+  - Thin wrapper around production task-builder mission factory.
   - Deep-clones param templates before merging runtime box/shelf params.
 
 `missionBuilderCore.js`
@@ -302,23 +302,26 @@ Important boundary:
 Important behavior:
 
 - `MissionPanel.jsx` should delegate mission object creation to `missionBuilder.js`.
+- `MissionHighLevelPanel.jsx` should also use `missionBuilder.js` and `missionStore.js`, not a separate executor.
 - Do not mutate exported template objects from `craneMissionData.js` in UI code.
 - Use `npm run test:mission-builder` for the focused builder test suite.
+- Use `npm run test:mission-production-factory` to compare production task-builder output with legacy template fixtures.
 
-## Advanced mission flow
+## High-level mission flow
 
 Files:
 
 - `src/components/subPages/MissionHighLevelPanel.jsx`
-- `src/stores/missionAdvancedStore.js`
-- `src/missions/missionTaskTemplates.js`
-- `src/missions/stepFunctions.js`
+- `src/missions/builders/missionBuilder.js`
+- `src/stores/missionStore.js`
+- `src/missions/runtime/missionRunner.js`
+- `src/missions/adapters/stepFunctions.js`
 
 Status:
 
-- Not the main production path.
-- Has known breakage: `stepFunctions.js` calls `boxStore.setBoxPosition`, which does not exist in main `boxStore.js`.
+- Uses the same production mission architecture as `MissionPanel.jsx`.
+- The old advanced executor/templates were removed after rewiring this UI.
 
 Recommendation:
 
-- For feature work, use main mission flow unless deliberately repairing advanced flow.
+- For feature work, keep using the shared production builder + runner path.
