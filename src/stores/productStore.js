@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { ProductList } from '../data/ProductList'; // 引入預設資料
 
 // 根據你的專案設定，選擇正確的環境變數前綴
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export const useProductStore = create((set, get) => ({
   products: [], // 儲存從 API 取得的產品列表
@@ -57,6 +57,7 @@ export const useProductStore = create((set, get) => ({
 
     } catch (err) {
       console.error("Error fetching product data from API, using default data:", err);
+      const defaultProductList = get().defaultProductList;
       // 如果 API 載入失敗，則使用預設資料
       set({
         products: defaultProductList.map(item => ({
@@ -97,4 +98,3 @@ export const useProductStore = create((set, get) => ({
     return products.find(product => product.id === productId);
   },
 }));
-

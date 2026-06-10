@@ -10,7 +10,7 @@ import Box from './components/Box'
 import Scene from './components/Scene'
 import { useBoxStore } from './stores/boxStore'
 import { useConveyorStore } from './stores/conveyorStore'
-import SubPanel from './components/Subpanel'
+import SubPanel from './components/SubPanel'
 import { useCraneStore } from './stores/craneStore'; 
 import CraneBindingLogic from './components/CraneBindingLogic';
 import BoxBindingUpdater from './components/BoxBindingUpdater';
