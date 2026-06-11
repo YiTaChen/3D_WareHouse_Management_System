@@ -336,3 +336,22 @@ Implementation plan:
   - mobile-friendly action layout
   - responsive inventory summary/table styles
 - Updated `SubPanelProduction.jsx`, `OperatorPanel.jsx`, and `Inventory.jsx` to use CSS classes instead of wide inline layouts.
+
+### 2026-06-10 - Mobile panel compaction pass
+
+- Reviewed the Chrome mobile screenshot where the bottom sheet still blocked too much of the 3D warehouse scene.
+- Tightened mobile/tablet behavior in `src/components/SubPanelProduction.css`:
+  - bottom sheet now has viewport margins instead of full-width edge-to-edge coverage
+  - mobile max-height reduced from 68vh to about 42-44vh
+  - low-height tablet/mobile viewports reduce max-height further to 40vh
+  - mobile header hides the eyebrow label and uses a small grab handle indicator
+- Tightened mobile controls in `src/components/subPages/OperatorPanel.css`:
+  - smaller tab height and padding
+  - hidden duplicate section titles because the active tab already names the mode
+  - hidden descriptive paragraphs on mobile
+  - smaller select, button, status, and inventory summary spacing
+  - compact inventory table cells for small screens
+
+Remaining:
+
+- Manual Chrome check should confirm the panel no longer dominates the scene on the target phone/tablet viewport.

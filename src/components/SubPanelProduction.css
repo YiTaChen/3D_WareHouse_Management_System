@@ -84,37 +84,75 @@
 @media (max-width: 720px) {
   .operator-shell {
     top: auto;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100vw;
-    max-height: 68vh;
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    border-radius: 10px 10px 0 0;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
+    max-height: 44vh;
+    border: 1px solid rgba(15, 23, 42, 0.16);
+    border-radius: 12px;
   }
 
   .operator-shell__header {
-    padding: 9px 10px;
+    position: relative;
+    padding: 11px 10px 8px;
+  }
+
+  .operator-shell__header::before {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 34px;
+    height: 4px;
+    border-radius: 999px;
+    background: #a6adb7;
+    content: '';
+    transform: translateX(-50%);
+  }
+
+  .operator-shell__eyebrow {
+    display: none;
+  }
+
+  .operator-shell__heading {
+    font-size: 13px;
+  }
+
+  .operator-shell__close {
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: 12px;
   }
 
   .operator-shell__drag-handle {
     display: none;
   }
+
+  .operator-shell__content {
+    overscroll-behavior: contain;
+  }
 }
 
 @media (max-width: 420px) {
   .operator-shell {
-    max-height: 64vh;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    max-height: 42vh;
   }
 
   .operator-shell__heading {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .operator-shell__close {
     padding: 6px 8px;
     font-size: 12px;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 900px) {
+  .operator-shell {
+    max-height: 40vh;
   }
 }

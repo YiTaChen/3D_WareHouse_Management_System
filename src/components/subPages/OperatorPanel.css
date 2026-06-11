@@ -165,17 +165,66 @@
 
 @media (max-width: 720px) {
   .operator-panel {
-    gap: 12px;
-    padding: 12px;
+    gap: 9px;
+    padding: 9px 10px 10px;
+  }
+
+  .operator-panel__tabs {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .operator-panel__tab {
+    min-height: 29px;
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+
+  .operator-section {
+    gap: 8px;
+  }
+
+  .operator-section__header {
+    gap: 2px;
   }
 
   .operator-section__title {
-    font-size: 16px;
+    display: none;
+  }
+
+  .operator-section__description {
+    display: none;
+  }
+
+  .operator-field {
+    gap: 4px;
+  }
+
+  .operator-field__label {
+    font-size: 12px;
+  }
+
+  .operator-select {
+    min-height: 34px;
+    padding: 6px 8px;
+    font-size: 13px;
   }
 
   .operator-actions {
     display: grid;
     grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .operator-button {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .operator-status {
+    padding: 6px 8px;
+    font-size: 12px;
   }
 
   .operator-button {
@@ -183,22 +232,58 @@
   }
 
   .inventory-summary {
-    grid-template-columns: repeat(3, minmax(76px, 1fr));
+    gap: 6px;
+    margin-bottom: 8px;
+    grid-template-columns: repeat(3, minmax(68px, 1fr));
+  }
+
+  .inventory-summary__card {
+    padding: 7px;
+  }
+
+  .inventory-summary__label {
+    font-size: 10px;
+  }
+
+  .inventory-summary__value {
+    font-size: 17px;
+  }
+
+  .operator-inventory th,
+  .operator-inventory td {
+    padding: 5px 6px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 420px) {
   .operator-panel {
-    padding: 10px;
+    padding: 8px;
   }
 
   .operator-panel__tab {
-    min-height: 32px;
-    padding: 6px 5px;
-    font-size: 12px;
+    min-height: 28px;
+    padding: 4px 5px;
+    font-size: 11px;
   }
 
   .inventory-summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-height: 700px) and (max-width: 900px) {
+  .operator-panel {
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .operator-section {
+    gap: 7px;
+  }
+
+  .operator-status {
+    max-height: 46px;
+    overflow: auto;
   }
 }
