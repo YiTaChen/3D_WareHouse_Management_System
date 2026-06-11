@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useBoxStore } from '../../stores/boxStore'; // 引入你的 boxStore
+import ShelfData from '../../data/ShelfData';
 
 
 
@@ -8,16 +9,12 @@ import { useUIStore } from '../../stores/uiStore';
 
 // 定義表格列頭的類型和是否可排序
 const columns = [
-  { id: 'checkBoxPosition', label: '', sortable: false, type: 'button' },
   { id: 'box_id', label: 'Box ID', sortable: true, type: 'string' },
-  { id: 'shelf_id', label: 'Shelf ID', sortable: true, type: 'string' }, // 如果有 shelf_id 數據
-  { id: 'item_id', label: 'Item ID', sortable: true, type: 'string' },
-  { id: 'item_name', label: 'Item Name', sortable: true, type: 'string' },
+  { id: 'shelf_id', label: 'Shelf', sortable: true, type: 'string' },
+  { id: 'item_name', label: 'Item', sortable: true, type: 'string' },
   { id: 'quantity', label: 'Quantity', sortable: true, type: 'number' },
-  { id: 'x', label: 'X', sortable: true, type: 'number' },
-  { id: 'y', label: 'Y', sortable: true, type: 'number' },
-  { id: 'z', label: 'Z', sortable: true, type: 'number' },
-  { id: 'outboundButton', label: '', sortable: false, type: 'button' },
+  { id: 'status', label: 'Status', sortable: false, type: 'string' },
+  { id: 'highlight', label: '', sortable: false, type: 'button' },
 ];
 
 
@@ -89,6 +86,10 @@ export default function Inventory() {
     return sortDirection === 'asc' ? compareResult : -compareResult;
   });
 
+  const totalBoxes = new Set(inventoryData.map((row) => row.box_id)).size;
+  const occupiedShelves = new Set(inventoryData.map((row) => row.shelf_id).filter(Boolean)).size;
+  const availableShelves = Math.max((ShelfData.shelves?.length || 0) - occupiedShelves, 0);
+
   if (isLoadingInventory) {
     return <div style={{ padding: '20px', textAlign: 'center' }}>Loading inventory data...</div>;
   }
@@ -98,8 +99,12 @@ export default function Inventory() {
   }
 
   return (
-    <div style={{ padding: '20px', overflowX: 'auto' }}>
-      <h2>Current Inventory</h2>
+    <div style={{ padding: 0, overflowX: 'auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 14 }}>
+        <SummaryCard label="Total Boxes" value={totalBoxes} />
+        <SummaryCard label="Occupied Shelves" value={occupiedShelves} />
+        <SummaryCard label="Available Shelves" value={availableShelves} />
+      </div>
  
 
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -130,24 +135,17 @@ export default function Inventory() {
                 <tr><td colSpan={columns.length} style={{ textAlign: 'center', padding: '10px' }}>No inventory data available.</td></tr> // Fix: <td> immediately after <tr>
             ) : (
                 sortedInventoryData.map((row, index) => (
-                <tr key={index}>
-                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                    <button onClick={
-                        () => handleCheckBoxPosition([row.x, row.y, row.z])
-
-
-                    }>Check Box Position</button>
-                    </td>
+                <tr key={index} onClick={() => handleCheckBoxPosition([row.x, row.y, row.z])} style={{ cursor: 'pointer' }}>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.box_id}</td>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.shelf_id}</td>
-                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.item_id}</td>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>{row.item_name}</td>
                     <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'right' }}>{row.quantity}</td>
-                    <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'right' }}>{row.x.toFixed(3)}</td>
-                    <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'right' }}>{row.y.toFixed(3)}</td>
-                    <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'right' }}>{row.z.toFixed(3)}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>Stored</td>
                     <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                    <button onClick={() => console.log('Outbound for:', row.box_id, row.item_id)}>Outbound</button>
+                    <button onClick={(event) => {
+                      event.stopPropagation();
+                      handleCheckBoxPosition([row.x, row.y, row.z]);
+                    }}>Highlight</button>
                     </td>
                 </tr>
                 ))
@@ -157,3 +155,10 @@ export default function Inventory() {
     </div>
   );
 }
+
+const SummaryCard = ({ label, value }) => (
+  <div style={{ padding: 12, background: '#fff', border: '1px solid #ddd', borderRadius: 6 }}>
+    <div style={{ color: '#666', fontSize: 12 }}>{label}</div>
+    <div style={{ fontSize: 22, fontWeight: 700 }}>{value}</div>
+  </div>
+);

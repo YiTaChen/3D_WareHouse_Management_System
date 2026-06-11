@@ -67,3 +67,15 @@ export const getPortConveyorId = (portId) => portConfigs[portId]?.conveyorId ?? 
 
 export const getInboundShelfZPositions = (portId) =>
   portConfigs[portId]?.inboundShelfZPositions ?? [];
+
+export const getInboundPortForShelfZ = (shelfZ) =>
+  portOptionsByDirection[PORT_DIRECTIONS.INBOUND].find((portId) =>
+    getInboundShelfZPositions(portId).includes(shelfZ),
+  ) ?? '';
+
+export const getOutboundPortForShelfZ = (shelfZ) => {
+  if (shelfZ === -8 || shelfZ === -4) return 'Port2';
+  if (shelfZ === -2 || shelfZ === 2) return 'Port3';
+  if (shelfZ === 4) return 'Port5';
+  return '';
+};

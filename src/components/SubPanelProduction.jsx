@@ -1,27 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Box from './Box';
-import BoxCreate from './subPages/BoxCreate';
-import CraneControlPanel  from './subPages/Test';
-import ObjectBindingTest from './subPages/ObjectBindingTest';
-import BoxControlPanel from './subPages/BoxControlPanel';
-import MissionPanel from './subPages/MissionPanel.jsx';
-import Inventory from './subPages/Inventory.jsx';
-
-// 這裡我們只是 placeholders
-const TabContent1 = () => (
-  <MissionPanel tabId={1} />
-);
-
-const TabContent2 = () => (
-  <BoxCreate tabId={2} />
-);
-
-const TabContent3 = () => (
-  <div> <Inventory tabId={3} />  </div>
-);
-
-
-// 你可以在這裡定義更多的 TabContentX 元件
+import React, { useEffect, useRef, useState } from 'react';
+import OperatorPanel from './subPages/OperatorPanel.jsx';
 
 export default function SubPanelProduction( {setShowSubPanel}) {
 
@@ -96,25 +74,6 @@ export default function SubPanelProduction( {setShowSubPanel}) {
 
 
 
-  // 狀態來追蹤當前活躍的分頁
-  const [activeTab, setActiveTab] = useState('tab1'); // 預設顯示 tab1
-
-  // 根據 activeTab 渲染不同的內容
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'tab1':
-        return <TabContent1 />;
-      case 'tab2':
-        return <TabContent2 />;
-      case 'tab3':
-        return <TabContent3 />;
-      
-      // 這裡可以新增更多 case
-      default:
-        return <TabContent1 />;
-    }
-  };
-
   return (
     <div 
         ref={panelRef}
@@ -135,9 +94,9 @@ export default function SubPanelProduction( {setShowSubPanel}) {
       {/* 分頁標籤 */}
 
 
-       <div><button style={{backgroundColor:'lightgreen' }}  onClick={()=> setShowSubPanel(false)}>Close Main Function Panel</button>
+       <div><button style={{backgroundColor:'lightgreen' }}  onClick={()=> setShowSubPanel(false)}>Close Control Panel</button>
         <br />
-        <label > this tab can be dragged </label>
+        <label >Demo Operator Panel</label>
         </div>
                 <div
                     ref={dragHandleRef} // Attach ref here
@@ -151,56 +110,13 @@ export default function SubPanelProduction( {setShowSubPanel}) {
                         color: '#555',
                     }}
                 >
-                    Drag Here
+                    Drag panel
     </div>
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid #ccc',
-      }}>
-
-       
-
-        <TabButton isActive={activeTab === 'tab1'} onClick={() => setActiveTab('tab1')}>
-           Mission Test
-        </TabButton>
-        <TabButton isActive={activeTab === 'tab2'} onClick={() => setActiveTab('tab2')}>
-          Add New Box
-        </TabButton>
-         <TabButton isActive={activeTab === 'tab3'} onClick={() => setActiveTab('tab3')}>
-          View Inventory 
-        </TabButton>
-        
-        {/* 在這裡新增更多 TabButton */}
-      </div>
 
       {/* 分頁內容 */}
       <div style={{ flexGrow: 1, overflowY: 'auto' }}>
-        {renderContent()}
+        <OperatorPanel />
       </div>
     </div>
   );
 }
-
-// 輔助元件：分頁按鈕
-const TabButton = ({ children, isActive, onClick }) => (
-  <button
-    onClick={onClick}
-    style={{
-      flex: 1, // 讓按鈕均勻分佈
-      padding: '10px 15px',
-      cursor: 'pointer',
-      border: 'none',
-      backgroundColor: isActive ? '#f0f0f0' : 'transparent',
-      borderBottom: isActive ? '2px solid #007bff' : '2px solid transparent',
-      color: isActive ? '#007bff' : '#333',
-      fontWeight: isActive ? 'bold' : 'normal',
-      outline: 'none',
-      fontSize: '14px',
-      whiteSpace: 'nowrap', // 防止文字換行
-      textOverflow: 'ellipsis', // 文字溢出顯示省略號
-      overflow: 'hidden', // 隱藏溢出內容
-    }}
-  >
-    {children}
-  </button>
-);

@@ -10,7 +10,6 @@ import Box from './components/Box'
 import Scene from './components/Scene'
 import { useBoxStore } from './stores/boxStore'
 import { useConveyorStore } from './stores/conveyorStore'
-import SubPanel from './components/SubPanel'
 import { useCraneStore } from './stores/craneStore'; 
 import CraneBindingLogic from './components/CraneBindingLogic';
 import BoxBindingUpdater from './components/BoxBindingUpdater';
@@ -119,8 +118,6 @@ export default function App() {
 
   const [showSubPanel, setShowSubPanel] = useState(false);
 
-   const [showEngineerSubPanel, setShowEngineerSubPanel] = useState(false);
-
   const craneIds = Object.keys(useCraneStore(state => state.craneStates));
 
 
@@ -133,11 +130,7 @@ export default function App() {
       >
     {showSubPanel? 
       <SubPanelProduction  setShowSubPanel={setShowSubPanel}/> : 
-      <button style={{marginRight: '20px', marginLeft:  '20px' , backgroundColor:'lightgreen' }} onClick={()=> setShowSubPanel(true)}>Show Main Function Panel</button>
-      } 
-      {showEngineerSubPanel?  
-      <SubPanel  setShowEngineerSubPanel={setShowEngineerSubPanel}/> : 
-      <button style={{marginRight: '20px', marginLeft:  '20px', backgroundColor:'lightblue' }} onClick={()=> setShowEngineerSubPanel(true)}>Show Engineer Testing Panel</button>
+      <button style={{marginRight: '20px', marginLeft:  '20px' , backgroundColor:'lightgreen' }} onClick={()=> setShowSubPanel(true)}>Open Control Panel</button>
       } 
 
 </div>
