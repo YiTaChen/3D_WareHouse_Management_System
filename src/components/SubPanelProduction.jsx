@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import OperatorPanel from './subPages/OperatorPanel.jsx';
+import './SubPanelProduction.css';
 
 export default function SubPanelProduction( {setShowSubPanel}) {
 
     const panelRef = useRef(null);
 
 
-    const [panelPosition, setPanelPosition] = useState({ x: 20, y: 20 }); // Adjusted for 800px width
     const dragHandleRef = useRef(null); // Reference to the specific drag handle area
 
 
@@ -77,44 +77,27 @@ export default function SubPanelProduction( {setShowSubPanel}) {
   return (
     <div 
         ref={panelRef}
-    
-      style={{
-      position: 'absolute',
-      top: panelPosition.y,   //'20px', // 調整位置
-      right: panelPosition.x, //'20px', // 調整位置
-      zIndex: 100, // 確保在其他元素之上
-      backgroundColor: 'rgba(255, 255, 255, 0.9)', // 半透明白色背景
-      borderRadius: '8px',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-      width: '800px', // 固定寬度，可調整
-      height: 'auto', // 高度自適應內容
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+        className="operator-shell"
+      >
       {/* 分頁標籤 */}
 
 
-       <div><button style={{backgroundColor:'lightgreen' }}  onClick={()=> setShowSubPanel(false)}>Close Control Panel</button>
-        <br />
-        <label >Demo Operator Panel</label>
+       <div className="operator-shell__header">
+        <div className="operator-shell__title">
+          <span className="operator-shell__eyebrow">Warehouse Demo</span>
+          <span className="operator-shell__heading">Operator Control Panel</span>
+        </div>
+        <button className="operator-shell__close" onClick={()=> setShowSubPanel(false)}>Close</button>
         </div>
                 <div
                     ref={dragHandleRef} // Attach ref here
-                    style={{
-                        flexGrow: 1, // Takes up remaining space
-                        padding: '5px 10px', // Padding to make it easier to click
-                        cursor: 'grab', // Indicate draggable area
-                        userSelect: 'none', // Prevent text selection during drag
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        color: '#555',
-                    }}
+                    className="operator-shell__drag-handle"
                 >
                     Drag panel
     </div>
 
       {/* 分頁內容 */}
-      <div style={{ flexGrow: 1, overflowY: 'auto' }}>
+      <div className="operator-shell__content">
         <OperatorPanel />
       </div>
     </div>

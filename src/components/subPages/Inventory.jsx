@@ -99,8 +99,8 @@ export default function Inventory() {
   }
 
   return (
-    <div style={{ padding: 0, overflowX: 'auto' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 14 }}>
+    <div className="operator-inventory">
+      <div className="inventory-summary">
         <SummaryCard label="Total Boxes" value={totalBoxes} />
         <SummaryCard label="Occupied Shelves" value={occupiedShelves} />
         <SummaryCard label="Available Shelves" value={availableShelves} />
@@ -157,8 +157,8 @@ export default function Inventory() {
 }
 
 const SummaryCard = ({ label, value }) => (
-  <div style={{ padding: 12, background: '#fff', border: '1px solid #ddd', borderRadius: 6 }}>
-    <div style={{ color: '#666', fontSize: 12 }}>{label}</div>
-    <div style={{ fontSize: 22, fontWeight: 700 }}>{value}</div>
+  <div className="inventory-summary__card">
+    <div className="inventory-summary__label">{label}</div>
+    <div className="inventory-summary__value">{value}</div>
   </div>
 );

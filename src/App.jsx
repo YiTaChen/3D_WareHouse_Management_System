@@ -122,21 +122,19 @@ export default function App() {
 
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div className="app-shell">
      
 
-<div
-  
-      >
+<div className="app-toolbar">
     {showSubPanel? 
       <SubPanelProduction  setShowSubPanel={setShowSubPanel}/> : 
-      <button style={{marginRight: '20px', marginLeft:  '20px' , backgroundColor:'lightgreen' }} onClick={()=> setShowSubPanel(true)}>Open Control Panel</button>
+      <button className="app-primary-action" onClick={()=> setShowSubPanel(true)}>Open Control Panel</button>
       } 
 
 </div>
     
 
-      <Canvas shadows camera={{ position: [-35, 22, 24], fov: 35 }}>
+      <Canvas className="app-canvas" shadows camera={{ position: [-35, 22, 24], fov: 35 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, -5]} intensity={1} castShadow />
         <OrbitControls />

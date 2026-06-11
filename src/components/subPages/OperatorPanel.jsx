@@ -13,6 +13,7 @@ import { useMissionStore } from '../../stores/missionStore';
 import { useShelfStore } from '../../stores/shelfStore';
 import { useUIStore } from '../../stores/uiStore';
 import Inventory from './Inventory.jsx';
+import './OperatorPanel.css';
 
 const createDemoBoxData = (boxId, position) => ({
   id: boxId,
@@ -98,15 +99,16 @@ function InboundDemo() {
   };
 
   return (
-    <section style={{ display: 'grid', gap: 14 }}>
-      <div>
-        <h3 style={{ margin: '0 0 6px' }}>Inbound</h3>
-        <p style={{ margin: 0, color: '#555' }}>Select a destination shelf. The system will create a demo box at the matching inbound port.</p>
+    <section className="operator-section">
+      <div className="operator-section__header">
+        <h3 className="operator-section__title">Inbound</h3>
+        <p className="operator-section__description">Select a destination shelf. The system will create a demo box at the matching inbound port.</p>
       </div>
 
-      <label style={{ display: 'grid', gap: 6 }}>
-        <span>Destination Shelf</span>
+      <label className="operator-field">
+        <span className="operator-field__label">Destination Shelf</span>
         <select
+          className="operator-select"
           value={selectedShelfId}
           onChange={(event) => {
             setSelectedShelfId(event.target.value);
@@ -114,7 +116,6 @@ function InboundDemo() {
             if (shelf) setHighlightPosition(shelf.position);
           }}
           disabled={shelfOptions.length === 0 || isRunning}
-          style={{ padding: '8px', border: '1px solid #bbb', borderRadius: 4 }}
         >
           {shelfOptions.length > 0 ? (
             shelfOptions.map((shelf) => (
@@ -129,14 +130,14 @@ function InboundDemo() {
       </label>
 
       <button
+        className="operator-button operator-button--primary"
         onClick={runInbound}
         disabled={!selectedShelf || !selectedPortId || isRunning}
-        style={{ padding: '10px 12px', background: '#1f7a4d', color: 'white', border: 0, borderRadius: 4, cursor: 'pointer' }}
       >
         Run Inbound
       </button>
 
-      <p style={{ margin: 0, color: '#333' }}>Status: {status}</p>
+      <p className="operator-status">Status: {status}</p>
     </section>
   );
 }
@@ -203,19 +204,19 @@ function OutboundDemo() {
   };
 
   return (
-    <section style={{ display: 'grid', gap: 14 }}>
-      <div>
-        <h3 style={{ margin: '0 0 6px' }}>Outbound</h3>
-        <p style={{ margin: 0, color: '#555' }}>Choose a shelf with a box. The scene highlights it before outbound starts.</p>
+    <section className="operator-section">
+      <div className="operator-section__header">
+        <h3 className="operator-section__title">Outbound</h3>
+        <p className="operator-section__description">Choose a shelf with a box. The scene highlights it before outbound starts.</p>
       </div>
 
-      <label style={{ display: 'grid', gap: 6 }}>
-        <span>Source Shelf</span>
+      <label className="operator-field">
+        <span className="operator-field__label">Source Shelf</span>
         <select
+          className="operator-select"
           value={selectedShelfId}
           onChange={(event) => setSelectedShelfId(event.target.value)}
           disabled={shelfIds.length === 0 || isRunning}
-          style={{ padding: '8px', border: '1px solid #bbb', borderRadius: 4 }}
         >
           {shelfIds.length > 0 ? (
             shelfIds.map((shelfId) => (
@@ -229,34 +230,34 @@ function OutboundDemo() {
         </select>
       </label>
 
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div className="operator-actions">
         <button
+          className="operator-button operator-button--secondary"
           onClick={() => selectedShelfPosition && setHighlightPosition(selectedShelfPosition)}
           disabled={!selectedShelfPosition}
-          style={{ padding: '10px 12px', background: '#f0f0f0', border: '1px solid #bbb', borderRadius: 4, cursor: 'pointer' }}
         >
           Highlight Shelf
         </button>
         <button
+          className="operator-button operator-button--blue"
           onClick={runOutbound}
           disabled={!selectedShelfId || !selectedShelfPosition || !selectedPortId || !selectedBoxId || isRunning}
-          style={{ padding: '10px 12px', background: '#245b9f', color: 'white', border: 0, borderRadius: 4, cursor: 'pointer' }}
         >
           Run Outbound
         </button>
       </div>
 
-      <p style={{ margin: 0, color: '#333' }}>Status: {status}</p>
+      <p className="operator-status">Status: {status}</p>
     </section>
   );
 }
 
 function InventoryDemo() {
   return (
-    <section style={{ display: 'grid', gap: 12 }}>
-      <div>
-        <h3 style={{ margin: '0 0 6px' }}>Inventory</h3>
-        <p style={{ margin: 0, color: '#555' }}>Review stored boxes and highlight their current scene position.</p>
+    <section className="operator-section">
+      <div className="operator-section__header">
+        <h3 className="operator-section__title">Inventory</h3>
+        <p className="operator-section__description">Review stored boxes and highlight their current scene position.</p>
       </div>
       <Inventory />
     </section>
@@ -273,22 +274,13 @@ export default function OperatorPanel() {
   ];
 
   return (
-    <div style={{ padding: 16, background: '#f7f7f7' }}>
-      <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid #ccc', marginBottom: 16 }}>
+    <div className="operator-panel">
+      <div className="operator-panel__tabs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            style={{
-              flex: 1,
-              padding: '10px 12px',
-              border: 0,
-              borderBottom: activeTab === tab.id ? '3px solid #1f6feb' : '3px solid transparent',
-              background: activeTab === tab.id ? '#fff' : 'transparent',
-              color: activeTab === tab.id ? '#1f4e8c' : '#333',
-              fontWeight: activeTab === tab.id ? 700 : 500,
-              cursor: 'pointer',
-            }}
+            className={`operator-panel__tab${activeTab === tab.id ? ' operator-panel__tab--active' : ''}`}
           >
             {tab.label}
           </button>

@@ -195,6 +195,9 @@ Goal: 讓 demo 過程穩定、可理解、可恢復。
 
 Tasks:
 
+- [x] Optimize control panel layout for desktop so it does not feel too wide or block the scene.
+- [x] Add tablet/mobile responsive panel behavior.
+- [x] Use compact operator controls and avoid full-width button-heavy visual weight where unnecessary.
 - [ ] Add clear button states: disabled, running, completed, failed.
 - [ ] Add concise mission progress text.
 - [ ] Prevent duplicate mission runs while a mission is already running.
@@ -287,3 +290,49 @@ Remaining:
 
 - Manual browser flow still needs a full end-to-end check with backend/physics running: inbound -> inventory refresh -> outbound.
 - Inventory refresh after mission completion may need a tighter trigger once manual flow is verified.
+
+### 2026-06-10 - Responsive panel optimization plan
+
+Problem:
+
+- The operator panel can feel too wide for demo and may block too much of the 3D warehouse.
+- Mobile/tablet layouts need a dedicated behavior; the panel should not cover the whole scene permanently.
+
+Implementation plan:
+
+1. Replace wide inline panel styles with CSS classes.
+2. Desktop:
+   - Use a compact right-side panel around 380-440px wide.
+   - Limit panel height and keep internal scrolling.
+   - Keep the scene visible behind/next to it.
+3. Tablet:
+   - Use a narrower panel with viewport-based width.
+   - Reduce padding and font sizes slightly.
+4. Mobile:
+   - Convert panel into a bottom sheet.
+   - Limit height to about 60-70vh.
+   - Make tabs compact and controls touch-friendly.
+5. Entry button:
+   - Use a compact floating `Open Control Panel` button.
+   - Avoid a large full-width button that distracts from the 3D scene.
+6. Verification:
+   - Build passes.
+   - Dev server can run on an alternate port when 5173 is occupied.
+   - Manual visual check on desktop and mobile-sized viewport.
+
+### 2026-06-10 - Responsive panel implementation
+
+- Imported `src/index.css` and `src/App.css` so the app uses intentional layout CSS instead of only inline styles.
+- Replaced Vite starter root styles with full-viewport app layout.
+- Changed `Open Control Panel` into a compact floating action button.
+- Added `src/components/SubPanelProduction.css`:
+  - desktop compact right-side panel
+  - internal scrolling
+  - mobile bottom-sheet behavior
+  - reduced header and close-button footprint
+- Added `src/components/subPages/OperatorPanel.css`:
+  - compact tabs
+  - responsive form controls
+  - mobile-friendly action layout
+  - responsive inventory summary/table styles
+- Updated `SubPanelProduction.jsx`, `OperatorPanel.jsx`, and `Inventory.jsx` to use CSS classes instead of wide inline layouts.
