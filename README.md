@@ -10,7 +10,25 @@
 
 ## Quick Start
 
-### Frontend
+### Run the App
+
+The easiest local setup uses the built-in SQLite demo database, so you do not need PostgreSQL.
+
+```bash
+npm run setup:all
+npm run dev:all
+```
+
+Then open `http://localhost:5173`.
+
+If you use `just`, the same flow is:
+
+```bash
+just setup
+just dev
+```
+
+### Frontend Only
 
 The frontend defaults to the local backend at `http://localhost:3002`, so a new clone can run without creating a root `.env` file.
 
@@ -26,7 +44,7 @@ Optional frontend env files:
 
 Important: `VITE_*` variables are bundled into browser JavaScript. Do not put PostgreSQL URLs, usernames, passwords, or other secrets in root frontend env files.
 
-### Backend
+### Backend Only
 
 The backend runs on port `3002` by default. If `backend/.env` is missing, it uses a local SQLite demo database at `backend/data/warehouse.sqlite`, so a new clone can run without installing PostgreSQL.
 
