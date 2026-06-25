@@ -7,9 +7,6 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 
-let dbConfig = {};
-const dbEnv = process.env.DB_ENV || 'local';
-
 const envOrDefault = (name, fallback) =>
     process.env[name] !== undefined ? process.env[name] : fallback;
 
@@ -21,7 +18,46 @@ const requireEnv = (name) => {
     return value;
 };
 
-if (dbEnv === 'local') {
+const hasCloudPgConfig = () =>
+    Boolean(process.env.PG_HOST && process.env.PG_USER && process.env.PG_PASSWORD && process.env.PG_DATABASE);
+
+const getDialectOptions = () => {
+    if (process.env.PG_SSL === 'true') {
+        return {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false,
+            },
+        };
+    }
+
+    return {};
+};
+
+const createSequelizeFromUrl = (databaseUrl) => (
+    new Sequelize(databaseUrl, {
+        dialect: 'postgres',
+        logging: false,
+        dialectOptions: getDialectOptions(),
+    })
+);
+
+const createSequelize = () => {
+    const dbEnv = process.env.DB_ENV ? process.env.DB_ENV.toLowerCase() : '';
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (dbEnv === 'database_url' || dbEnv === 'url') {
+        return createSequelizeFromUrl(requireEnv('DATABASE_URL'));
+    }
+
+    if (!dbEnv && databaseUrl) {
+        return createSequelizeFromUrl(databaseUrl);
+    }
+
+    const selectedDbEnv = dbEnv || (hasCloudPgConfig() ? 'cloud' : 'local');
+    let dbConfig = {};
+
+    if (selectedDbEnv === 'local') {
         dbConfig = {
             host: envOrDefault('PG_HOST_LOCAL', 'localhost'),
             port: envOrDefault('PG_PORT_LOCAL', 5432),
@@ -29,11 +65,9 @@ if (dbEnv === 'local') {
             username: envOrDefault('PG_USER_LOCAL', 'postgres'),
             password: envOrDefault('PG_PASSWORD_LOCAL', 'postgres'),
             dialect: envOrDefault('PG_DIALECT_LOCAL', 'postgres'),
-    };
-
-    } 
-    else if (dbEnv === 'cloud') 
-    {
+            dialectOptions: {},
+        };
+    } else if (selectedDbEnv === 'cloud') {
         dbConfig = {
             host: requireEnv('PG_HOST'),
             port: envOrDefault('PG_PORT', 5432),
@@ -41,26 +75,28 @@ if (dbEnv === 'local') {
             username: requireEnv('PG_USER'),
             password: requireEnv('PG_PASSWORD'),
             dialect: envOrDefault('PG_DIALECT', 'postgres'),
-        }
-    }
-    else {
-    throw new Error(`Unsupported DB_ENV "${dbEnv}". Use "local" or "cloud".`);
+            dialectOptions: getDialectOptions(),
+        };
+    } else {
+        throw new Error(`Unsupported DB_ENV "${selectedDbEnv}". Use "local", "cloud", or "database_url".`);
     }
 
+    return new Sequelize(
+        dbConfig.database,
+        dbConfig.username,
+        dbConfig.password,
+        {
+            host: dbConfig.host,
+            port: dbConfig.port,
+            logging: false,
+            dialect: dbConfig.dialect,
+            dialectOptions: dbConfig.dialectOptions,
+        }
+    );
+};
 
 // 用 Sequelize 連接 PostgreSQL 資料庫
-const sequelize = new Sequelize(
-  dbConfig.database,
-    dbConfig.username,
-    dbConfig.password,
-    {
-    host: dbConfig.host,
-    port: dbConfig.port,
-    logging: false,
-    dialect: dbConfig.dialect,
-    }
-  
-);
+const sequelize = createSequelize();
 
 
 // const Test1 = Test1Model(sequelize, DataTypes);
@@ -93,4 +129,3 @@ module.exports = {
     BoxContent,
 
 };
-

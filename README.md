@@ -37,7 +37,16 @@ cp .env.example .env
 npm start
 ```
 
-For custom local development, keep `DB_ENV=local` and fill in the `PG_*_LOCAL` values for your local PostgreSQL database. For Render or another cloud backend, set `DB_ENV=cloud` and store the real cloud database values in the hosting provider's environment-variable settings.
+Database selection rules:
+
+1. `DB_ENV=cloud` keeps using the legacy Render-compatible `PG_HOST`, `PG_USER`, `PG_PASSWORD`, `PG_DATABASE`, `PG_PORT`, and `PG_DIALECT` settings.
+2. `DB_ENV=local` keeps using the legacy local `PG_*_LOCAL` settings.
+3. `DB_ENV=database_url` uses `DATABASE_URL`.
+4. If `DB_ENV` is not set, `DATABASE_URL` is used when present.
+5. If `DB_ENV` is not set and a full cloud `PG_*` config is present, that cloud config is used.
+6. Otherwise the backend falls back to built-in local defaults.
+
+This keeps existing Render deployments working while allowing new setups to use a simpler `DATABASE_URL`.
 
 ---
 
