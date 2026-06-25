@@ -2,13 +2,21 @@
 
 ![Demo](./demo_resource_for_readme/warehouse_new.gif)
 
-**Version:** 0.8  
 🔗 [Live Demo](https://r3f-gravity-apply-test.firebaseapp.com)  
+
+🔗 [Hosted Backend](https://threed-warehouse-management-system.onrender.com)
 
 
 ---
 
 ## Quick Start
+
+### Prerequisites
+
+- Node.js 18 or newer
+- npm
+- `just` is optional. It provides shorter commands, but every `just` recipe has an equivalent `npm` command.
+- PostgreSQL is optional. A fresh clone runs with the built-in SQLite demo database when no backend env file is provided.
 
 ### Run the App
 
@@ -72,6 +80,8 @@ This keeps existing Render deployments working while allowing new users to run t
 
 The app also includes a top-right `DB` switcher for local development. It can switch the running backend between local SQLite, local PostgreSQL, and cloud PostgreSQL. PostgreSQL options are tested before switching; after a successful switch, the page reloads so frontend state is fetched from the newly selected database. The switcher API is enabled automatically only for localhost requests. Set `ENABLE_DB_SWITCHER=true` only on trusted private servers.
 
+The hosted Render backend can take a few seconds to respond after it has been idle.
+
 ---
 
 ## 🚩 Problem Statement
@@ -107,7 +117,7 @@ This system addresses the challenge by offering a **3D web-based visualization**
 | 3D Graphics  | Three.js           |
 | Frontend     | React.js           |
 | Backend      | Express.js         |
-| Database     | PostgreSQL         |
+| Database     | SQLite demo fallback, PostgreSQL |
 | Hosting      | Firebase (frontend), Render (backend + DB) |
 
 ---
@@ -137,17 +147,17 @@ This system addresses the challenge by offering a **3D web-based visualization**
 This project uses a relational database structure designed for clarity, extensibility, and 3D inventory visualization. The core tables include:
 
 - **boxes**: Basic unit for inventory, each with a unique `box_id`.
-- **boxContents**: Defines the relationship between boxes and stored items, including quantity and soft-delete status.
-- **boxPositions**: Stores spatial coordinates (`x, y, z`) of each box in the 3D warehouse.
+- **boxContent**: Defines the relationship between boxes and stored items, including quantity and soft-delete status.
+- **boxPosition**: Stores spatial coordinates (`position_x`, `position_y`, `position_z`) of each box in the 3D warehouse.
 - **items**: Master table of all item definitions.
 
 ### Relationships:
 
 - One **box** has one **boxPosition**
-- One **box** has many **boxContents**
-- One **item** can be in many **boxContents**
+- One **box** has many **boxContent** records
+- One **item** can be in many **boxContent** records
 
-All relationships are enforced with Sequelize associations and proper foreign key constraints.
+All relationships are defined with Sequelize associations and are created automatically during backend startup when the configured database is empty.
 
 ---
 
@@ -164,10 +174,15 @@ All relationships are enforced with Sequelize associations and proper foreign ke
 | DELETE | `/boxes/:id`                      | Delete a box                         |
 | PATCH  | `/boxes/:id/remove`               | Soft delete a box                    |
 | PATCH  | `/boxes/all/remove`               | Soft delete all boxes                |
-| GET    | `/boxes/:boxId/full`              | Get full box data (position + items) |
-| GET    | `/boxes/fullData`                 | Get full data for all boxes          |
-| PUT    | `/boxes/:boxId/position`          | Update box position                  |
-| PUT    | `/boxes/:boxId/content/:itemId`   | Update specific box item             |
+
+### 📦 Box Inventory APIs
+
+| Method | Endpoint                                      | Description                          |
+|--------|-----------------------------------------------|--------------------------------------|
+| GET    | `/boxInventory/:boxId/full`                   | Get full box data (position + items) |
+| GET    | `/boxInventory/fullData`                      | Get full data for all boxes          |
+| PUT    | `/boxInventory/:boxId/position`               | Update box position                  |
+| PUT    | `/boxInventory/:boxId/content/:itemId`        | Update specific box item             |
 
 ### 📦 Box Content APIs
 
@@ -207,15 +222,23 @@ All relationships are enforced with Sequelize associations and proper foreign ke
 | PUT    | `/items/:id`                      | Update an item                         |
 | DELETE | `/items/:id`                      | Delete an item                         |
 
+### 🗄️ Database Switcher APIs
+
+These APIs power the top-right `DB` switcher. They are enabled automatically for localhost requests. On a trusted private server, set `ENABLE_DB_SWITCHER=true` to enable them.
+
+| Method | Endpoint      | Description                                      |
+|--------|---------------|--------------------------------------------------|
+| GET    | `/db/status`  | Get the active database dialect and config type  |
+| POST   | `/db/test`    | Test a SQLite or PostgreSQL connection payload   |
+| POST   | `/db/switch`  | Switch the running backend to the tested database |
+
 ---
 
-## 🖼️ Version List 
+## 🖼️ Demo Links
 
-**Version:** 0.8  
-🔗 [Live Demo](https://r3f-gravity-apply-test.firebaseapp.com)  
+🔗 [Current Live Demo](https://r3f-gravity-apply-test.firebaseapp.com)
 
-**Version:** 0.2  
-🔗 [Prototype Demo](https://warehouse-3d-simple-tryrun.web.app/)
+🔗 [Earlier Prototype Demo](https://warehouse-3d-simple-tryrun.web.app/)
 
 ---
 
