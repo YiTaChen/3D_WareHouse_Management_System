@@ -1,9 +1,7 @@
 
 import { create } from 'zustand';
 import { ProductList } from '../data/ProductList'; // 引入預設資料
-
-// 根據你的專案設定，選擇正確的環境變數前綴
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export const useProductStore = create((set, get) => ({
   products: [], // 儲存從 API 取得的產品列表

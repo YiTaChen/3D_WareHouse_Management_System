@@ -1,37 +1,50 @@
 const { Sequelize } = require('sequelize');
+const path = require('path');
 // const Test1Model = require('./test1')
 
 
 
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 
 let dbConfig = {};
+const dbEnv = process.env.DB_ENV || 'local';
 
-if (process.env.DB_ENV === 'local') {
+const envOrDefault = (name, fallback) =>
+    process.env[name] !== undefined ? process.env[name] : fallback;
+
+const requireEnv = (name) => {
+    const value = process.env[name];
+    if (!value) {
+        throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return value;
+};
+
+if (dbEnv === 'local') {
         dbConfig = {
-            host: process.env.PG_HOST_LOCAL,
-            port: process.env.PG_PORT_LOCAL,
-            database: process.env.PG_DATABASE_LOCAL,
-            username: process.env.PG_USER_LOCAL,
-            password: process.env.PG_PASSWORD_LOCAL,
-            dialect: process.env.PG_DIALECT_LOCAL || 'postgres',
+            host: envOrDefault('PG_HOST_LOCAL', 'localhost'),
+            port: envOrDefault('PG_PORT_LOCAL', 5432),
+            database: envOrDefault('PG_DATABASE_LOCAL', 'warehouse_dev'),
+            username: envOrDefault('PG_USER_LOCAL', 'postgres'),
+            password: envOrDefault('PG_PASSWORD_LOCAL', 'postgres'),
+            dialect: envOrDefault('PG_DIALECT_LOCAL', 'postgres'),
     };
 
     } 
-    else if (process.env.DB_ENV === 'cloud') 
+    else if (dbEnv === 'cloud') 
     {
         dbConfig = {
-            host: process.env.PG_HOST,
-            port: process.env.PG_PORT,
-            database: process.env.PG_DATABASE,
-            username: process.env.PG_USER,
-            password: process.env.PG_PASSWORD,
-            dialect: process.env.PG_DIALECT || 'postgres',
+            host: requireEnv('PG_HOST'),
+            port: envOrDefault('PG_PORT', 5432),
+            database: requireEnv('PG_DATABASE'),
+            username: requireEnv('PG_USER'),
+            password: requireEnv('PG_PASSWORD'),
+            dialect: envOrDefault('PG_DIALECT', 'postgres'),
         }
     }
     else {
-    throw new Error('find no DB_ENV setting matched,  pls check .env setting');
+    throw new Error(`Unsupported DB_ENV "${dbEnv}". Use "local" or "cloud".`);
     }
 
 
@@ -80,5 +93,4 @@ module.exports = {
     BoxContent,
 
 };
-
 

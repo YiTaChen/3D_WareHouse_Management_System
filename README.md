@@ -8,6 +8,39 @@
 
 ---
 
+## Quick Start
+
+### Frontend
+
+The frontend defaults to the local backend at `http://localhost:3002`, so a new clone can run without creating a root `.env` file.
+
+```bash
+npm install
+npm run dev
+```
+
+Optional frontend env files:
+
+- Copy `.env.example` to `.env` when you want to override local development settings.
+- Copy `.env.production.example` to `.env.production` before a production build if you want the Firebase build to use the hosted backend.
+
+Important: `VITE_*` variables are bundled into browser JavaScript. Do not put PostgreSQL URLs, usernames, passwords, or other secrets in root frontend env files.
+
+### Backend
+
+The backend runs on port `3002` by default. If `backend/.env` is missing, it uses local PostgreSQL defaults: host `localhost`, port `5432`, database `warehouse_dev`, user `postgres`, password `postgres`.
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+npm start
+```
+
+For custom local development, keep `DB_ENV=local` and fill in the `PG_*_LOCAL` values for your local PostgreSQL database. For Render or another cloud backend, set `DB_ENV=cloud` and store the real cloud database values in the hosting provider's environment-variable settings.
+
+---
+
 ## 🚩 Problem Statement
 
 Traditional Warehouse Management Systems (WMS) usually provide text-based inventory data and, at most, 2D layouts. However, locating items in physical warehouses remains challenging.  

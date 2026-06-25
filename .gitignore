@@ -65,13 +65,19 @@ dist/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variables files
 .env
+.env.*
+!.env.example
+!.env.*.example
 
 # dataconnect generated files
 .dataconnect
 
 # Backend specific files
 backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.*.example
 backend/node_modules/
 backend/*.log
