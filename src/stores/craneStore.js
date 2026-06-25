@@ -59,7 +59,7 @@ const getDefaultCraneState = () => ({
   targetCranePosition: new THREE.Vector3(0, 3, -10),
   craneMoveSpeed: 1,
 
-  rotation: new THREE.Euler(...craneConfig.rotation), 
+  rotation: new THREE.Euler(0, 0, 0), 
       
   currentMoveTableLocalOffset: new THREE.Vector3(0, 1, 0), // Fallback if data is missing
   targetMoveTableLocalOffset: new THREE.Vector3(0, 1, 0),

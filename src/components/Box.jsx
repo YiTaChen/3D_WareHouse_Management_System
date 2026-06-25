@@ -7,16 +7,12 @@ import { useBoxStore } from '../stores/boxStore';
 // 預載入模型（這樣所有實例都能共享同一個載入的模型）
 useGLTF.preload('/box_ver1.gltf');
 
-export default function Box({ id, initialPosition }) {
+export default function Box({ id, initialPosition = [0, 5, 0] }) {
   const boxSize = [1, 1, 1];
   
   const boxData = useBoxStore(state => state.getBoxData(id));
   const setBoxRef = useBoxStore(state => state.setBoxRef);
-  
-  if (!boxData) {
-    console.warn(`Box component with ID ${id} rendered without boxData. Skipping.`);
-    return null;
-  }
+  const position = boxData?.position || initialPosition;
 
   // 使用 useGLTF hook 同步載入模型
   const { scene } = useGLTF('/box_ver1.gltf');
@@ -39,7 +35,7 @@ export default function Box({ id, initialPosition }) {
   // 創建物理體（現在模型已經同步可用）
   const [boxBodyRef, boxBodyApi] = useBox(() => ({
     mass: 1,
-    position: boxData.position,
+    position,
     type: 'Dynamic',
     args: boxSize,
     material: 'box',
@@ -56,6 +52,10 @@ export default function Box({ id, initialPosition }) {
   }));
 
   useEffect(() => {
+    if (!boxData) {
+      return undefined;
+    }
+
     if (boxBodyRef.current && boxBodyApi) {
       // console.log(`Setting box ref for ${id}:`, boxBodyRef.current);
       const fullRef = {
@@ -71,7 +71,12 @@ export default function Box({ id, initialPosition }) {
       console.log(`Cleaning up box ref for ${id}`);
       setBoxRef(id, null);
     };
-  }, [id, boxBodyRef, boxBodyApi, setBoxRef]);
+  }, [id, boxData, boxBodyRef, boxBodyApi, setBoxRef]);
+
+  if (!boxData) {
+    console.warn(`Box component with ID ${id} rendered without boxData. Skipping.`);
+    return null;
+  }
 
   return (
     <group ref={boxBodyRef}>
@@ -79,6 +84,4 @@ export default function Box({ id, initialPosition }) {
     </group>
   );
 }
-
-
 

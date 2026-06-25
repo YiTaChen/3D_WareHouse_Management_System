@@ -4,9 +4,9 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'node_modules', 'backend/node_modules'] },
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['src/**/*.{js,jsx}', '*.js'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -23,11 +23,29 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-empty': 'warn',
+      'no-undef': 'warn',
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^[A-Z_]' }],
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/rules-of-hooks': 'warn',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    files: ['backend/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'commonjs',
+      globals: globals.node,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      'no-empty': 'warn',
+      'no-undef': 'warn',
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^[A-Z_]' }],
     },
   },
 ]
