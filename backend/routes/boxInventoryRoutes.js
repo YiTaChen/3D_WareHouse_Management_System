@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { Box, BoxPosition, BoxContent, Item } = require('../models');
+const database = require('../models');
 
 // 1. 回傳特定 Box 完整資料 (position + content)
 router.get('/:boxId/full', async (req, res) => {
   try {
+    const { Box, BoxPosition, BoxContent, Item } = database.getModels();
     const { boxId } = req.params;
 
     // Use findByPk to get the box by its primary key
@@ -80,6 +81,7 @@ router.get('/:boxId/full', async (req, res) => {
 // GET /fullData - Get complete data for all Boxes
 router.get('/fullData', async (req, res) => {
   try {
+    const { Box, BoxPosition, BoxContent, Item } = database.getModels();
     const boxes = await Box.findAll({
       where: { isRemoved: false }, // Only get boxes that are not soft-deleted
       include: [
@@ -149,6 +151,7 @@ router.get('/fullData', async (req, res) => {
 // 2. 更新 BoxPosition (by box_id)
 router.put('/:boxId/position', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const { boxId } = req.params;
     const { x, y, z } = req.body;
 
@@ -169,6 +172,7 @@ router.put('/:boxId/position', async (req, res) => {
 // 3. 更新 BoxContent (by box_id + item_id)
 router.put('/:boxId/content/:itemId', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const { boxId, itemId } = req.params;
     const { quantity, isContentDelete } = req.body;
 
@@ -185,7 +189,6 @@ router.put('/:boxId/content/:itemId', async (req, res) => {
 });
 
 module.exports = router;
-
 
 
 

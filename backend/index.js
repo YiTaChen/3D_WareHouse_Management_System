@@ -32,6 +32,7 @@ app.use('/boxPositions', require('./routes/boxPositionRoutes'));
 app.use('/boxContents', require('./routes/boxContentRoutes'));
 
 app.use('/boxInventory', require('./routes/boxInventoryRoutes'));
+app.use('/db', require('./routes/dbRoutes'));
 
 
 app.get('/', (req, res) => {

@@ -52,6 +52,8 @@ Database selection rules:
 
 This keeps existing Render deployments working while allowing new users to run the full API without installing PostgreSQL.
 
+The app also includes a top-right `DB` switcher for local development. It can switch the running backend between local SQLite, local PostgreSQL, and cloud PostgreSQL. PostgreSQL options are tested before switching; after a successful switch, the page reloads so frontend state is fetched from the newly selected database. The switcher API is enabled automatically only for localhost requests. Set `ENABLE_DB_SWITCHER=true` only on trusted private servers.
+
 ---
 
 ## 🚩 Problem Statement

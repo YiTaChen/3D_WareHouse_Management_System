@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Box, BoxPosition, BoxContent, Item } = require('../models');
+const database = require('../models');
 
 
 
@@ -8,6 +8,7 @@ const { Box, BoxPosition, BoxContent, Item } = require('../models');
 // Create
 router.post('/', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const newBoxPosition = await BoxPosition.create(req.body);
     res.status(201).json(newBoxPosition);
   } catch (err) {
@@ -18,6 +19,7 @@ router.post('/', async (req, res) => {
 // Read all
 router.get('/', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const boxPositions = await BoxPosition.findAll();
     res.json(boxPositions);
   } catch (err) {
@@ -28,6 +30,7 @@ router.get('/', async (req, res) => {
 // boxPositions/map
 router.get('/map', async (req, res) => {
   try {
+    const { Box, BoxPosition } = database.getModels();
     const all = await BoxPosition.findAll(
       {
           include: {
@@ -55,6 +58,7 @@ router.get('/map', async (req, res) => {
 // GET /mapFullData - Get complete data for all Boxes in a map format
 router.get('/mapFullData', async (req, res) => {
   try {
+    const { Box, BoxPosition, BoxContent, Item } = database.getModels();
     const boxes = await Box.findAll({
       where: { isRemoved: false }, // Only get boxes that are not soft-deleted
       include: [
@@ -125,6 +129,7 @@ router.get('/mapFullData', async (req, res) => {
 // Read by ID
 router.get('/:id', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const boxPosition = await BoxPosition.findByPk(req.params.id);
     if (boxPosition) {
       res.json(boxPosition);
@@ -139,6 +144,7 @@ router.get('/:id', async (req, res) => {
 // Update by ID
 router.put('/:id', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const [updated] = await BoxPosition.update(req.body, {
       where: { boxPosition_id: req.params.id },
     });
@@ -156,6 +162,7 @@ router.put('/:id', async (req, res) => {
 // Delete by ID
 router.delete('/:id', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const deleted = await BoxPosition.destroy({
       where: { boxPosition_id: req.params.id },
     });
@@ -173,6 +180,7 @@ router.delete('/:id', async (req, res) => {
 // GET /box/:boxId - 根據 box_id 取得對應的 BoxPosition
 router.get('/box/:boxId', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const position = await BoxPosition.findOne({
       where: { box_id: req.params.boxId },
     });
@@ -190,6 +198,7 @@ router.get('/box/:boxId', async (req, res) => {
 // POST /box/:boxId - 為特定 box_id 建立位置資料
 router.post('/box/:boxId', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const { position_x, position_y, position_z } = req.body;
 
     // check if box_id is exists, then return error
@@ -220,6 +229,7 @@ router.post('/box/:boxId', async (req, res) => {
 // PATCH /box/:boxId - 僅更新 position_x, position_y, position_z 任一欄位
 router.patch('/box/:boxId', async (req, res) => {
   try {
+    const { BoxPosition } = database.getModels();
     const { position_x, position_y, position_z } = req.body;
     const [updated] = await BoxPosition.update(
       { position_x, position_y, position_z },

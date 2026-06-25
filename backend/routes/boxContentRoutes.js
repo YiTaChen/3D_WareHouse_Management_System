@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { BoxContent } = require('../models');
+const database = require('../models');
 
 
 
 // Create
 router.post('/', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const newBoxContent = await BoxContent.create(req.body);
     res.status(201).json(newBoxContent);
   } catch (err) {
@@ -17,6 +18,7 @@ router.post('/', async (req, res) => {
 // Read all
 router.get('/', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const boxContents = await BoxContent.findAll();
     res.json(boxContents);
   } catch (err) {
@@ -27,6 +29,7 @@ router.get('/', async (req, res) => {
 // Read by ID
 router.get('/:id', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const boxContent = await BoxContent.findByPk(req.params.id);
     if (boxContent) {
       res.json(boxContent);
@@ -41,6 +44,7 @@ router.get('/:id', async (req, res) => {
 // Update by ID
 router.put('/:id', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const [updated] = await BoxContent.update(req.body, {
       where: { boxContent_id: req.params.id },
     });
@@ -58,6 +62,7 @@ router.put('/:id', async (req, res) => {
 // Delete by ID
 router.delete('/:id', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const deleted = await BoxContent.destroy({
       where: { boxContent_id: req.params.id },
     });
@@ -75,6 +80,7 @@ router.delete('/:id', async (req, res) => {
 // GET /boxContents/box/:boxId - get content by boxId
 router.get('/box/:boxId', async (req, res) => {
   try {
+    const { BoxContent } = database.getModels();
     const contents = await BoxContent.findAll({
       where: {
         box_id: req.params.boxId,

@@ -1,0 +1,147 @@
+.db-switcher {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 180;
+  color: #1f2933;
+}
+
+.db-switcher__trigger {
+  min-width: 44px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  background: rgba(36, 91, 159, 0.95);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+}
+
+.db-switcher__panel {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  display: grid;
+  width: min(360px, calc(100vw - 28px));
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+.db-switcher__header {
+  display: grid;
+  gap: 2px;
+}
+
+.db-switcher__title {
+  color: #17202a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.db-switcher__status {
+  color: #607086;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.db-switcher__fields {
+  display: grid;
+  gap: 8px;
+}
+
+.db-switcher__field {
+  display: grid;
+  gap: 5px;
+  color: #2f3a47;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.db-switcher__field input,
+.db-switcher__field select {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid #b9c3cf;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f2933;
+  font-size: 13px;
+}
+
+.db-switcher__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2f3a47;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.db-switcher__check input {
+  width: 16px;
+  height: 16px;
+}
+
+.db-switcher__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.db-switcher__actions button {
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid #b9c3cf;
+  border-radius: 6px;
+  background: #fff;
+  color: #25313d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.db-switcher__actions button:disabled {
+  opacity: 0.65;
+}
+
+.db-switcher__switch {
+  border-color: #1f7a4d !important;
+  background: #1f7a4d !important;
+  color: #fff !important;
+}
+
+.db-switcher__message {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #dbe1e8;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #2f3a47;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .db-switcher {
+    top: 10px;
+    right: 10px;
+  }
+
+  .db-switcher__trigger {
+    min-width: 42px;
+    min-height: 36px;
+    padding: 7px 9px;
+    font-size: 13px;
+  }
+
+  .db-switcher__panel {
+    width: min(340px, calc(100vw - 20px));
+  }
+}

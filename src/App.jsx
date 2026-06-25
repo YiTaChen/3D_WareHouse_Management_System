@@ -17,6 +17,7 @@ import SubPanelProduction from './components/SubPanelProduction.jsx';
 import { useProductStore } from './stores/productStore';
 import { useUIStore } from './stores/uiStore'; 
 import HighlightSpot from './components/effect/HighlightSpot'; // 引入高亮元件
+import DatabaseSwitcher from './components/DatabaseSwitcher.jsx';
 
 
 
@@ -123,6 +124,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <DatabaseSwitcher />
      
 
 <div className="app-toolbar">

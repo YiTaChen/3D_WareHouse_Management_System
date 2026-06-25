@@ -3,12 +3,13 @@ const express = require('express');
 
 const router = express.Router();
 
-const { Item } = require('../models');
+const database = require('../models');
 
 
 // Create
 router.post('/', async (req, res) => {
   try {
+    const { Item } = database.getModels();
     const newItem = await Item.create(req.body);
     res.json(newItem);
   } catch (err) {
@@ -18,6 +19,7 @@ router.post('/', async (req, res) => {
 
 // Read all
 router.get('/', async (req, res) => {
+  const { Item } = database.getModels();
   const items = await Item.findAll();
   res.json(items);
 });
@@ -27,6 +29,7 @@ router.get('/', async (req, res) => {
 // GET /items/categories - 列出所有不同 category
 router.get('/categories', async (req, res) => {
   try {
+    const { Item } = database.getModels();
     const categories = await Item.findAll({
       attributes: ['category'],
       group: ['category'],
@@ -45,6 +48,7 @@ router.get('/categories', async (req, res) => {
 
 // Read one
 router.get('/:id', async (req, res) => {
+  const { Item } = database.getModels();
   const item = await Item.findByPk(req.params.id);
   if (!item) return res.status(404).json({ error: 'Item not found' });
   res.json(item);
@@ -52,6 +56,7 @@ router.get('/:id', async (req, res) => {
 
 // Update
 router.put('/:id', async (req, res) => {
+  const { Item } = database.getModels();
   const item = await Item.findByPk(req.params.id);
   if (!item) return res.status(404).json({ error: 'Item not found' });
   await item.update(req.body);
@@ -60,6 +65,7 @@ router.put('/:id', async (req, res) => {
 
 // Delete
 router.delete('/:id', async (req, res) => {
+  const { Item } = database.getModels();
   const item = await Item.findByPk(req.params.id);
   if (!item) return res.status(404).json({ error: 'Item not found' });
   await item.destroy();
@@ -71,6 +77,7 @@ router.delete('/:id', async (req, res) => {
 // GET /items/category/:category/ - 根據 category 取得資料
 router.get('/category/:category', async (req, res) => {
   try {
+    const { Item } = database.getModels();
     const items = await Item.findAll({
       where: { category: req.params.category }
     });
@@ -93,5 +100,4 @@ router.get('/category/:category', async (req, res) => {
 });
 
 module.exports = router;
-
 

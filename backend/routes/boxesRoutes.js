@@ -3,13 +3,14 @@ const express = require('express');
 
 const router = express.Router();
 
-const { Box } = require('../models');
+const database = require('../models');
 
 
 
 // Create
 router.post('/', async (req, res) => {
   try {
+    const { Box } = database.getModels();
     const newBox = await Box.create(req.body);
     res.json(newBox);
   } catch (err) {
@@ -19,12 +20,14 @@ router.post('/', async (req, res) => {
 
 // Read all
 router.get('/', async (req, res) => {
+  const { Box } = database.getModels();
   const boxes = await Box.findAll();
   res.json(boxes);
 });
 
 // Read one
 router.get('/:id', async (req, res) => {
+  const { Box } = database.getModels();
   const box = await Box.findByPk(req.params.id);
   if (!box) return res.status(404).json({ error: 'Box not found' });
   res.json(box);
@@ -32,6 +35,7 @@ router.get('/:id', async (req, res) => {
 
 // Update
 router.put('/:id', async (req, res) => {
+  const { Box } = database.getModels();
   const box = await Box.findByPk(req.params.id);
   if (!box) return res.status(404).json({ error: 'Box not found' });
   await box.update(req.body);
@@ -40,6 +44,7 @@ router.put('/:id', async (req, res) => {
 
 // Delete
 router.delete('/:id', async (req, res) => {
+  const { Box } = database.getModels();
   const box = await Box.findByPk(req.params.id);
   if (!box) return res.status(404).json({ error: 'Box not found' });
   await box.destroy();
@@ -50,6 +55,7 @@ router.delete('/:id', async (req, res) => {
 // only remove the box (soft delete)
 router.patch('/:id/remove', async (req, res) => {
   try {
+    const { Box } = database.getModels();
     const [updated] = await Box.update(
       { isRemoved: true },
       { where: { box_id: req.params.id } }
@@ -70,6 +76,7 @@ router.patch('/:id/remove', async (req, res) => {
 // Soft delete all Boxes (set isRemoved to true for all)
 router.patch('/all/remove', async (req, res) => {
   try {
+    const { Box } = database.getModels();
     const [updatedCount] = await Box.update(
       { isRemoved: true },
       { where: {} } // 空的 where 條件表示更新所有記錄
@@ -85,6 +92,5 @@ router.patch('/all/remove', async (req, res) => {
 
 
 module.exports = router;
-
 
 

@@ -1,4 +1,4 @@
-const {Test1} = require('../models');
+const database = require('../models');
 const express = require('express');
 const router = express.Router();
 
@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     try {
+        const { Test1 } = database.getModels();
         const results = await Test1.findAll();
         res.json(results);
     } catch (err) {
