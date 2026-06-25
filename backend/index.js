@@ -5,9 +5,7 @@ const express = require('express');
 const cors = require('cors');  // 引入 CORS 中介軟體
 
 
-// const { Sequelize, DataTypes } = require('sequelize');
-const { sequelize, Test1 } = require('./models');
-const { FORCE } = require('sequelize/lib/index-hints');
+const { initializeDatabase } = require('./db/initializeDatabase');
 
 
 const app = express();
@@ -42,15 +40,8 @@ app.get('/', (req, res) => {
 
 
 // 初始化 DB
-sequelize.authenticate()
+initializeDatabase()
   .then(() => {
-    console.log('資料庫連線成功');
-    return sequelize.sync({alter: true}); // 可改成 sync({ alter: true })
-    // return sequelize.sync({force: true}); // 強制更新
-    
-  })
-  .then(() => {
-    console.log('資料表同步完成');
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
     });

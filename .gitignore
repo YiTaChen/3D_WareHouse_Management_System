@@ -81,3 +81,5 @@ backend/.env.*
 !backend/.env.*.example
 backend/node_modules/
 backend/*.log
+backend/data/*.sqlite
+backend/data/*.sqlite-*

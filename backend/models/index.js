@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const fs = require('fs');
 const path = require('path');
 // const Test1Model = require('./test1')
 
@@ -18,8 +19,8 @@ const requireEnv = (name) => {
     return value;
 };
 
-const hasCloudPgConfig = () =>
-    Boolean(process.env.PG_HOST && process.env.PG_USER && process.env.PG_PASSWORD && process.env.PG_DATABASE);
+const getSqliteStoragePath = () =>
+    path.resolve(__dirname, '..', process.env.SQLITE_STORAGE || 'data/warehouse.sqlite');
 
 const getDialectOptions = () => {
     if (process.env.PG_SSL === 'true') {
@@ -36,25 +37,31 @@ const getDialectOptions = () => {
 
 const createSequelizeFromUrl = (databaseUrl) => (
     new Sequelize(databaseUrl, {
-        dialect: 'postgres',
         logging: false,
         dialectOptions: getDialectOptions(),
     })
 );
 
+const createSqliteSequelize = () => {
+    const storage = getSqliteStoragePath();
+    fs.mkdirSync(path.dirname(storage), { recursive: true });
+
+    return new Sequelize({
+        dialect: 'sqlite',
+        storage,
+        logging: false,
+    });
+};
+
 const createSequelize = () => {
     const dbEnv = process.env.DB_ENV ? process.env.DB_ENV.toLowerCase() : '';
     const databaseUrl = process.env.DATABASE_URL;
 
-    if (dbEnv === 'database_url' || dbEnv === 'url') {
-        return createSequelizeFromUrl(requireEnv('DATABASE_URL'));
-    }
-
-    if (!dbEnv && databaseUrl) {
+    if (databaseUrl) {
         return createSequelizeFromUrl(databaseUrl);
     }
 
-    const selectedDbEnv = dbEnv || (hasCloudPgConfig() ? 'cloud' : 'local');
+    const selectedDbEnv = dbEnv || 'sqlite';
     let dbConfig = {};
 
     if (selectedDbEnv === 'local') {
@@ -77,8 +84,10 @@ const createSequelize = () => {
             dialect: envOrDefault('PG_DIALECT', 'postgres'),
             dialectOptions: getDialectOptions(),
         };
+    } else if (selectedDbEnv === 'sqlite' || selectedDbEnv === 'demo') {
+        return createSqliteSequelize();
     } else {
-        throw new Error(`Unsupported DB_ENV "${selectedDbEnv}". Use "local", "cloud", or "database_url".`);
+        throw new Error(`Unsupported DB_ENV "${selectedDbEnv}". Use "local", "cloud", "sqlite", or "demo".`);
     }
 
     return new Sequelize(

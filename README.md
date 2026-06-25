@@ -28,25 +28,29 @@ Important: `VITE_*` variables are bundled into browser JavaScript. Do not put Po
 
 ### Backend
 
-The backend runs on port `3002` by default. If `backend/.env` is missing, it uses local PostgreSQL defaults: host `localhost`, port `5432`, database `warehouse_dev`, user `postgres`, password `postgres`.
+The backend runs on port `3002` by default. If `backend/.env` is missing, it uses a local SQLite demo database at `backend/data/warehouse.sqlite`, so a new clone can run without installing PostgreSQL.
 
 ```bash
 cd backend
 npm install
-cp .env.example .env
 npm start
 ```
 
+Optional backend env files:
+
+- Skip `backend/.env` for the easiest demo setup. The backend will create and use the ignored SQLite file automatically.
+- Copy `backend/.env.example` to `backend/.env` when you want to customize SQLite, local PostgreSQL, Render PostgreSQL, or `DATABASE_URL`.
+- Run `npm run reset:demo` inside `backend` to delete the local SQLite demo database and start fresh.
+
 Database selection rules:
 
-1. `DB_ENV=cloud` keeps using the legacy Render-compatible `PG_HOST`, `PG_USER`, `PG_PASSWORD`, `PG_DATABASE`, `PG_PORT`, and `PG_DIALECT` settings.
-2. `DB_ENV=local` keeps using the legacy local `PG_*_LOCAL` settings.
-3. `DB_ENV=database_url` uses `DATABASE_URL`.
-4. If `DB_ENV` is not set, `DATABASE_URL` is used when present.
-5. If `DB_ENV` is not set and a full cloud `PG_*` config is present, that cloud config is used.
-6. Otherwise the backend falls back to built-in local defaults.
+1. `DATABASE_URL`, when present, is used first.
+2. `DB_ENV=cloud` uses the legacy Render-compatible `PG_HOST`, `PG_USER`, `PG_PASSWORD`, `PG_DATABASE`, `PG_PORT`, and `PG_DIALECT` settings.
+3. `DB_ENV=local` uses the legacy local `PG_*_LOCAL` settings.
+4. `DB_ENV=sqlite` or `DB_ENV=demo` uses the local SQLite file.
+5. If neither `DATABASE_URL` nor `DB_ENV` is set, the backend falls back to SQLite demo mode.
 
-This keeps existing Render deployments working while allowing new setups to use a simpler `DATABASE_URL`.
+This keeps existing Render deployments working while allowing new users to run the full API without installing PostgreSQL.
 
 ---
 
