@@ -199,7 +199,8 @@ export const stepFunctions = {
       }
 
       // speed value: negative value conduct positive rotation
-      const positiveSpeed = 0 - Math.abs(useConveyorStore.getState().conveyorStates[conveyorId].speed);
+      const conveyorState = useConveyorStore.getState().getConveyorState(conveyorId);
+      const positiveSpeed = 0 - Math.abs(conveyorState.speed);
 
       // 執行停止
       setSpeedFn(conveyorId, positiveSpeed);
@@ -225,7 +226,8 @@ export const stepFunctions = {
       }
 
       // speed value: negative value conduct positive rotation
-      const nagetiveSpeed = Math.abs(useConveyorStore.getState().conveyorStates[conveyorId].speed);
+      const conveyorState = useConveyorStore.getState().getConveyorState(conveyorId);
+      const nagetiveSpeed = Math.abs(conveyorState.speed);
 
       console.log(` setConveyorRotateSpeedNagetive: ${nagetiveSpeed} `);
 

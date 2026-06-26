@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react'
-
-import layoutData from '../../data/layoutData'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { useBoxStore } from '../../stores/boxStore'
 import { useConveyorStore } from '../../stores/conveyorStore'
+import { useConveyorLayoutStore } from '../../stores/conveyorLayoutStore'
+import { getVisibleConveyors } from '../../conveyors/conveyorLayout'
 
 
 import { useCraneStore } from '../../stores/craneStore.js';
@@ -15,13 +15,25 @@ import * as THREE from 'three';
 
 export default function ConveyorControlPanel() {
 
-   const addBox = useBoxStore((state) => state.addBox)
+    const addBox = useBoxStore((state) => state.addBox)
     const boxesData = useBoxStore(state => state.boxesData);
     const { rotate, setRotate, rollerSpeed, setRollerSpeed } = useConveyorStore()
     const { setConveyorRotate, setConveyorSpeed, conveyorStates } = useConveyorStore();
-    const [selectedConveyorId, setSelectedConveyorId] = useState(layoutData.conveyors[0]?.id || '');
+    const conveyors = useConveyorLayoutStore((state) => state.conveyors);
+    const visibleConveyors = useMemo(() => getVisibleConveyors(conveyors), [conveyors]);
+    const [selectedConveyorId, setSelectedConveyorId] = useState(visibleConveyors[0]?.id || '');
     const [individualInputValue, setIndividualInputValue] = useState('');
     const currentSelectedConveyorState = conveyorStates[selectedConveyorId] || { rotate: false, speed: -20 };
+
+    useEffect(() => {
+      const selectedConveyorExists = visibleConveyors.some((conveyor) => (
+        conveyor.id === selectedConveyorId
+      ));
+
+      if (!selectedConveyorExists) {
+        setSelectedConveyorId(visibleConveyors[0]?.id || '');
+      }
+    }, [selectedConveyorId, visibleConveyors]);
 
   
  
@@ -44,13 +56,13 @@ export default function ConveyorControlPanel() {
     };
   
     const handleAllConveyorsIsRotateToggle = () => {
-      layoutData.conveyors.forEach(conv => {
-        setConveyorRotate(conv.id, true); 
+      visibleConveyors.forEach(conv => {
+        setConveyorRotate(conv.id, true);
       })
     }
-  
+
     const handleAllConveyorsNotRotateToggle = () => {
-      layoutData.conveyors.forEach(conv => {
+      visibleConveyors.forEach(conv => {
         setConveyorRotate(conv.id, false);
       })
     }
@@ -74,7 +86,7 @@ export default function ConveyorControlPanel() {
                 }}
                 className="border px-2 py-1 mx-2"
               >
-                {layoutData.conveyors.map(conv => (
+                {visibleConveyors.map(conv => (
                   <option key={conv.id} value={conv.id}>
                     {conv.id}
                   </option>
@@ -117,8 +129,6 @@ export default function ConveyorControlPanel() {
             </div>
   );
 }
-
-
 
 
 

@@ -3,25 +3,20 @@ import { create } from 'zustand';
 import layoutData from '../data/layoutData'; // 引入 layoutData
 
 
+const createDefaultConveyorState = () => ({
+  rotate: false, // 預設不轉動
+  speed: -20,    // 預設速度
+  BulkSensorDetected: false, // 新增：感應器是否檢測到物體
+  sensor1Detected: false, // 新增：感應器1是否檢測到物體
+  sensor2Detected: false, // 新增：感應器2是否檢測到物體
+  lightColor: '#808080', // 新增：燈的顏色，預設灰色 (關閉狀態)
+});
+
 
 const initializeConveyorStates = () => {
   const conveyorStates = {};
   layoutData.conveyors.forEach(conv => {
-    conveyorStates[conv.id] = {
-      rotate: false, // 預設不轉動
-      speed: -20,    // 預設速度
-
-
-      BulkSensorDetected: false, // 新增：感應器是否檢測到物體
-
-      sensor1Detected: false, // 新增：感應器1是否檢測到物體
-      sensor2Detected: false, // 新增：感應器2是否檢測到物體
-      lightColor: '#808080', // 新增：燈的顏色，預設灰色 (關閉狀態)
-
-      
-
-
-    };
+    conveyorStates[conv.id] = createDefaultConveyorState();
   });
   return conveyorStates;
   // console.log('Conveyor states initialized:', conveyorStates);
@@ -62,48 +57,29 @@ export const useConveyorStore = create((set, get) => ({
   conveyorStates: initializeConveyorStates(),
 
   setConveyorRotate: (id, isRotate) =>
-    set((state) => 
-    {
-    const currentConvState = state.conveyorStates[id];
-    const updatedConvState = {
-      ...currentConvState,
-      rotate: isRotate,
-    };
-    // console.log('Conveyor rotate state:', isRotate, 'for id:', id);
-    // console.log('Current conveyor state:', currentConvState);
-    // console.log('Updated conveyor state:', updatedConvState);
+    set((state) => {
+      const currentConvState = state.conveyorStates[id] || createDefaultConveyorState();
+      const updatedConvState = {
+        ...currentConvState,
+        rotate: isRotate,
+      };
 
+      updatedConvState.lightColor = calculateLightColor(updatedConvState);
 
-    updatedConvState.lightColor = calculateLightColor(updatedConvState);
-
-    return {
+      return {
         conveyorStates: {
           ...state.conveyorStates,
           [id]: updatedConvState,
         },
       };
-
-    //   ({
-    //   conveyorStates: {
-    //     ...state.conveyorStates,
-    //     [id]: {
-    //       ...state.conveyorStates[id],
-    //       rotate: isRotate,
-
-    //       lightColor: isRotate ? '#00FF00' : '#808080', // 綠燈 (啟動), 灰燈 (停止)
-    //     },
-    //   },
-    // })
-  
-    }
-    ),
+    }),
 
   setConveyorSpeed: (id, value) =>
     set((state) => ({
       conveyorStates: {
         ...state.conveyorStates,
         [id]: {
-          ...state.conveyorStates[id],
+          ...(state.conveyorStates[id] || createDefaultConveyorState()),
           speed: value,
         },
       },
@@ -130,7 +106,7 @@ export const useConveyorStore = create((set, get) => ({
       // const currentConvState = newConveyorStates[id];
 
 
-       const currentConvState = state.conveyorStates[id];
+       const currentConvState = state.conveyorStates[id] || createDefaultConveyorState();
       const updatedConvState = {
         ...currentConvState,
         [sensorKey]: detected,
@@ -163,7 +139,7 @@ export const useConveyorStore = create((set, get) => ({
    * @param {string} id - 輸送帶的 ID
    * @returns {object} 包含 rotate, speed, sensor1Detected, sensor2Detected, lightColor 的物件
    */
-  getConveyorState: (id) => get().conveyorStates[id],
+  getConveyorState: (id) => get().conveyorStates[id] || createDefaultConveyorState(),
 
   // rotate: false,
   // rollerSpeed: -20, // Default speed for the roller

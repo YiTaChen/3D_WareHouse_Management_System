@@ -3,10 +3,11 @@ import Ground from './Ground'
 // import CylinderPlatform from './CylinderPlatform'
 // import Conveyor from './Conveyor'
 import { useGLTF } from '@react-three/drei';
-import { layoutData } from '../data/layoutData.js'
 import ConveyorWithPhysics from './ConveyorWithPhysics'
 
 import { useConveyorStore } from '../stores/conveyorStore.js'
+import { useConveyorLayoutStore } from '../stores/conveyorLayoutStore.js'
+import { getVisibleConveyors } from '../conveyors/conveyorLayout.js'
 import ShelfData from '../data/ShelfData'; 
 import Shelf from './Shelf';
 import ShelfBatch from './Shelf'; // 引入貨架批次渲染組件
@@ -26,13 +27,15 @@ export default function Scene() {
   
 
   const { rotate, rollerSpeed } = useConveyorStore();
+  const conveyors = useConveyorLayoutStore((state) => state.conveyors);
+  const visibleConveyors = getVisibleConveyors(conveyors);
 
   return (
     <>
 
       <Ground />
 
-      {layoutData.conveyors.map((c) => {
+      {visibleConveyors.map((c) => {
         // console.log('Conveyor position:', c.position, 'rotation:', c.rotation)
         return (
           <ConveyorWithPhysics

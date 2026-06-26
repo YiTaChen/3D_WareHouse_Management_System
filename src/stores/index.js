@@ -3,3 +3,4 @@
 
 export * from './boxStore';
 export * from './conveyorStore';
+export * from './conveyorLayoutStore';
