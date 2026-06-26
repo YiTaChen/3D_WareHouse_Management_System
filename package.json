@@ -11,6 +11,7 @@
     "setup:all": "npm install && npm --prefix backend install",
     "build": "vite build",
     "lint": "eslint .",
+    "test:conveyor-layout": "node --test src/conveyors/conveyorLayout.test.js",
     "test:mission-builder": "node --test src/missions/builders/missionBuilderCore.test.js",
     "test:mission-production-factory": "node --test src/missions/builders/productionMissionFactory.test.js",
     "test:mission-runner": "node --test src/missions/runtime/missionRunner.test.js",
