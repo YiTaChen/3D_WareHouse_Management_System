@@ -1,0 +1,133 @@
+.conveyor-editor {
+  position: absolute;
+  top: 62px;
+  left: 14px;
+  z-index: 86;
+  width: min(340px, calc(100vw - 28px));
+  max-height: calc(100vh - 84px);
+  overflow-y: auto;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(18, 22, 26, 0.94);
+  color: #f4f7f8;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
+}
+
+.conveyor-editor__header,
+.conveyor-editor__actions,
+.conveyor-editor__grid,
+.conveyor-editor__removed {
+  display: flex;
+  gap: 8px;
+}
+
+.conveyor-editor__header {
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.conveyor-editor__title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.conveyor-editor__count {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #c9d2d8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.conveyor-editor__actions {
+  margin-bottom: 12px;
+}
+
+.conveyor-editor button,
+.conveyor-editor select,
+.conveyor-editor input {
+  min-height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.conveyor-editor button {
+  padding: 7px 10px;
+  background: #2f8f5f;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.conveyor-editor button:hover {
+  border-color: rgba(255, 255, 255, 0.58);
+}
+
+.conveyor-editor button:disabled {
+  background: #46515a;
+}
+
+.conveyor-editor select,
+.conveyor-editor input {
+  width: 100%;
+  padding: 6px 8px;
+  background: #f7faf9;
+  color: #12161a;
+}
+
+.conveyor-editor__body {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.conveyor-editor__field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: #c9d2d8;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.conveyor-editor__group {
+  display: grid;
+  gap: 7px;
+}
+
+.conveyor-editor__group-title {
+  color: #f4f7f8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.conveyor-editor__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.conveyor-editor__removed {
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.conveyor-editor__removed .conveyor-editor__group-title {
+  flex-basis: 100%;
+}
+
+.conveyor-editor__removed button {
+  background: #7f6b28;
+}
+
+@media (max-width: 720px) {
+  .conveyor-editor {
+    top: 58px;
+    left: 10px;
+    width: calc(100vw - 20px);
+  }
+}

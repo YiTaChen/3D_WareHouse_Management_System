@@ -33,7 +33,27 @@
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
 }
 
+.app-secondary-action {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  background: rgba(52, 65, 75, 0.94);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+}
+
+.app-secondary-action--active {
+  background: rgba(127, 107, 40, 0.96);
+}
+
 .app-primary-action:hover {
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.app-secondary-action:hover {
   border-color: rgba(255, 255, 255, 0.55);
 }
 
@@ -48,7 +68,8 @@
     left: 10px;
   }
 
-  .app-primary-action {
+  .app-primary-action,
+  .app-secondary-action {
     min-height: 36px;
     padding: 7px 10px;
     font-size: 13px;

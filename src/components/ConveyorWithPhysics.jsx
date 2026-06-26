@@ -4,6 +4,7 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import RollerCylinder from './RollerCylinder'
 import { useConveyorStore } from '../stores/conveyorStore';
+import { useConveyorLayoutStore } from '../stores/conveyorLayoutStore';
 import ConveyorExtras from './ConveyorExtras';  
 
 
@@ -54,6 +55,7 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
 
 
   const { rotate, speed } = useConveyorStore(state => state.getConveyorState(id));
+  const selectConveyor = useConveyorLayoutStore(state => state.selectConveyor);
 
 
   const { scene } = useGLTF('/plateform_conveyor_ver5.gltf') // add lasor sensor and light bulb
@@ -134,7 +136,12 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
 
 
   return (
-    <>
+    <group
+      onClick={(event) => {
+        event.stopPropagation();
+        selectConveyor(id);
+      }}
+    >
       <primitive object={clonedScene} />
       {rollers.map((roller, i) => {
         const worldPosition = new THREE.Vector3()
@@ -206,11 +213,9 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
 
 
 
-
-    </>
+    </group>
   )
 }
-
 
 
 

@@ -18,6 +18,7 @@ import { useProductStore } from './stores/productStore';
 import { useUIStore } from './stores/uiStore'; 
 import HighlightSpot from './components/effect/HighlightSpot'; // 引入高亮元件
 import DatabaseSwitcher from './components/DatabaseSwitcher.jsx';
+import ConveyorEditor from './components/ConveyorEditor.jsx';
 
 
 
@@ -118,6 +119,7 @@ export default function App() {
   }
 
   const [showSubPanel, setShowSubPanel] = useState(false);
+  const [showConveyorEditor, setShowConveyorEditor] = useState(false);
 
   const craneIds = Object.keys(useCraneStore(state => state.craneStates));
 
@@ -127,13 +129,22 @@ export default function App() {
       <DatabaseSwitcher />
      
 
-<div className="app-toolbar">
-    {showSubPanel? 
-      <SubPanelProduction  setShowSubPanel={setShowSubPanel}/> : 
-      <button className="app-primary-action" onClick={()=> setShowSubPanel(true)}>Open Control Panel</button>
-      } 
-
-</div>
+      <div className="app-toolbar">
+        {showSubPanel ? (
+          <SubPanelProduction setShowSubPanel={setShowSubPanel} />
+        ) : (
+          <button className="app-primary-action" onClick={() => setShowSubPanel(true)}>
+            Open Control Panel
+          </button>
+        )}
+        <button
+          className={`app-secondary-action${showConveyorEditor ? ' app-secondary-action--active' : ''}`}
+          onClick={() => setShowConveyorEditor((current) => !current)}
+        >
+          Conveyor Edit
+        </button>
+      </div>
+      {showConveyorEditor && <ConveyorEditor />}
     
 
       <Canvas className="app-canvas" shadows camera={{ position: [-35, 22, 24], fov: 35 }}>
