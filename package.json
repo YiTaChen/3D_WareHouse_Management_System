@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "test:conveyor-layout": "node --test src/conveyors/conveyorLayout.test.js",
     "test:conveyor-layout-store": "node --test src/stores/conveyorLayoutStore.test.js",
+    "test:conveyor-store": "node --test src/stores/conveyorStore.test.js",
     "test:conveyor-transform": "node --test src/conveyors/conveyorTransform.test.js",
     "test:mission-builder": "node --test src/missions/builders/missionBuilderCore.test.js",
     "test:mission-production-factory": "node --test src/missions/builders/productionMissionFactory.test.js",

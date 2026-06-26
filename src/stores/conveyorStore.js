@@ -1,16 +1,18 @@
 // src/stores/conveyorStore.js
 import { create } from 'zustand';
-import layoutData from '../data/layoutData'; // 引入 layoutData
+import layoutData from '../data/layoutData.js'; // 引入 layoutData
 
 
-const createDefaultConveyorState = () => ({
+const DEFAULT_CONVEYOR_STATE = {
   rotate: false, // 預設不轉動
   speed: -20,    // 預設速度
   BulkSensorDetected: false, // 新增：感應器是否檢測到物體
   sensor1Detected: false, // 新增：感應器1是否檢測到物體
   sensor2Detected: false, // 新增：感應器2是否檢測到物體
   lightColor: '#808080', // 新增：燈的顏色，預設灰色 (關閉狀態)
-});
+};
+
+const createDefaultConveyorState = () => ({ ...DEFAULT_CONVEYOR_STATE });
 
 
 const initializeConveyorStates = () => {
@@ -139,7 +141,7 @@ export const useConveyorStore = create((set, get) => ({
    * @param {string} id - 輸送帶的 ID
    * @returns {object} 包含 rotate, speed, sensor1Detected, sensor2Detected, lightColor 的物件
    */
-  getConveyorState: (id) => get().conveyorStates[id] || createDefaultConveyorState(),
+  getConveyorState: (id) => get().conveyorStates[id] || DEFAULT_CONVEYOR_STATE,
 
   // rotate: false,
   // rollerSpeed: -20, // Default speed for the roller
