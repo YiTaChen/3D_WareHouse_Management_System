@@ -17,6 +17,8 @@ export default function RollerCylinder({ roller_position, equip_position, rotati
   // euler.z = temp // 修正 cannon 的 Y 軸 cylinder 長度方向
 
   const rotationArray = [euler.x, euler.y, euler.z]
+  const [positionX, positionY, positionZ] = roller_position
+  const [rotationX, rotationY, rotationZ] = rotationArray
 
   // console.log( 'key:', key11 ,' ,RollerCylinder position:', position)
   const [ref, api] = useCylinder(() => ({
@@ -27,13 +29,18 @@ export default function RollerCylinder({ roller_position, equip_position, rotati
     material: 'roller',
     type: 'Kinematic',
   }))
-//   console.log('RollerCylinder rotate:', rotate)
+  //   console.log('RollerCylinder rotate:', rotate)
   // useEffect(() => {
 
   // // api.angularVelocity.set(rotate ? 0 : 0, rotate ? 0 : 0, rotate ? 1 : 0)
   // api.angularVelocity.set(rotate ? roller_rotate_deg_Array[0] : 0, rotate ? roller_rotate_deg_Array[1] : 0, rotate ? roller_rotate_deg_Array[2] : 0)
    
   // }, [rotate])
+
+  useEffect(() => {
+    api.position.set(positionX, positionY, positionZ)
+    api.rotation.set(rotationX, rotationY, rotationZ)
+  }, [api, positionX, positionY, positionZ, rotationX, rotationY, rotationZ])
 
   useEffect(() => {
     api.angularVelocity.set(rotate ? roller_rotate_deg_Array[0] : 0, rotate ? roller_rotate_deg_Array[1] : 0, rotate ? roller_rotate_deg_Array[2] : 0)
