@@ -1,9 +1,8 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
-import { useBoxStore } from '../stores/boxStore';
 import { useFrame } from '@react-three/fiber';
 import { useBoxEquipStore } from '../stores/boxEquipStore';
 
@@ -22,14 +21,13 @@ function getLocalBoundingBoxSize(mesh) {
 
 
 
-export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosition, craneWorldRotation }) {
+export default function CraneInvisibleBulkSensor({ id, craneWorldPosition, craneWorldRotation }) {
   
   
   // const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入完整的 Crane 模型來提取感測器部分
   const { scene: fullCraneScene } = useGLTF('/Crane_ver1.gltf');
 
   const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
-  const getBoxData = useBoxStore(state => state.getBoxData);
 
   // // 提取感測器網格
   // const bulkSensorMesh = useMemo(() => {
@@ -84,7 +82,7 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
 
 
   // ----------------- 隱形感測器物理體 -----------------
-  const [bulkSensorRef, bulkSensorApi] = useBox(() => ({
+  const [, bulkSensorApi] = useBox(() => ({
     mass: 0,
     isTrigger: true,
     type: 'Kinematic', // 設置為 Kinematic，以便我們在 useFrame 中控制它跟隨 Crane
@@ -97,8 +95,6 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
       const boxId = e.body.userData?.appId;
       if (boxId) {
         setCraneSensorDetected(id, 'BulkSensorDetected', true);
-        const boxData = getBoxData(boxId);
-
         clearBoxCollision(boxId); // clear last one 
         setBoxCollidingWithEquipment(boxId, id); // add current one
 
@@ -109,14 +105,20 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
       const boxId = e.body.userData?.appId;
       if (boxId) {
         setCraneSensorDetected(id, 'BulkSensorDetected', false);
-        const boxData = getBoxData(boxId);
         // console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) left Crane Bulk Sensor.`);
       }
     },
   }));
+  const lastPhysicsInputs = useRef(null);
 
   // ----------------- useFrame for sensor movement -----------------
   useFrame(() => {
+    const nextInputs = [...craneWorldPosition, ...craneWorldRotation];
+    const inputsChanged = !lastPhysicsInputs.current || nextInputs.some(
+      (value, index) => value !== lastPhysicsInputs.current[index]
+    );
+    if (!inputsChanged) return;
+
     // 獲取 Crane 物理體的當前世界位置和旋轉 (從 props 傳入的 Crane 世界位置和旋轉)
     const cranePhysicsWorldPosition = new THREE.Vector3(...craneWorldPosition);
     const cranePhysicsWorldQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
@@ -129,17 +131,8 @@ export default function CraneInvisibleBulkSensor({ id, modelPath, craneWorldPosi
     // 設置 bulkSensor 物理體的位置和旋轉
     bulkSensorApi.position.set(bulkSensorTargetWorldPosition.x, bulkSensorTargetWorldPosition.y, bulkSensorTargetWorldPosition.z);
     bulkSensorApi.quaternion.set(cranePhysicsWorldQuaternion.x, cranePhysicsWorldQuaternion.y, cranePhysicsWorldQuaternion.z, cranePhysicsWorldQuaternion.w);
+    lastPhysicsInputs.current = nextInputs;
   });
 
-  return (
-    <>
-      {/* 為了調試，渲染 Bulk Sensor 的物理碰撞箱 */}
-      {bulkSensorLocalProps && (
-        <mesh ref={bulkSensorRef}>
-          {/* <boxGeometry args={bulkSensorLocalProps.args} />
-          <meshBasicMaterial color="red" wireframe opacity={0.5} transparent /> */}
-        </mesh>
-      )}
-    </>
-  );
+  return null;
 }

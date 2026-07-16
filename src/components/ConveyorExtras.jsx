@@ -1,25 +1,17 @@
 // src/components/ConveyorExtras.jsx
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useConveyorStore } from '../stores/conveyorStore';
-import { useBoxStore } from '../stores/boxStore'; // 引入 Box Store
 import { useBoxEquipStore } from '../stores/boxEquipStore';
 
 export default function ConveyorExtras({
   id,
-  conveyorPosition,
-  conveyorRotation, // Conveyor自身的旋轉，用於轉換本地座標到世界座標
   invisibleMaterialMesh,
-  sensor1Mesh,
-  sensor2Mesh,
   lightBulbMesh,
 }) {
   const setSensorDetected = useConveyorStore(state => state.setSensorDetected);
   const { lightColor } = useConveyorStore(state => state.getConveyorState(id));
-
-  const getBoxData = useBoxStore(state => state.getBoxData); // 獲取 Box 資料的方法
-
 
   
 //   console.log(`invisibleMaterialMesh for ID ${id}:`, invisibleMaterialMesh);
@@ -117,7 +109,7 @@ export default function ConveyorExtras({
 
   // ----------------- 隱形碰撞體 (InvisibleMaterial) -----------------
   const invisibleMaterialProps = useMemo(() => getWorldProperties(invisibleMaterialMesh), [invisibleMaterialMesh]);
-  const [invisibleRef] = useBox(() => ({
+  useBox(() => ({
     mass: 0, // 靜止物體
     isTrigger: true, // 設置為觸發器，不會阻擋物體，只檢測碰撞
     position: invisibleMaterialProps?.position || [0, 0, 0],
@@ -135,9 +127,6 @@ export default function ConveyorExtras({
         const boxId = e.body.userData?.appId;
         if (boxId) { // 確保是 Box 觸發的
             setSensorDetected(id, 'BulkSensorDetected', true);
-            const boxData = getBoxData(boxId); // 從 store 獲取 Box 的資料
-
-            // console.log('clearBoxCollision:', clearBoxCollision);
             clearBoxCollision(boxId); // clear last one 
             setBoxCollidingWithEquipment(boxId, id); // add current one
             // console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered the main detection area!`);
@@ -154,87 +143,16 @@ export default function ConveyorExtras({
         const boxId = e.body.userData?.appId;
         if (boxId) {
             setSensorDetected(id, 'BulkSensorDetected', false);
-            const boxData = getBoxData(boxId);
             // console.log(`Conveyor ${id}: Box ID ${boxId} (Name: ${boxData?.name}) left the main detection area!`);
         }
     },
   }));
-
-  // ----------------- 感應器 (Sensor_1, Sensor_2) -----------------
-  const sensor1Props = useMemo(() => getWorldProperties(sensor1Mesh), [sensor1Mesh]);
-  const [sensor1Ref] = useBox(() => ({
-    mass: 0,
-    isTrigger: true, // 設置為觸發器，不會阻擋物體，只檢測碰撞
-    position: sensor1Props?.position || [0, 0, 0],
-    rotation: sensor1Props?.rotation || [0, 0, 0],
-    args: sensor1Props?.args || [0.5, 0.5, 0.5], // 默認值，確保有尺寸
-    onCollideBegin: (e) => {
-
-
-        // change using bulk sensor first
-
-    //   if (e.body.material.name === 'box') { // 假設 Box 的材質名稱為 'box'
-    //     setSensorDetected(id, 'sensor1Detected', true);
-    //     console.log(`Conveyor ${id}: Sensor 1 Detected Box!`);
-    //   }
-    },
-    onCollideEnd: (e) => {
-    //   if (e.body.material.name === 'box') {
-    //     setSensorDetected(id, 'sensor1Detected', false);
-    //     console.log(`Conveyor ${id}: Sensor 1 Lost Box!`);
-    //   }
-    },
-  }));
-
-  const sensor2Props = useMemo(() => getWorldProperties(sensor2Mesh), [sensor2Mesh]);
-  const [sensor2Ref] = useBox(() => ({
-    mass: 0,
-    isTrigger: true,
-    position: sensor2Props?.position || [0, 0, 0],
-    rotation: sensor2Props?.rotation || [0, 0, 0],
-    args: sensor2Props?.args || [0.5, 0.5, 0.5], // 默認值，確保有尺寸
-    onCollideBegin: (e) => {
-
-
-        // change using bulk sensor first 
-
-    //   if (e.body.material.name === 'box') {
-    //     setSensorDetected(id, 'sensor2Detected', true);
-    //     console.log(`Conveyor ${id}: Sensor 2 Detected Box!`);
-    //   }
-    },
-    onCollideEnd: (e) => {
-    //   if (e.body.material.name === 'box') {
-    //     setSensorDetected(id, 'sensor2Detected', false);
-    //     console.log(`Conveyor ${id}: Sensor 2 Lost Box!`);
-    //   }
-    },
-  }));
-
 
   return (
     <>
       {/* 物理碰撞體不需渲染可見的網格，它們會自動添加到物理世界 */}
       {/* 如果需要視覺調試，可以在這裡添加 mesh */}
       {/* Example for debugging: */}
-      {/* {invisibleMaterialProps && (
-        <mesh ref={invisibleRef}>
-          <boxGeometry args={invisibleMaterialProps.args} />
-          <meshBasicMaterial color="red" wireframe />
-        </mesh>
-      )} */}
-      {/* {sensor1Props && (
-        <mesh ref={sensor1Ref}>
-          <boxGeometry args={sensor1Props.args} />
-          <meshBasicMaterial color="blue" wireframe />
-        </mesh>
-      )} */}
-      {/* {sensor2Props && (
-        <mesh ref={sensor2Ref}>
-          <boxGeometry args={sensor2Props.args} />
-          <meshBasicMaterial color="green" wireframe />
-        </mesh>
-      )} */}
     </>
   );
 }

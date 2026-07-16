@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
@@ -60,6 +60,7 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
     material: 'craneTable',
     userData: { id: `movePlate-${id}`, args: moveTableLocalProps.args },
   }));
+  const lastPhysicsInputs = useRef(null);
 
   // 在 Ref 有效時，註冊進 Store
   useEffect(() => {
@@ -77,18 +78,28 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
   useFrame((_, delta) => {
     if (!moveTableApi) return;
 
-    const cranePos = new THREE.Vector3(...craneWorldPosition);
-    const craneRot = new THREE.Euler(...craneWorldRotation);
-    const craneQuat = new THREE.Quaternion().setFromEuler(craneRot);
+    const nextInputs = [
+      ...craneWorldPosition,
+      ...craneWorldRotation,
+      ...currentMoveTableLocalOffset.toArray(),
+    ];
+    const inputsChanged = !lastPhysicsInputs.current || nextInputs.some(
+      (value, index) => value !== lastPhysicsInputs.current[index]
+    );
 
-    const localOffset = currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat);
-    const worldPos = cranePos.clone().add(localOffset);
+    if (inputsChanged) {
+      const cranePos = new THREE.Vector3(...craneWorldPosition);
+      const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
+      const localOffset = currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat);
+      const worldPos = cranePos.add(localOffset);
 
-    moveTableApi.position.set(worldPos.x, worldPos.y, worldPos.z);
-    moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w);
+      moveTableApi.position.set(worldPos.x, worldPos.y, worldPos.z);
+      moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w);
+      lastPhysicsInputs.current = nextInputs;
+    }
 
-    // 控制 moveTable 內部滑動
-    if (!isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset)) {
+    const shouldMoveTable = !isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset);
+    if (shouldMoveTable) {
       const distance = currentMoveTableLocalOffset.distanceTo(targetMoveTableLocalOffset);
       const moveDistance = moveTableSpeed * delta;
 

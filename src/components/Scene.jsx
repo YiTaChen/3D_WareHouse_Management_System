@@ -1,32 +1,14 @@
 // import Box from './Box'
 import Ground from './Ground'
-// import CylinderPlatform from './CylinderPlatform'
-// import Conveyor from './Conveyor'
-import { useGLTF } from '@react-three/drei';
 import { layoutData } from '../data/layoutData.js'
 import ConveyorWithPhysics from './ConveyorWithPhysics'
-
-import { useConveyorStore } from '../stores/conveyorStore.js'
 import ShelfData from '../data/ShelfData'; 
-import Shelf from './Shelf';
-import ShelfBatch from './Shelf'; // 引入貨架批次渲染組件
 import Crane from './Crane'; // 引入 Crane 組件
 import CraneData from '../data/CraneData'; // 引入 Crane 資料
-import ShelveMultiInstances from './ShelveMultiInstances'; // 引入多實例貨架組件
-import { QuickShelfBatch, VisualCullingShelfBatch } from './Shelf';
+import { VisualCullingShelfBatch } from './Shelf';
 
 
 export default function Scene() {
-
-  //  console.log('Scene rotate:', rotate)
-
-  // const gltf = useGLTF('/models/conveyor_scene.glb'); // Load your entire scene GLTF
-
-  // const { scene } = useGLTF('/plateform_conveyor_ver5.gltf') // add lasor sensor and light bulb
-  
-
-  const { rotate, rollerSpeed } = useConveyorStore();
-
   return (
     <>
 

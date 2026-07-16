@@ -8,16 +8,7 @@ import MoveTable from './MoveTable';
 import CraneInvisibleBulkSensor from './CraneInvisibleBulkSensor';
 
 
-// 輔助函數：獲取 Three.js 物件的本地尺寸 (用於創建碰撞體 args)
-function getLocalBoundingBoxSize(mesh) {
-    if (!mesh || !mesh.geometry) return [1, 1, 1];
-    const bbox = new THREE.Box3().setFromObject(mesh);
-    const size = new THREE.Vector3();
-    bbox.getSize(size);
-    return size.toArray();
-}
-
-export default function Crane({ id, modelPath, position, rotation }) {
+export default function Crane({ id, modelPath, rotation }) {
   const { scene } = useGLTF(modelPath || '/Crane_ver1.gltf'); 
 
   const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
@@ -81,51 +72,27 @@ export default function Crane({ id, modelPath, position, rotation }) {
     }
   }, [craneApi, id, currentCranePosition]); 
 
-  // ----------------- useFrame for Crane's continuous movement -----------------
-  useFrame((state, delta) => { // 重新引入 delta 參數以實現平滑移動
+  // ----------------- useFrame for Crane's movement -----------------
+  useFrame((_, delta) => {
     if (!craneApi || !craneApi.position || !targetCranePosition) {
-        return;
+      return;
     }
 
-    const currentPhysicsPosition = new THREE.Vector3();
-    craneApi.position.copy(currentPhysicsPosition); 
-
-    let newPosition; // 用來儲存最終應該設定給物理體的位置
-
-    // 判斷是否需要移動
     const shouldMove = !currentCranePosition.equals(targetCranePosition) && !isMoveTableMoving;
-
-    if (shouldMove) {
-        // 執行移動邏輯
-        const distance = currentCranePosition.distanceTo(targetCranePosition); // 使用 store 中的 currentCranePosition 來計算距離
-        const moveStep = craneMoveSpeed * delta; 
-
-        if (moveStep >= distance) {
-            newPosition = targetCranePosition; 
-        } else {
-            const direction = targetCranePosition.clone().sub(currentCranePosition).normalize(); // 使用 store 中的 currentCranePosition
-            newPosition = currentCranePosition.clone().add(direction.multiplyScalar(moveStep));
-        }
-        // 更新 store，同時也會更新 isCraneMoving 狀態
-        updateCraneCurrentPosition(id, newPosition.toArray()); 
-
-    } else {
-        // 不移動時，物理體的位置應該精確地等於 store 中的 currentCranePosition
-        // 這強制物理引擎將其保持在目標位置，防止回到原點
-        newPosition = currentCranePosition; // 直接使用 store 中的值
-        
-        // 如果已經到達目標位置，確保 isCraneMoving 是 false
-        const currentIsCraneMoving = useCraneStore.getState().getCraneState(id).isCraneMoving;
-        if (currentIsCraneMoving) {
-            // 這裡更新 store 只是為了將 isCraneMoving 設為 false，位置本身應該已經正確
-            updateCraneCurrentPosition(id, newPosition.toArray()); 
-        }
+    if (!shouldMove) {
+      return;
     }
-    
-    // 確保物理體的位置始終被設定為計算出的 newPosition
-    // 這是防止 Kinematic 物體回到 [0,0,0] 的關鍵
+
+    const distance = currentCranePosition.distanceTo(targetCranePosition);
+    const moveStep = craneMoveSpeed * delta;
+    const newPosition = moveStep >= distance
+      ? targetCranePosition
+      : currentCranePosition.clone().add(
+        targetCranePosition.clone().sub(currentCranePosition).normalize().multiplyScalar(moveStep)
+      );
+
+    updateCraneCurrentPosition(id, newPosition.toArray());
     craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
-    
   });
 
 
@@ -158,7 +125,6 @@ export default function Crane({ id, modelPath, position, rotation }) {
           id={id}
           craneWorldPosition={currentCranePosition.toArray()}
           craneWorldRotation={rotation}
-          modelPath={modelPath} 
           setCraneSensorDetected={setCraneSensorDetected}
         />
     </>  
