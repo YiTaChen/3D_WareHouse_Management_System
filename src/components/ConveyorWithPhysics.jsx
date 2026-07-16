@@ -4,7 +4,6 @@ import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import RollerCylinder from './RollerCylinder'
-import ConveyorSurface from './ConveyorSurface'
 import { useConveyorStore } from '../stores/conveyorStore';
 import ConveyorExtras from './ConveyorExtras';  
 
@@ -89,37 +88,6 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
         const oriRadius = (sizeArray[0] + sizeArray[2]) / 4;
         const oriLength = sizeArray[1];
 
-  const stoppedSurface = useMemo(() => {
-    if (!rollers.length) return null;
-
-    clonedScene.updateMatrixWorld(true);
-    const rootInverse = clonedScene.matrixWorld.clone().invert();
-    const localBounds = new THREE.Box3();
-
-    rollers.forEach((roller) => {
-      if (!roller.geometry.boundingBox) {
-        roller.geometry.computeBoundingBox();
-      }
-
-      const rollerBounds = roller.geometry.boundingBox.clone();
-      const rollerToRoot = rootInverse.clone().multiply(roller.matrixWorld);
-      rollerBounds.applyMatrix4(rollerToRoot);
-      localBounds.union(rollerBounds);
-    });
-
-    const localCenter = localBounds.getCenter(new THREE.Vector3());
-    const localSize = localBounds.getSize(new THREE.Vector3());
-    const worldPosition = localCenter.applyMatrix4(clonedScene.matrixWorld);
-    const worldQuaternion = clonedScene.getWorldQuaternion(new THREE.Quaternion());
-    const worldRotation = new THREE.Euler().setFromQuaternion(worldQuaternion);
-
-    return {
-      position: worldPosition.toArray(),
-      rotation: [worldRotation.x, worldRotation.y, worldRotation.z],
-      size: localSize.toArray(),
-    };
-  }, [clonedScene, rollers]);
-
   useFrame((_, delta) => {
     if (!rotate) return;
 
@@ -141,14 +109,7 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
   return (
     <>
       <primitive object={clonedScene} />
-      {!rotate && stoppedSurface && (
-        <ConveyorSurface
-          position={stoppedSurface.position}
-          rotation={stoppedSurface.rotation}
-          size={stoppedSurface.size}
-        />
-      )}
-      {rotate && rollers.map((roller, i) => {
+      {rollers.map((roller, i) => {
         const worldPosition = new THREE.Vector3()
         const worldQuaternion = new THREE.Quaternion()
 
@@ -172,6 +133,7 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
             radius={oriRadius}
             length={oriLength}
             angularVelocity={rollerRotateDeg}
+            rotate={rotate}
           />
         )
       })}
