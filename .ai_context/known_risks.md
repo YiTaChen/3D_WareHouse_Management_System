@@ -2,10 +2,6 @@
 
 ## Build/runtime risks
 
-- `src/App.jsx` imports `./components/Subpanel`, but actual file is `SubPanel.jsx`.
-  - Works on case-insensitive macOS.
-  - Can fail on Linux/Firebase/CI.
-
 - `zustand` is imported throughout `src/stores/*`, but root `package.json` does not list it as direct dependency.
   - Add it explicitly to avoid install drift.
 
@@ -93,12 +89,22 @@
 - GLTF child names are application logic contracts.
   - Model edits can silently break sensors/rollers/move tables/shelves.
 
+### Conveyor roller axis and transfer contract
+
+- The roller cylinder geometry in `plateform_conveyor_ver5.gltf` is authored along local Y and the roller node is already rotated into conveyor space.
+- Visual roller animation must use `roller.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotationStep)` or the shared `ROLLER_LOCAL_AXIS` constant.
+- Do not replace that with `roller.rotation.x/y/z += ...`, and do not overwrite the authored quaternion in `useFrame`. Euler rotation around an assumed world axis makes sloped/turned rollers tumble or orbit around the wrong pivot instead of spinning around their own axle.
+- Physics colliders must preserve each roller's exact world position/quaternion and 16 cylinder segments. The rejected single-box stopped-conveyor collider blocked transfers at conveyor seams, and reducing the cylinder to 8 segments caused transfer instability.
+- Stopped rollers are `Static`; running rollers are `Kinematic`. Outbound destination conveyors (`conv4`, `conv7`, `conv19`) must briefly run to pull the box fully onto the exit, then stop immediately.
+- Before changing any of this behavior, read `performance_optimization.md` and run its full conveyor regression checklist. A visually plausible straight conveyor is not sufficient verification.
+
 - UI panels use fixed width and inline absolute positioning.
   - Small screens may overflow.
 
 ## Testing gaps
 
-- No frontend unit/integration tests found.
+- Focused Node tests exist for mission building, the production mission factory, and the mission runner.
+- No React component tests, browser end-to-end suite, or deterministic physics/conveyor tests exist.
 - No backend tests found.
 - Backend `npm test` is placeholder.
 - No CI config found.

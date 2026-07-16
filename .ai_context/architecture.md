@@ -109,10 +109,11 @@ erDiagram
 
 ## Important coupling
 
-- GLTF child names are logic contracts:
-  - Conveyor: `Roller_`, `InvisibleBulkSensor`, `Sensor_0`, `Sensor_1`, `Light_bulb_0`
+- GLTF child names and authored transforms are logic contracts:
+  - Conveyor: `Roller_`, `InvisibleBulkSensor`, `Light_bulb_0`. `Sensor_0`/`Sensor_1` are intentionally not instantiated as physics bodies.
+  - Conveyor roller geometry uses local Y as its axle and is pre-rotated by the model. Preserve `rotateOnAxis(localY, step)` and the authored quaternion; direct scene-axis Euler increments are incorrect.
   - Crane: `movePlate`, `CraneInvisibleBulkSensor`
   - Shelf: `ShelfInvisibleBulkSensor`, `table`, `Leg_`
 - `Inventory.jsx` shelf location depends on runtime sensor collision state, not only DB position.
 - Box persisted position is updated explicitly by `updateBoxCurrentPositionServer()`, not continuously.
-- Mission execution depends on exact `functionKey` names in `craneMissionData.stepFunctions`.
+- Mission execution depends on exact `functionKey` names resolved by `src/missions/adapters/stepFunctions.js`.

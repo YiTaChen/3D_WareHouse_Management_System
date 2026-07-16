@@ -2,9 +2,7 @@
 
 這個資料夾是給後續 AI agent 與工程維護者使用的 repo 索引。它不是產品文件，而是「修改程式前要先讀的工程上下文」。
 
-Repo root:
-
-`/Users/adam/git/3d_warehause/3D_WareHouse_Management_System`
+Repo root is the directory that contains this `.ai_context/` folder. Do not depend on a machine-specific absolute path.
 
 建議閱讀順序:
 
@@ -15,7 +13,8 @@ Repo root:
 5. `function_index.md`：function/component/store/API 索引。
 6. `functions/`：需要深入時再讀詳細 function 說明。
 7. `known_risks.md` 與 `change_guidelines.md`：修改前必讀。
-8. `improve_plan/`：若任務涉及重構、架構改善、TDD 導入或 todo list 項目，必須以這裡的 plan 作為溝通、執行與追蹤基準。
+8. `performance_optimization.md`：改 3D 效能、physics、conveyor、roller、crane 或 shelf culling 前必讀。
+9. `improve_plan/`：若任務涉及重構、架構改善、TDD 導入或 todo list 項目，必須以這裡的 plan 作為溝通、執行與追蹤基準。
 
 文件分層原則:
 
@@ -32,4 +31,4 @@ Repo root:
 - 若 todo item 有對應細部 plan，先讀 `improve_plan/todo_list_planAndFeature/` 底下的文件，並依其 phase、definition of done、TDD strategy 與 open questions 作為溝通基準。
 - 若實作過程發現 plan 過時或需要調整，請同步更新 `improve_plan/`，避免後續 agent 失去上下文。
 
-最後更新: 2026-05-19
+最後更新: 2026-07-15

@@ -11,7 +11,8 @@
    - backend API
    - DB schema
 4. If the task is an improvement, refactor, TDD/testing effort, or todo-list item, read `improve_plan/todo_list.md` and the relevant file under `improve_plan/todo_list_planAndFeature/`.
-5. Open the relevant `functions/*.md` file.
+5. If the task touches 3D performance, physics, conveyors, rollers, cranes, or shelf culling, read `performance_optimization.md`.
+6. Open the relevant `functions/*.md` file.
 
 ## Improve plan alignment
 
@@ -61,6 +62,17 @@ For mission changes:
 - The old advanced mission executor/templates were removed; keep mission work on the shared production builder + runner path.
 - For mission flow refactor/TDD work, use `improve_plan/todo_list_planAndFeature/mission_flow_refactor_plan.md` as the primary plan and tracking reference.
 
+## Conveyor and GLTF changes
+
+- Treat the GLTF transform hierarchy and child names as model contracts; inspect the asset and current world transforms before changing rotation math.
+- Conveyor roller geometry is authored along local Y. Preserve `ROLLER_LOCAL_AXIS = new THREE.Vector3(0, 1, 0)` and animate with `roller.rotateOnAxis(ROLLER_LOCAL_AXIS, rotationStep)`.
+- Never guess the roller axle from scene-space x/y/z or increment `roller.rotation.x/y/z` directly. Do not replace the authored quaternion every frame.
+- Keep one exact 16-segment cylinder collider per roller. Do not substitute one box collider for a stopped conveyor and do not lower the segment count without full seam testing.
+- Keep stopped roller bodies `Static` and running roller bodies `Kinematic`; verify that changing body type still wakes and transfers the mission box correctly.
+- Test visual axial spin and physical transfer independently. Cover straight, reversed, turned, and sloped conveyors from multiple camera angles.
+- Run inbound routes and outbound routes ending at `conv4`, `conv7`, and `conv19`. Confirm the box reaches the exit and the destination conveyor stops after arrival.
+- Use the baseline, rejected approaches, and full regression checklist in `performance_optimization.md` before accepting a conveyor optimization.
+
 ## Backend changes
 
 For API contract changes:
@@ -89,6 +101,9 @@ For new endpoints:
 
 Minimum useful checks:
 
+- Mission builder: `npm run test:mission-builder`
+- Production mission factory: `npm run test:mission-production-factory`
+- Mission runner: `npm run test:mission-runner`
 - Frontend: `npm run lint`
 - Frontend: `npm run build`
 - Backend: `npm start` and `GET /`
@@ -96,7 +111,7 @@ Minimum useful checks:
 
 Known limitation:
 
-- There is no real test suite today.
+- Focused mission tests exist, but there is no automated React, browser end-to-end, physics/conveyor, API, or backend regression suite today.
 
 ## Documentation upkeep
 

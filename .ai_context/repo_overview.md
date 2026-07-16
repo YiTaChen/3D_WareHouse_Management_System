@@ -42,7 +42,7 @@ Hosting / deployment:
 前端:
 
 ```bash
-cd /Users/adam/git/3d_warehause/3D_WareHouse_Management_System
+# Run from the repository root (the directory containing .ai_context/).
 npm install
 npm run dev
 ```
@@ -50,7 +50,7 @@ npm run dev
 後端:
 
 ```bash
-cd /Users/adam/git/3d_warehause/3D_WareHouse_Management_System/backend
+cd backend
 npm install
 npm start
 ```
@@ -84,10 +84,10 @@ App 啟動:
 
 Mission:
 
-1. `MissionPanel.jsx` 依 inbound/outbound + port/shelf 選擇 mission template。
-2. `missionStore.setMission()` 存任務。
-3. `missionStore.runMission()` 逐 task/step 執行。
-4. step 依 `functionKey` 呼叫 `craneMissionData.js` 裡的 `stepFunctions`。
+1. `MissionPanel.jsx` 解析 inbound/outbound + port/shelf/box context。
+2. `missionBuilder.js` 透過 production factory 建立 mission，不修改 exported template params。
+3. `missionStore.setMission()` 存任務，`missionStore.runMission()` 注入 production adapters。
+4. `missionRunner.js` 逐 task/step 執行，step 依 `functionKey` 呼叫 `src/missions/adapters/stepFunctions.js`。
 
 Inventory:
 

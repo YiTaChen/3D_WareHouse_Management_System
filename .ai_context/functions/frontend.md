@@ -11,10 +11,13 @@
 - Creates R3F `<Canvas>`, lights, `<Physics>`, materials, ground, boxes, scene, binding updater, and highlight marker.
 - Renders boxes from `useBoxStore(state => state.boxesData)`.
 
-Important notes:
+Performance behavior:
 
-- Imports `./components/Subpanel`, but actual file is `SubPanel.jsx`. This can break on case-sensitive filesystems.
-- Contains legacy/unused conveyor control state and handlers.
+- Uses demand rendering with `FrameRateLimiter` capped at 30 FPS.
+- Caps DPR at 1.5 on desktop and 1.25 on coarse-pointer/small-screen devices.
+- Disables antialiasing and shadows on low-power devices.
+- Configures Cannon with sleeping, SAP broadphase, two max substeps, a 1/30 step, and `shouldInvalidate={false}`.
+- Mounts `Ground` through `Scene` only; do not add a duplicate ground body in `App`.
 
 ## `src/components/Scene.jsx`
 
@@ -56,8 +59,9 @@ Important runtime detail:
 - Loads `/plateform_conveyor_ver5.gltf`.
 - Clones and positions the conveyor model.
 - Finds children named `Roller_*`, creates a `RollerCylinder` for each.
-- Finds `InvisibleBulkSensor`, `Sensor_0`, `Sensor_1`, `Light_bulb_0` and passes them to `ConveyorExtras`.
+- Finds `InvisibleBulkSensor` and `Light_bulb_0` and passes them to `ConveyorExtras`. The unused `Sensor_0`/`Sensor_1` physics bodies are intentionally not created.
 - Reads conveyor state from `useConveyorStore.getConveyorState(id)`.
+- Animates the GLTF roller visuals in `useFrame` only while the conveyor is running.
 
 Helpers:
 
@@ -65,17 +69,25 @@ Helpers:
 - `getRotatedSizeNew(size, rotation)` uses quaternion rotation for bounding size.
 - `getRotatedVector(vector, rotation)` rotates an angular velocity vector.
 
-Model contract:
+Critical model/rotation contract:
 
 - Depends on GLTF child names. Renaming model children will break logic.
+- The GLTF cylinder geometry's long axis is local Y; the roller node is already pre-rotated into conveyor space.
+- Visual spin must remain `roller.rotateOnAxis(ROLLER_LOCAL_AXIS, rotationStep)` with `ROLLER_LOCAL_AXIS = new THREE.Vector3(0, 1, 0)`.
+- Do not use `roller.rotation.z += rotationStep`, guess another Euler axis, or overwrite the authored quaternion. Those changes make turned/sloped rollers tumble around the wrong pivot.
+- Each collider receives the roller's exact world position and world quaternion. See `performance_optimization.md` before changing this path.
 
 ## `src/components/RollerCylinder.jsx`
 
-`RollerCylinder({ roller_position, equip_position, rotation, size, rotate, key11, radius, length, roller_rotate_deg_Array })`
+`RollerCylinder({ rollerPosition, rotation, radius, length, angularVelocity, rotate })`
 
-- Creates a kinematic cylinder body for each roller.
-- Applies angular velocity when conveyor `rotate` is true.
+- Creates one exact 16-segment cylinder body for each roller.
+- Uses a `Static` body while stopped and a `Kinematic` body while running.
+- Applies angular velocity only while the conveyor is running.
+- Returns no visible mesh; the cloned GLTF roller is the visual representation.
 - Used by `ConveyorWithPhysics`.
+
+Do not replace stopped rollers with one box collider. That optimization was tested and reverted because its square leading edge blocked inbound and outbound box transfers between conveyor sections.
 
 ## `src/components/ConveyorExtras.jsx`
 
@@ -83,6 +95,7 @@ Model contract:
 
 - Creates invisible/sensor physics pieces for conveyor.
 - Handles collision begin/end.
+- Creates only the retained `InvisibleBulkSensor`; the 38 unused `Sensor_0`/`Sensor_1` bodies were removed as part of the performance work.
 - Updates:
   - `conveyorStore.setSensorDetected(id, 'BulkSensorDetected', true/false)`
   - `boxEquipStore.clearBoxCollision(boxId)`

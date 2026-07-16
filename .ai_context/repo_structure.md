@@ -1,6 +1,6 @@
 # Repo Structure
 
-Root: `/Users/adam/git/3d_warehause/3D_WareHouse_Management_System`
+Root: the repository directory that contains `.ai_context/`; do not depend on a machine-specific absolute path.
 
 ## Root files
 

@@ -142,9 +142,9 @@ Model child-name contracts:
 - Conveyor:
   - `Roller_`
   - `InvisibleBulkSensor`
-  - `Sensor_0`
-  - `Sensor_1`
   - `Light_bulb_0`
+  - `Sensor_0` and `Sensor_1` may remain in the asset but are intentionally not instantiated as physics bodies.
+  - Roller cylinder geometry is authored along local Y and the node is pre-rotated into conveyor space. Preserve local-Y axial animation and the authored transform; see `performance_optimization.md`.
 - Crane:
   - `movePlate`
   - `CraneInvisibleBulkSensor`

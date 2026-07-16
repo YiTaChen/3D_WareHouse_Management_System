@@ -102,9 +102,15 @@ Flow:
 
 1. UI sets conveyor rotate/speed.
 2. `ConveyorWithPhysics` reads conveyor state.
-3. `RollerCylinder` applies angular velocity.
-4. `ConveyorExtras` collision events update sensor state and box/equipment mapping.
-5. `conveyorStore` recalculates light color.
+3. The cloned GLTF rollers spin around their authored local-Y axle with `rotateOnAxis`; do not replace this with direct x/y/z Euler increments.
+4. `RollerCylinder` uses exact 16-segment bodies, `Static` while stopped and `Kinematic` while running, and applies angular velocity.
+5. `ConveyorExtras` keeps only the `InvisibleBulkSensor`; its collision events update sensor state and box/equipment mapping.
+6. `conveyorStore` recalculates light color.
+
+Performance/correctness contract:
+
+- Read `performance_optimization.md` before changing conveyor visuals, roller bodies, sensors, physics settings, or transfer behavior.
+- The local-Y roller axis, exact collider transforms, 16 segments, and per-roller stopped surfaces are regression-sensitive. Straight, turned, reversed, and sloped conveyors must all be tested.
 
 ## Crane and move table
 
@@ -168,6 +174,9 @@ Flow:
 3. `missionBuilder.js` builds a mission through the production task-builder factory without mutating exported template params.
 4. `missionStore.runMission()` injects production adapters from `src/missions/adapters/stepFunctions.js`.
 5. `missionRunner.runMission()` runs tasks/steps and reports state changes back to the store.
+6. Starting a conveyor wakes the selected outbound box so a sleeping Cannon body can move again.
+7. Outbound missions briefly run the final destination conveyor (`conv4`, `conv7`, or `conv19`), wait for confirmed arrival, and stop it immediately afterward.
+8. A failed step propagates an error through step/task/mission state; the UI must not report a failed transfer as completed.
 
 Avoid confusion:
 
