@@ -8,9 +8,7 @@ import ConveyorSurface from './ConveyorSurface'
 import { useConveyorStore } from '../stores/conveyorStore';
 import ConveyorExtras from './ConveyorExtras';  
 
-
-
-
+const ROLLER_LOCAL_AXIS = new THREE.Vector3(0, 1, 0);
 
 function getRotatedVector(vector, rotation) {
   const vec = new THREE.Vector3(...vector)
@@ -127,7 +125,8 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
 
     const rotationStep = speed * delta;
     rollers.forEach((roller) => {
-      roller.rotation.z += rotationStep;
+      // The GLTF cylinders are authored along local Y, then pre-rotated into conveyor space.
+      roller.rotateOnAxis(ROLLER_LOCAL_AXIS, rotationStep);
     });
   });
 
@@ -193,6 +192,3 @@ export default function ConveyorWithPhysics({ id, position, rotation}) {
     </>
   )
 }
-
-
-
