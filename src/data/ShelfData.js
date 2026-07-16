@@ -27,17 +27,18 @@ const shelves = [];
 
 let count = 0;
 
-
+const shelfColumns = 18;
+const shelfLevels = 5;
 
 for (let z = -8; z <= 8; z += 2) {
   const zPassNumber = new Set([-6, 0, 6, 8]);
   if (zPassNumber.has(z)) continue; // 跳過 z = 0 的層
 
 
-  for (let j = 0; j < 3; j++) {
-      for (let i = 0; i < 6; i++) {
+  for (let j = 0; j < shelfLevels; j++) {
+      for (let i = 0; i < shelfColumns; i++) {
         shelves.push({
-          id: `shelf${String(count + 1).padStart(3, '0')}`, // shelf005 ~ shelf009
+          id: `shelf${String(count + 1).padStart(3, '0')}`,
           position: [i*2 + 2, ( 2 * j ) , z ],
           rotation: [0, 0, 0],
         });

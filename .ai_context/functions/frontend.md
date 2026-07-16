@@ -18,6 +18,7 @@ Performance behavior:
 - Disables antialiasing and shadows on low-power devices.
 - Configures Cannon with sleeping, SAP broadphase, two max substeps, a 1/30 step, and `shouldInvalidate={false}`.
 - Mounts `Ground` through `Scene` only; do not add a duplicate ground body in `App`.
+- In development, `?perf=1` mounts `PerformanceProbe` and exposes R3F timing/render counts through the root `data-warehouse-perf` attribute.
 
 ## `src/components/Scene.jsx`
 
@@ -155,7 +156,6 @@ This is the current practical binding mechanism used by missions.
 
 Key exports:
 
-- `Shelf(...)`
 - `BatchedShelfLoader(...)`
 - `QuickShelfBatch(...)`
 - `VisualCullingShelfBatch(...)`
@@ -164,13 +164,16 @@ Purpose:
 
 - Loads shelf model.
 - Batches shelf rendering to reduce initial cost.
-- Builds static colliders for shelf table/legs.
-- Builds sensor trigger for shelf occupancy.
-- Collision updates shelf sensor state and box/equipment mapping.
+- Renders shelf tables/legs as five instanced meshes and updates instance matrices for visually visible shelves.
+- Groups the 450 shelf locations into 25 `(Y, Z)` rows.
+- Builds one continuous static table body and one trigger body per row, approximately 50 bodies instead of 900 per-shelf bodies.
+- A row collision uses the box's current world X to resolve the exact shelf ID and update shelf/box equipment state.
+- Layout grouping and ID mapping helpers live in `src/components/shelfLayout.js` with `npm run test:shelf-layout` coverage.
 
 Model contract:
 
 - Depends on child names such as `ShelfInvisibleBulkSensor`, `table`, `Leg_`.
+- The current aggregation assumes each row has contiguous shelves along X with matching Y, Z, and rotation. Update `shelfLayout.js` and its tests if that geometry changes.
 
 ## `src/components/Materials.jsx`
 

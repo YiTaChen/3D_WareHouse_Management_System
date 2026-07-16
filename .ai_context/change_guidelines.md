@@ -104,6 +104,7 @@ Minimum useful checks:
 - Mission builder: `npm run test:mission-builder`
 - Production mission factory: `npm run test:mission-production-factory`
 - Mission runner: `npm run test:mission-runner`
+- Shelf layout/aggregated physics: `npm run test:shelf-layout`
 - Frontend: `npm run lint`
 - Frontend: `npm run build`
 - Backend: `npm start` and `GET /`

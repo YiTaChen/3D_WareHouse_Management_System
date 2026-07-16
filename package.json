@@ -14,6 +14,7 @@
     "test:mission-builder": "node --test src/missions/builders/missionBuilderCore.test.js",
     "test:mission-production-factory": "node --test src/missions/builders/productionMissionFactory.test.js",
     "test:mission-runner": "node --test src/missions/runtime/missionRunner.test.js",
+    "test:shelf-layout": "node --test src/components/shelfLayout.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

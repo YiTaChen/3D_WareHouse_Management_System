@@ -16,6 +16,7 @@ npm run build
 npm run test:mission-builder
 npm run test:mission-production-factory
 npm run test:mission-runner
+npm run test:shelf-layout
 npm run preview
 ```
 
@@ -100,10 +101,11 @@ After code changes, prefer:
 1. `npm run test:mission-builder`
 2. `npm run test:mission-production-factory`
 3. `npm run test:mission-runner`
-4. `npm run lint`
-5. `npm run build`
-6. Backend smoke check with `GET /`
-7. Manual UI flow for touched feature
+4. `npm run test:shelf-layout`
+5. `npm run lint`
+6. `npm run build`
+7. Backend smoke check with `GET /`
+8. Manual UI flow for touched feature
 
 For any conveyor, roller, physics, crane, or shelf-culling change, also run the browser regression checklist in `performance_optimization.md`. Build and mission tests cannot detect a wrong visual axle or a box blocked at a conveyor seam.
 

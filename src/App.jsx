@@ -15,10 +15,13 @@ import { useUIStore } from './stores/uiStore';
 import HighlightSpot from './components/effect/HighlightSpot'; // 引入高亮元件
 import DatabaseSwitcher from './components/DatabaseSwitcher.jsx';
 import FrameRateLimiter from './components/FrameRateLimiter.jsx';
+import PerformanceProbe from './components/PerformanceProbe.jsx';
 
 const craneIds = Object.keys(useCraneStore.getState().craneStates);
 
 export default function App() {
+  const performanceProbeEnabled = import.meta.env.DEV
+    && new URLSearchParams(window.location.search).has('perf');
   const [isLowPowerDevice] = useState(() => (
     window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
   ));
@@ -68,6 +71,7 @@ export default function App() {
         shadows={!isLowPowerDevice}
       >
         <FrameRateLimiter fps={30} />
+        {performanceProbeEnabled && <PerformanceProbe enabled />}
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, -5]} intensity={1} castShadow={!isLowPowerDevice} />
         <OrbitControls />

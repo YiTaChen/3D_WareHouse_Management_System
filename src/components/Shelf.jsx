@@ -1,16 +1,21 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useShelfStore } from '../stores/shelfStore';
 import { useBoxEquipStore } from '../stores/boxEquipStore';
+import { useBoxStore } from '../stores/boxStore';
 import { useThree } from '@react-three/fiber';
+import {
+  createShelfRows,
+  getNearestShelfInRow,
+  getShelfRowBody,
+} from './shelfLayout';
 
 // 共享材質
 const SharedMaterials = {
-  invisibleMaterial: null,
   transparentTableMaterial: null,
   transparentLegMaterial: null,
   initialized: false
@@ -18,12 +23,6 @@ const SharedMaterials = {
 
 function initializeSharedMaterials() {
   if (SharedMaterials.initialized) return;
-  
-  SharedMaterials.invisibleMaterial = new THREE.MeshBasicMaterial({
-    transparent: true,
-    opacity: 0,
-    visible: false,
-  });
   
   SharedMaterials.transparentTableMaterial = new THREE.MeshBasicMaterial({
     transparent: true,
@@ -38,130 +37,146 @@ function initializeSharedMaterials() {
   SharedMaterials.initialized = true;
 }
 
-// 修改後的 Shelf 組件 - 支持視覺剔除但保持物理
-function Shelf({ 
-  id, 
-  position, 
-  rotation, 
-  sharedScene, 
-  isVisuallyVisible = true  // 新增：控制視覺顯示
-}) {
+function getWorldProperties(mesh) {
+  if (!mesh) return null;
+
+  const worldPosition = new THREE.Vector3();
+  const worldQuaternion = new THREE.Quaternion();
+  const worldScale = new THREE.Vector3();
+  mesh.updateWorldMatrix(true, false);
+  mesh.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
+
+  if (!mesh.geometry.boundingBox) {
+    mesh.geometry.computeBoundingBox();
+  }
+
+  const localSize = mesh.geometry.boundingBox
+    ? new THREE.Vector3().subVectors(mesh.geometry.boundingBox.max, mesh.geometry.boundingBox.min)
+    : new THREE.Vector3(1, 1, 1);
+  const euler = new THREE.Euler().setFromQuaternion(worldQuaternion);
+
+  return {
+    position: worldPosition.toArray(),
+    rotation: [euler.x, euler.y, euler.z],
+    args: localSize.multiply(worldScale).toArray(),
+  };
+}
+
+function InstancedShelfVisuals({ shelves, sharedScene, maxInstances }) {
+  const meshRefs = useRef(new Map());
+
+  const visualParts = useMemo(() => {
+    if (!sharedScene) return [];
+
+    initializeSharedMaterials();
+    sharedScene.updateMatrixWorld(true);
+    const parts = [];
+
+    sharedScene.traverse((obj) => {
+      if (!obj.isMesh || obj.name === 'ShelfInvisibleBulkSensor') return;
+
+      const material = obj.name === 'table'
+        ? SharedMaterials.transparentTableMaterial
+        : SharedMaterials.transparentLegMaterial;
+
+      parts.push({
+        geometry: obj.geometry,
+        localMatrix: obj.matrixWorld.clone(),
+        material,
+        name: obj.name,
+      });
+    });
+
+    return parts;
+  }, [sharedScene]);
+
+  useLayoutEffect(() => {
+    const shelfMatrix = new THREE.Matrix4();
+    const instanceMatrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3(1, 1, 1);
+
+    for (const part of visualParts) {
+      const mesh = meshRefs.current.get(part.name);
+      if (!mesh) continue;
+
+      mesh.count = shelves.length;
+      for (let index = 0; index < shelves.length; index += 1) {
+        const shelf = shelves[index];
+        position.set(...shelf.position);
+        quaternion.setFromEuler(new THREE.Euler(...shelf.rotation, 'XYZ'));
+        shelfMatrix.compose(position, quaternion, scale);
+        instanceMatrix.multiplyMatrices(shelfMatrix, part.localMatrix);
+        mesh.setMatrixAt(index, instanceMatrix);
+      }
+
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    }
+  }, [shelves, visualParts]);
+
+  return visualParts.map((part) => (
+    <instancedMesh
+      key={part.name}
+      ref={(node) => {
+        if (node) meshRefs.current.set(part.name, node);
+        else meshRefs.current.delete(part.name);
+      }}
+      args={[part.geometry, part.material, maxInstances]}
+    />
+  ));
+}
+
+function ShelfRowPhysics({ row, tableTemplate, bulkSensorTemplate }) {
   const setShelfSensorDetected = useShelfStore(state => state.setShelfSensorDetected);
   const setBoxCollidingWithEquipment = useBoxEquipStore(state => state.setBoxCollidingWithEquipment);
   const clearBoxCollision = useBoxEquipStore(state => state.clearBoxCollision);
+  const collidingShelfByBox = useRef(new Map());
 
-  const clonedScene = useMemo(() => {
-    if (!sharedScene || !position || !rotation) return null;
+  const tableBody = useMemo(() => getShelfRowBody(row, tableTemplate), [row, tableTemplate]);
+  const sensorBody = useMemo(() => getShelfRowBody(row, bulkSensorTemplate), [row, bulkSensorTemplate]);
 
-    const clone = sharedScene.clone(true);
-    clone.position.set(position[0], position[1], position[2]);
-    clone.rotation.set(rotation[0], rotation[1], rotation[2]);
-    clone.updateMatrixWorld(true);
-    
-    // 🎯 關鍵：根據可見性設置整個場景的可見性
-    clone.visible = isVisuallyVisible;
-    
-    return clone;
-  }, [sharedScene, position, rotation, isVisuallyVisible]);
-
-  const shelfParts = useMemo(() => {
-    if (!clonedScene) return {};
-    
-    const parts = { legs: [] };
-    
-    clonedScene.traverse((obj) => {
-      if (obj.isMesh) {
-        if (obj.name === 'table') {
-          parts.table = obj;
-          if (SharedMaterials.transparentTableMaterial) {
-            obj.material = SharedMaterials.transparentTableMaterial.clone();
-          }
-        } else if (obj.name === 'ShelfInvisibleBulkSensor') {
-          parts.bulkSensor = obj;
-          obj.visible = false; // 感測器始終不可見
-          if (SharedMaterials.invisibleMaterial) {
-            obj.material = SharedMaterials.invisibleMaterial.clone();
-          }
-        } else if (obj.name.startsWith('Leg_')) {
-          parts.legs.push(obj);
-          if (SharedMaterials.transparentLegMaterial) {
-            obj.material = SharedMaterials.transparentLegMaterial.clone();
-          }
-        }
-      }
-    });
-    
-    return parts;
-  }, [clonedScene]);
-
-  const getWorldProperties = (mesh) => {
-    if (!mesh) return null;
-    const worldPosition = new THREE.Vector3();
-    const worldQuaternion = new THREE.Quaternion();
-    const worldScale = new THREE.Vector3();
-    mesh.updateWorldMatrix(true, false);
-    mesh.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
-    const localSize = mesh.geometry?.boundingBox ?
-      new THREE.Vector3().subVectors(mesh.geometry.boundingBox.max, mesh.geometry.boundingBox.min) :
-      new THREE.Vector3(1, 1, 1);
-    const finalSize = localSize.multiply(worldScale).toArray();
-    const euler = new THREE.Euler().setFromQuaternion(worldQuaternion);
-    return {
-      position: worldPosition.toArray(),
-      rotation: [euler.x, euler.y, euler.z],
-      args: finalSize,
-    };
-  };
-
-  const tableProps = useMemo(() => getWorldProperties(shelfParts.table), [shelfParts.table]);
-  const bulkSensorProps = useMemo(() => getWorldProperties(shelfParts.bulkSensor), [shelfParts.bulkSensor]);
-
-  // 🎯 關鍵：物理碰撞體始終存在（不受視覺可見性影響）
   useBox(() => ({
     mass: 0,
     type: 'Static',
-    position: tableProps?.position || [0, 0, 0],
-    rotation: tableProps?.rotation || [0, 0, 0],
-    args: tableProps?.args || [1, 0.1, 1],
+    position: tableBody.position,
+    rotation: tableBody.rotation,
+    args: tableBody.args,
     material: 'shelfTable',
-    // 物理碰撞體不受視覺剔除影響
   }));
 
   useBox(() => ({
     mass: 0,
-    isTrigger: true,
     type: 'Static',
-    position: bulkSensorProps?.position || [0, 0, 0],
-    rotation: bulkSensorProps?.rotation || [0, 0, 0],
-    args: bulkSensorProps?.args || [1, 1, 1],
+    isTrigger: true,
+    position: sensorBody.position,
+    rotation: sensorBody.rotation,
+    args: sensorBody.args,
     onCollideBegin: (e) => {
       const boxId = e.body.userData?.appId;
-      if (boxId) {
-        setShelfSensorDetected(id, 'BulkSensorDetected', true);
+      if (!boxId) return;
 
-        // clear last collision with equipment (normally crane)
-        clearBoxCollision(boxId);
-        // set new collision with equipment
-        setBoxCollidingWithEquipment(boxId, id);
-        
-        
-        // 🎯 可選：當 box 碰撞時顯示調試信息
-        if (!isVisuallyVisible) {
-          // console.log(`📦 Box ${boxId} 與不可見的 Shelf ${id} 發生碰撞`);
-        }
-      }
+      const boxPosition = useBoxStore.getState().getBoxWorldPosition(boxId);
+      const boxX = boxPosition?.[0] ?? row.shelves[0].position[0];
+      const nearestShelf = getNearestShelfInRow(row, boxX);
+
+      collidingShelfByBox.current.set(boxId, nearestShelf.id);
+      setShelfSensorDetected(nearestShelf.id, 'BulkSensorDetected', true);
+      clearBoxCollision(boxId);
+      setBoxCollidingWithEquipment(boxId, nearestShelf.id);
     },
     onCollideEnd: (e) => {
       const boxId = e.body.userData?.appId;
-      if (boxId) {
-        setShelfSensorDetected(id, 'BulkSensorDetected', false);
-      }
+      const shelfId = boxId ? collidingShelfByBox.current.get(boxId) : null;
+      if (!boxId || !shelfId) return;
+
+      setShelfSensorDetected(shelfId, 'BulkSensorDetected', false);
+      collidingShelfByBox.current.delete(boxId);
     },
   }));
 
-  // 🎯 關鍵：始終返回視覺組件（由 visible 屬性控制顯示）
-  if (!clonedScene) return null;
-  return <primitive object={clonedScene} />;
+  return null;
 }
 
 // 批量載入的 Shelf 組件 - 支持視覺剔除
@@ -170,17 +185,14 @@ export default function BatchedShelfLoader({
   batchSize = 20,
   batchInterval = 300,
   maxConcurrent = 20000,
-  enableVisualCulling = true,    // 🎯 改名：視覺剔除
-  visualCullingDistance = 100,   // 🎯 改名：視覺剔除距離
-  enablePhysicsCulling = false,  // 🎯 新增：物理剔除（通常不建議開啟）
-  physicsCullingDistance = 200,  // 🎯 新增：物理剔除距離
+  enableVisualCulling = true,
+  visualCullingDistance = 100,
   cameraRef = null
 }) {
   const { scene } = useGLTF('/Shelf_ver1.gltf');
   const { camera } = useThree();
   const [loadedBatches, setLoadedBatches] = useState(0);
   const [visuallyVisibleShelves, setVisuallyVisibleShelves] = useState(new Set());
-  const [physicallyActiveShelves, setPhysicallyActiveShelves] = useState(new Set());
   const loadingRef = useRef(false);
   const timeoutRef = useRef(null);
   const lastCullingCheck = useRef({
@@ -190,6 +202,23 @@ export default function BatchedShelfLoader({
   });
 
   const activeCamera = cameraRef || camera;
+
+  const shelfPartTemplates = useMemo(() => {
+    if (!scene) return null;
+
+    scene.updateMatrixWorld(true);
+    let table = null;
+    let bulkSensor = null;
+
+    scene.traverse((obj) => {
+      if (obj.name === 'table') table = getWorldProperties(obj);
+      if (obj.name === 'ShelfInvisibleBulkSensor') bulkSensor = getWorldProperties(obj);
+    });
+
+    return table && bulkSensor ? { table, bulkSensor } : null;
+  }, [scene]);
+
+  const shelfRows = useMemo(() => createShelfRows(shelves), [shelves]);
 
   useEffect(() => {
     initializeSharedMaterials();
@@ -231,7 +260,6 @@ export default function BatchedShelfLoader({
     };
   }, [scene, shelves, batchSize, batchInterval]);
 
-  // 🎯 關鍵：分別處理視覺和物理剔除
   useFrame((state) => {
     if (!activeCamera || !shelves?.length) return;
 
@@ -248,7 +276,6 @@ export default function BatchedShelfLoader({
     }
 
     const newVisuallyVisible = new Set();
-    const newPhysicallyActive = new Set();
     
     const maxLoadedIndex = Math.min(loadedBatches * batchSize, shelves.length);
     
@@ -261,28 +288,14 @@ export default function BatchedShelfLoader({
       const dz = cameraPosition.z - shelf.position[2];
       const distanceSquared = dx * dx + dy * dy + dz * dz;
       
-      // 視覺剔除判斷
       if (!enableVisualCulling || distanceSquared <= visualCullingDistance * visualCullingDistance) {
         newVisuallyVisible.add(shelf.id);
       }
-      
-      // 物理剔除判斷（通常不建議開啟）
-      if (!enablePhysicsCulling || distanceSquared <= physicsCullingDistance * physicsCullingDistance) {
-        newPhysicallyActive.add(shelf.id);
-      }
     }
-    
-    // 更新視覺可見性
+
     if (newVisuallyVisible.size !== visuallyVisibleShelves.size || 
         [...newVisuallyVisible].some(id => !visuallyVisibleShelves.has(id))) {
       setVisuallyVisibleShelves(newVisuallyVisible);
-    }
-    
-    // 更新物理活躍性
-    if (enablePhysicsCulling && 
-        (newPhysicallyActive.size !== physicallyActiveShelves.size || 
-         [...newPhysicallyActive].some(id => !physicallyActiveShelves.has(id)))) {
-      setPhysicallyActiveShelves(newPhysicallyActive);
     }
 
     previousCheck.position.copy(cameraPosition);
@@ -290,18 +303,10 @@ export default function BatchedShelfLoader({
     previousCheck.time = elapsedTime;
   });
 
-  // 計算要渲染的 Shelf
   const shelvesToRender = useMemo(() => {
     const maxToLoad = Math.min(loadedBatches * batchSize, shelves?.length || 0);
-    let shelvesToLoad = shelves?.slice(0, maxToLoad) || [];
-    
-    // 🎯 關鍵：如果啟用物理剔除，只載入物理活躍的 shelf
-    if (enablePhysicsCulling && activeCamera) {
-      shelvesToLoad = shelvesToLoad.filter(shelf => physicallyActiveShelves.has(shelf.id));
-    }
-    
-    return shelvesToLoad.slice(0, maxConcurrent);
-  }, [shelves, loadedBatches, batchSize, physicallyActiveShelves, enablePhysicsCulling, maxConcurrent, activeCamera]);
+    return (shelves?.slice(0, maxToLoad) || []).slice(0, maxConcurrent);
+  }, [shelves, loadedBatches, batchSize, maxConcurrent]);
 
   if (!scene) {
     return <div>載入 Shelf 模型中...</div>;
@@ -309,43 +314,20 @@ export default function BatchedShelfLoader({
 
   return (
     <>
-      {/* 調試信息顯示 */}
-      {/* <div style={{
-        position: 'fixed',
-        top: '10px',
-        left: '10px',
-        background: 'rgba(0,0,0,0.8)',
-        color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '12px',
-        zIndex: 1000,
-        fontFamily: 'monospace'
-      }}>
-        <div>載入進度: {loadingProgress.toFixed(1)}%</div>
-        <div>總數: {shelves?.length || 0}</div>
-        <div>已載入: {Math.min(loadedBatches * batchSize, shelves?.length || 0)}</div>
-        <div>📱 視覺可見: {visuallyVisibleShelves.size}</div>
-        <div>⚽ 物理活躍: {enablePhysicsCulling ? physicallyActiveShelves.size : '全部'}</div>
-        <div>🎮 實際渲染: {shelvesToRender.length}</div>
-        <div>👁️ 視覺距離: {visualCullingDistance}</div>
-        {enablePhysicsCulling && <div>⚡ 物理距離: {physicsCullingDistance}</div>}
-        <div>📍 相機位置: {activeCamera ? 
-          `(${activeCamera.position.x.toFixed(1)}, ${activeCamera.position.y.toFixed(1)}, ${activeCamera.position.z.toFixed(1)})` 
-          : '未找到'}</div>
-      </div> */}
-      
-      {/* 🎯 關鍵：渲染所有 shelf，但分別控制視覺和物理 */}
-      {shelvesToRender.map((shelf) => (
-        <Shelf
-          key={shelf.id}
-          id={shelf.id}
-          position={shelf.position}
-          rotation={shelf.rotation}
-          sharedScene={scene}
-          isVisuallyVisible={visuallyVisibleShelves.has(shelf.id)}  // 🎯 視覺控制
+      {shelfPartTemplates && shelfRows.map((row) => (
+        <ShelfRowPhysics
+          key={`physics-${row.key}`}
+          row={row}
+          tableTemplate={shelfPartTemplates.table}
+          bulkSensorTemplate={shelfPartTemplates.bulkSensor}
         />
       ))}
+
+      <InstancedShelfVisuals
+        shelves={shelvesToRender.filter((shelf) => visuallyVisibleShelves.has(shelf.id))}
+        sharedScene={scene}
+        maxInstances={shelves.length}
+      />
     </>
   );
 }
@@ -358,7 +340,6 @@ export function QuickShelfBatch({ shelves }) {
       batchSize={30}
       batchInterval={50}
       enableVisualCulling={false}
-      enablePhysicsCulling={false}
     />
   );
 }
@@ -373,15 +354,14 @@ export function VisualCullingShelfBatch({ shelves, cameraRef }) {
       batchSize={10}
       batchInterval={15}
       maxConcurrent={2000}
-      enableVisualCulling={true}      // ✅ 啟用視覺剔除
-      visualCullingDistance={55}      // 📱 視覺剔除距離
-      enablePhysicsCulling={false}    // ❌ 關閉物理剔除（保持物理碰撞）
+      enableVisualCulling={true}
+      visualCullingDistance={55}
       cameraRef={cameraRef || camera}
     />
   );
 }
 
-// 🎯 完全剔除版本（性能最佳但可能影響遊戲性）
+// More aggressive visual culling for constrained devices.
 export function FullCullingShelfBatch({ shelves, cameraRef }) {
   const { camera } = useThree();
   
@@ -391,10 +371,8 @@ export function FullCullingShelfBatch({ shelves, cameraRef }) {
       batchSize={5}
       batchInterval={200}
       maxConcurrent={100}
-      enableVisualCulling={true}      // ✅ 啟用視覺剔除
-      visualCullingDistance={30}      // 📱 視覺剔除距離
-      enablePhysicsCulling={true}     // ⚡ 啟用物理剔除
-      physicsCullingDistance={100}    // ⚽ 物理剔除距離
+      enableVisualCulling={true}
+      visualCullingDistance={30}
       cameraRef={cameraRef || camera}
     />
   );

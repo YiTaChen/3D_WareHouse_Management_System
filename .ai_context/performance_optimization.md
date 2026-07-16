@@ -76,6 +76,48 @@ Typical idle state now has 152 static roller bodies rather than 152 continuously
 - `Shelf.jsx` throttles culling checks to at most four times per second and skips recomputation when the camera and loaded batches did not change.
 - Broad, unused Zustand subscriptions and legacy handlers were removed from `App.jsx`.
 
+## 450-shelf scale test (18 x 5 x 5)
+
+Verified layout in `src/data/ShelfData.js`:
+
+- X: 18 positions (`2` through `36`)
+- Y: 5 levels (`0` through `8`)
+- Z: 5 rows (`-8`, `-4`, `-2`, `2`, `4`)
+- Total: 450 shelf locations (`shelf001` through `shelf450`)
+
+### Physics scaling contract
+
+The naive 450-shelf version created one table body and one trigger body per shelf, approximately 900 shelf physics bodies. It still rendered at 30 FPS, but Cannon fell behind real time and a clean `shelf001` inbound stopped at the `conv3` check after 7.6 seconds. The same mission with 90 shelves completed in 21.2 seconds.
+
+The verified implementation groups the 18 contiguous X positions for each `(Y, Z)` pair:
+
+- 25 physical rows total.
+- One continuous static table body and one trigger body per row: approximately 50 shelf physics bodies.
+- The row trigger resolves the exact shelf ID from the box's current world X through `boxStore.getBoxWorldPosition()`.
+- Do not use collision-event `body.position` as the X source; it was unavailable in this event path and incorrectly mapped `shelf090` to `shelf073`.
+- Pure helpers and regression tests live in `src/components/shelfLayout.js` and `shelfLayout.test.js`.
+
+### Visual scaling contract
+
+- Shelf tables and four legs render as five instanced meshes rather than 450 cloned GLTF scenes.
+- Camera-distance visual culling still controls which instance matrices are active.
+- At the tested camera, desktop draw calls dropped from 1042 to 492 and a 390 x 844 mobile viewport dropped from 850 to 339.
+- Both desktop and mobile viewport tests held the intentional 30 FPS steady-state cap.
+- A development-only probe is available at `?perf=1`; it writes R3F FPS, max frame gap, draw calls, triangles, geometries, and textures to `data-warehouse-perf` on the root element.
+
+### Mission timing baseline
+
+Measured with a clean temporary SQLite database and isolated local frontend/backend:
+
+- `shelf001` inbound with 90 shelves: 21.19 seconds.
+- `shelf001` inbound with optimized 450 shelves: 21.19 seconds.
+- `shelf001` outbound with optimized 450 shelves: 28.49 seconds.
+- Far/high `shelf090` (`x=36`, `y=8`, `z=-8`) inbound: 31.66 seconds.
+- `shelf090` outbound: 38.96 seconds.
+- The extra `shelf090` time is expected travel distance, not lag; mission FPS remained approximately 30 and both directions completed.
+
+Residual note: initial scene setup can show one roughly 300 ms frame gap while the warehouse is loading. Steady state and mission execution recover to 30 FPS; do not confuse that one-time load spike with mission-time lag.
+
 ## Conveyor correctness safeguards added during optimization
 
 Performance work exposed workflow assumptions that must remain documented:
@@ -129,6 +171,7 @@ Automated:
 npm run test:mission-builder
 npm run test:mission-production-factory
 npm run test:mission-runner
+npm run test:shelf-layout
 npm run build
 npx eslint <changed-files>
 ```
