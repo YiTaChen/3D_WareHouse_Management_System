@@ -184,10 +184,28 @@ const buildCrane2OutboundConveyorTask = ({
       params: { conveyorId: conv5th, boxId },
     }),
     createStep({
+      id: 'step5.1',
+      name: `${conv6th} conveyor set rotate nagetive`,
+      functionKey: 'setConveyorRotateSpeedNagetive',
+      params: { conveyorId: conv6th },
+    }),
+    createStep({
+      id: 'step5.5',
+      name: `${conv6th} conveyor rotate`,
+      functionKey: 'startConveyorRotate',
+      params: { conveyorId: conv6th, boxId, waitMs: 100 },
+    }),
+    createStep({
       id: 'step6',
       name: 'Wait Box to exit port',
       functionKey: 'checkBoxOnEquipment',
       params: { boxId, equipmentId: conv6th },
+    }),
+    createStep({
+      id: 'step6.1',
+      name: `${conv6th} conveyor stop rotate`,
+      functionKey: 'stopConveyorRotate',
+      params: { conveyorId: conv6th },
     }),
     updateBoxPosition({ id: 'step6.5', boxId }),
     softDeleteBoxAfterOutbound({ id: 'step6.6', boxId }),
@@ -261,6 +279,7 @@ const buildOutboundConveyorTask = ({
       { id: 'step3', conveyorId: conv3rd, name: `${conv3rd} conveyor rotate` },
       { id: 'step4', conveyorId: conv4th, name: `${conv4th} conveyor rotate` },
       { id: 'step5', conveyorId: conv5th, name: `${conv5th} conveyor rotate` },
+      { id: 'step5.5', conveyorId: conv6th, name: `${conv6th} conveyor rotate`, waitMs: 100 },
     ],
     conveyorsToStop: [
       { id: 'step7', conveyorId: conv1st, name: `${conv1st} conveyor stop rotate` },
@@ -274,6 +293,12 @@ const buildOutboundConveyorTask = ({
     boxId,
     arrivalEquipmentId: conv6th,
     afterWaitSteps: [
+      createStep({
+        id: 'step6.1',
+        name: `${conv6th} conveyor stop rotate`,
+        functionKey: 'stopConveyorRotate',
+        params: { conveyorId: conv6th },
+      }),
       updateBoxPosition({ id: 'step6.5', boxId }),
       softDeleteBoxAfterOutbound({ id: 'step6.6', boxId }),
     ],

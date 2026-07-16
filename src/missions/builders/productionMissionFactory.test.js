@@ -103,3 +103,40 @@ test('buildOutboundProductionMission matches legacy crane2 outbound task shape',
     withConveyorWakeBoxIds(outboundTemplateFunctionForCrane2(params), params.boxId),
   );
 });
+
+test('outbound briefly runs and then stops the destination conveyor', () => {
+  const mission = buildOutboundProductionMission({
+    ...crane003_OutboundMissionTemplate,
+    ...runtimeInput,
+  });
+  const steps = mission.tasks.find((task) => task.id === 'task6').steps;
+  const startIndex = steps.findIndex(
+    (step) => step.functionKey === 'startConveyorRotate' && step.params.conveyorId === 'conv19',
+  );
+  const waitIndex = steps.findIndex((step) => step.functionKey === 'checkBoxOnEquipment');
+  const stopIndex = steps.findIndex(
+    (step) => step.functionKey === 'stopConveyorRotate' && step.params.conveyorId === 'conv19',
+  );
+
+  assert.equal(steps[startIndex].params.waitMs, 100);
+  assert.ok(startIndex < waitIndex);
+  assert.ok(waitIndex < stopIndex);
+});
+
+test('crane2 sets the destination direction before starting it', () => {
+  const mission = buildOutboundProductionMission({
+    ...crane002_OutboundMissionTemplate,
+    ...runtimeInput,
+    useCrane2ConveyorSequence: true,
+  });
+  const steps = mission.tasks.find((task) => task.id === 'task6').steps;
+  const speedIndex = steps.findIndex(
+    (step) => step.functionKey === 'setConveyorRotateSpeedNagetive' && step.params.conveyorId === 'conv7',
+  );
+  const startIndex = steps.findIndex(
+    (step) => step.functionKey === 'startConveyorRotate' && step.params.conveyorId === 'conv7',
+  );
+
+  assert.ok(speedIndex < startIndex);
+  assert.equal(steps[startIndex].params.waitMs, 100);
+});

@@ -870,6 +870,13 @@ export const crane003InboundMission = inboundTemplateFunction({
               params: { conveyorId: conv5th },
               status: 'pending',
             },
+            {
+              id: 'step5.5',
+              name: `${conv6th} conveyor rotate`,
+              functionKey: 'startConveyorRotate',
+              params: { conveyorId: conv6th, waitMs: 100 },
+              status: 'pending',
+            },
 
 
             {
@@ -877,6 +884,13 @@ export const crane003InboundMission = inboundTemplateFunction({
               name:  `${conv6th} Wait Box to exit port`,
               functionKey: 'checkBoxOnEquipment',
               params: { boxId: boxId, equipmentId: conv6th },
+              status: 'pending',
+            },
+            {
+              id: 'step6.1',
+              name: `${conv6th} conveyor stop rotate`,
+              functionKey: 'stopConveyorRotate',
+              params: { conveyorId: conv6th },
               status: 'pending',
             },
 
@@ -1258,6 +1272,20 @@ export const crane001_OutboundMission = outboundTemplateFunction(crane001_Outbou
               params: { conveyorId: conv5th },
               status: 'pending',
             },
+            {
+              id: 'step5.1',
+              name: `${conv6th} conveyor set rotate nagetive`,
+              functionKey: 'setConveyorRotateSpeedNagetive',
+              params: { conveyorId: conv6th },
+              status: 'pending',
+            },
+            {
+              id: 'step5.5',
+              name: `${conv6th} conveyor rotate`,
+              functionKey: 'startConveyorRotate',
+              params: { conveyorId: conv6th, waitMs: 100 },
+              status: 'pending',
+            },
 
 
             {
@@ -1265,6 +1293,13 @@ export const crane001_OutboundMission = outboundTemplateFunction(crane001_Outbou
               name: 'Wait Box to exit port',
               functionKey: 'checkBoxOnEquipment',
               params: { boxId: boxId, equipmentId: conv6th },
+              status: 'pending',
+            },
+            {
+              id: 'step6.1',
+              name: `${conv6th} conveyor stop rotate`,
+              functionKey: 'stopConveyorRotate',
+              params: { conveyorId: conv6th },
               status: 'pending',
             },
 

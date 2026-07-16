@@ -150,7 +150,7 @@ export const stepFunctions = {
     return true;
   },
 
-  startConveyorRotate: async ({ conveyorId, boxId }) => {
+  startConveyorRotate: async ({ conveyorId, boxId, waitMs = 1000 }) => {
     // 如果 conveyorId 是 'pass'，則不執行旋轉
     if (conveyorId != 'pass') {
       const setStartFn = useConveyorStore.getState().setConveyorRotate;
@@ -168,8 +168,7 @@ export const stepFunctions = {
         useBoxStore.getState().wakeUpBox(boxId);
       }
     }
-    // 模擬等待：固定等待 1 秒
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
 
     return true;
   },

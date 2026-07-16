@@ -30,11 +30,15 @@ export const conveyorMoveUntilBoxArrives = ({
   name: taskName,
   steps: [
     ...speedSteps.map((step) => createStep(step)),
-    ...conveyorsToStart.map(({ id, conveyorId, name }) => createStep({
+    ...conveyorsToStart.map(({ id, conveyorId, name, waitMs }) => createStep({
       id,
       name,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId, boxId },
+      params: {
+        conveyorId,
+        boxId,
+        ...(waitMs === undefined ? {} : { waitMs }),
+      },
     })),
     createStep({
       id: waitStepId,
