@@ -90,7 +90,10 @@ function InboundDemo() {
 
       setMission(JSON.parse(JSON.stringify(nextMission)));
       setStatus('Mission running...');
-      await useMissionStore.getState().runMission();
+      const completedMission = await useMissionStore.getState().runMission();
+      if (completedMission?.status !== 'done') {
+        throw new Error('Inbound mission stopped before completion.');
+      }
       setStatus('Inbound mission completed.');
     } catch (error) {
       console.error('[OperatorPanel] Failed to run inbound mission:', error);
@@ -195,7 +198,10 @@ function OutboundDemo() {
 
       setMission(JSON.parse(JSON.stringify(nextMission)));
       setStatus('Mission running...');
-      await useMissionStore.getState().runMission();
+      const completedMission = await useMissionStore.getState().runMission();
+      if (completedMission?.status !== 'done') {
+        throw new Error('Outbound mission stopped before the box reached the exit.');
+      }
       setStatus('Outbound mission completed.');
     } catch (error) {
       console.error('[OperatorPanel] Failed to run outbound mission:', error);

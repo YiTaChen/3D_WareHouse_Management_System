@@ -34,7 +34,7 @@ export const conveyorMoveUntilBoxArrives = ({
       id,
       name,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId },
+      params: { conveyorId, boxId },
     })),
     createStep({
       id: waitStepId,

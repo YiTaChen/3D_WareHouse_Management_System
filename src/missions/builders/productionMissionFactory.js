@@ -60,7 +60,7 @@ const buildCrane2InboundConveyorTask = ({ boxId, conv1st, conv2nd, conv3rd }) =>
       id: 'step1.5',
       name: `${conv1st} conveyor rotate`,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv1st },
+      params: { conveyorId: conv1st, boxId },
     }),
     createStep({
       id: 'step2',
@@ -72,7 +72,7 @@ const buildCrane2InboundConveyorTask = ({ boxId, conv1st, conv2nd, conv3rd }) =>
       id: 'step2.5',
       name: `${conv2nd} conveyor rotate`,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv2nd },
+      params: { conveyorId: conv2nd, boxId },
     }),
     createStep({
       id: 'step3',
@@ -145,7 +145,7 @@ const buildCrane2OutboundConveyorTask = ({
       id: 'step1.5',
       name: `${conv1st} conveyor rotate`,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv1st },
+      params: { conveyorId: conv1st, boxId },
     }),
     createStep({
       id: 'step2',
@@ -157,7 +157,7 @@ const buildCrane2OutboundConveyorTask = ({
       id: 'step2.5',
       name: `${conv2nd} conveyor rotate`,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv2nd },
+      params: { conveyorId: conv2nd, boxId },
     }),
     createStep({
       id: 'step3',
@@ -169,19 +169,19 @@ const buildCrane2OutboundConveyorTask = ({
       id: 'step3.5',
       name: `${conv3rd} conveyor rotate `,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv3rd },
+      params: { conveyorId: conv3rd, boxId },
     }),
     createStep({
       id: 'step4',
       name: `${conv4th} conveyor rotate`,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv4th },
+      params: { conveyorId: conv4th, boxId },
     }),
     createStep({
       id: 'step5',
       name: `${conv5th} conveyor rotate`,
       functionKey: 'startConveyorRotate',
-      params: { conveyorId: conv5th },
+      params: { conveyorId: conv5th, boxId },
     }),
     createStep({
       id: 'step6',

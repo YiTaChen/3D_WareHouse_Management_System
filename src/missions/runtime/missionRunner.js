@@ -13,6 +13,13 @@ const setStepStatus = (mission, step, status, callbacks) => {
   notifyMissionChange(mission, callbacks);
 };
 
+const setExecutionError = (mission, task, step, callbacks) => {
+  step.status = 'error';
+  task.status = 'error';
+  mission.status = 'error';
+  notifyMissionChange(mission, callbacks);
+};
+
 export const runMission = async (mission, stepFunctions, callbacks = {}) => {
   if (!mission) return mission;
 
@@ -38,18 +45,18 @@ export const runMission = async (mission, stepFunctions, callbacks = {}) => {
 
       const stepFunction = stepFunctions?.[step.functionKey];
       if (!stepFunction) {
-        setStepStatus(mission, step, 'error', callbacks);
+        setExecutionError(mission, task, step, callbacks);
         return mission;
       }
 
       try {
         const result = await stepFunction(step.params);
         if (!result) {
-          setStepStatus(mission, step, 'error', callbacks);
+          setExecutionError(mission, task, step, callbacks);
           return mission;
         }
       } catch {
-        setStepStatus(mission, step, 'error', callbacks);
+        setExecutionError(mission, task, step, callbacks);
         return mission;
       }
 

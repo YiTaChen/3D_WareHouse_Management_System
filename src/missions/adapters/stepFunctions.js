@@ -59,7 +59,7 @@ export const stepFunctions = {
     try {
       await waitUntilArrived();
       return true;
-    } catch (e) {
+    } catch {
       console.warn(`[moveCraneTable] 等待 ${craneName} 移動完成時逾時`);
       return false;
     }
@@ -93,7 +93,7 @@ export const stepFunctions = {
     try {
       await waitUntilArrived();
       return true;
-    } catch (e) {
+    } catch {
       console.warn(`[moveCrane] 等待 ${craneName} 移動完成時逾時`);
       return false;
     }
@@ -116,7 +116,7 @@ export const stepFunctions = {
     return true;
   },
 
-  craneUnBindingBox: async ({ craneId, boxId }) => {
+  craneUnBindingBox: async ({ boxId }) => {
     const unbindFn = useBoxStore.getState().clearBoxBoundToMoveplate;
 
     if (!unbindFn) {
@@ -150,7 +150,7 @@ export const stepFunctions = {
     return true;
   },
 
-  startConveyorRotate: async ({ conveyorId }) => {
+  startConveyorRotate: async ({ conveyorId, boxId }) => {
     // 如果 conveyorId 是 'pass'，則不執行旋轉
     if (conveyorId != 'pass') {
       const setStartFn = useConveyorStore.getState().setConveyorRotate;
@@ -162,6 +162,11 @@ export const stepFunctions = {
 
       // 執行開始旋轉
       setStartFn(conveyorId, true);
+
+      // Outbound boxes may have gone to sleep while waiting on a stopped conveyor.
+      if (boxId) {
+        useBoxStore.getState().wakeUpBox(boxId);
+      }
     }
     // 模擬等待：固定等待 1 秒
     await new Promise((resolve) => setTimeout(resolve, 1000));

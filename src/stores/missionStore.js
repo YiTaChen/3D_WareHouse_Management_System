@@ -11,7 +11,7 @@ export const useMissionStore = create((set, get) => ({
     const mission = get().mission;
     if (!mission) return;
 
-    await runRuntimeMission(mission, stepFunctions, {
+    return runRuntimeMission(mission, stepFunctions, {
       onMissionChange: (updatedMission) => set({ mission: updatedMission }),
     });
   },

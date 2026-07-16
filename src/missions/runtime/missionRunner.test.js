@@ -106,8 +106,8 @@ test('return false marks the step error and stops', async () => {
   await runMission(mission, stepFunctions);
 
   assert.deepEqual(calls, ['first']);
-  assert.equal(mission.status, 'running');
-  assert.equal(mission.tasks[0].status, 'running');
+  assert.equal(mission.status, 'error');
+  assert.equal(mission.tasks[0].status, 'error');
   assert.equal(mission.tasks[0].steps[0].status, 'error');
   assert.equal(mission.tasks[0].steps[1].status, 'idle');
   assert.equal(mission.tasks[1].status, 'idle');
@@ -127,6 +127,8 @@ test('unknown functionKey marks the step error and stops', async () => {
   await runMission(mission, stepFunctions);
 
   assert.deepEqual(calls, []);
+  assert.equal(mission.status, 'error');
+  assert.equal(mission.tasks[0].status, 'error');
   assert.equal(mission.tasks[0].steps[0].status, 'error');
   assert.equal(mission.tasks[0].steps[1].status, 'idle');
   assert.equal(mission.tasks[1].status, 'idle');
@@ -149,6 +151,8 @@ test('throw marks the step error and stops', async () => {
   await runMission(mission, stepFunctions);
 
   assert.deepEqual(calls, ['first']);
+  assert.equal(mission.status, 'error');
+  assert.equal(mission.tasks[0].status, 'error');
   assert.equal(mission.tasks[0].steps[0].status, 'error');
   assert.equal(mission.tasks[0].steps[1].status, 'idle');
 });

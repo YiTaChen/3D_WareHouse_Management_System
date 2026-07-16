@@ -32,6 +32,18 @@ const flattenStepFields = (mission) =>
     })),
   );
 
+const withConveyorWakeBoxIds = (mission, boxId) => {
+  const updatedMission = structuredClone(mission);
+  updatedMission.tasks.forEach((task) => {
+    task.steps.forEach((step) => {
+      if (step.functionKey === 'startConveyorRotate') {
+        step.params.boxId = boxId;
+      }
+    });
+  });
+  return updatedMission;
+};
+
 const assertSameImportantShape = (actual, expected) => {
   assert.equal(actual.id, expected.id);
   assert.equal(actual.name, expected.name);
@@ -52,7 +64,7 @@ test('buildInboundProductionMission matches legacy inbound task shape', () => {
 
   assertSameImportantShape(
     buildInboundProductionMission(params),
-    inboundTemplateFunction(params),
+    withConveyorWakeBoxIds(inboundTemplateFunction(params), params.boxId),
   );
 });
 
@@ -64,7 +76,7 @@ test('buildInboundProductionMission matches legacy crane2 inbound task shape', (
 
   assertSameImportantShape(
     buildInboundProductionMission({ ...params, useCrane2ConveyorSequence: true }),
-    inboundTemplateFunctionForCrane2(params),
+    withConveyorWakeBoxIds(inboundTemplateFunctionForCrane2(params), params.boxId),
   );
 });
 
@@ -76,7 +88,7 @@ test('buildOutboundProductionMission matches legacy outbound task shape', () => 
 
   assertSameImportantShape(
     buildOutboundProductionMission(params),
-    outboundTemplateFunction(params),
+    withConveyorWakeBoxIds(outboundTemplateFunction(params), params.boxId),
   );
 });
 
@@ -88,6 +100,6 @@ test('buildOutboundProductionMission matches legacy crane2 outbound task shape',
 
   assertSameImportantShape(
     buildOutboundProductionMission({ ...params, useCrane2ConveyorSequence: true }),
-    outboundTemplateFunctionForCrane2(params),
+    withConveyorWakeBoxIds(outboundTemplateFunctionForCrane2(params), params.boxId),
   );
 });
