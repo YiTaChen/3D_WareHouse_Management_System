@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useLayoutEffect, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
@@ -15,7 +15,7 @@ function getLocalBoundingBoxSize(mesh) {
   return size.toArray();
 }
 
-export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }) {
+export default function MoveTable({ id, craneWorldRotation }) {
   const { scene } = useGLTF('/moveTable_ver2.gltf');
 
   // 取出 movePlate Mesh 與碰撞體尺寸
@@ -41,10 +41,6 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
 
 
   // Zustand 讀取狀態
-  const currentMoveTableLocalOffset = useCraneStore(state => state.getCraneState(id).currentMoveTableLocalOffset);
-  const targetMoveTableLocalOffset = useCraneStore(state => state.getCraneState(id).targetMoveTableLocalOffset);
-  const moveTableSpeed = useCraneStore(state => state.getCraneState(id).moveTableSpeed);
-  const isCraneMoving = useCraneStore(state => state.getCraneState(id).isCraneMoving);
   const setMoveTableRef = useCraneStore(state => state.setMoveTableRef);
   const updateMoveTableCurrentLocalOffset = useCraneStore(state => state.updateMoveTableCurrentLocalOffset);
 
@@ -61,12 +57,27 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
     userData: { id: `movePlate-${id}`, args: moveTableLocalProps.args },
   }));
   const lastPhysicsInputs = useRef(null);
+  const moveTableVisualRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const craneState = useCraneStore.getState().getCraneState(id);
+    if (!craneState || !moveTableVisualRef.current) return;
+
+    const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
+    const worldPosition = craneState.currentCranePosition.clone().add(
+      craneState.currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat),
+    );
+
+    moveTableVisualRef.current.position.copy(worldPosition);
+    moveTableVisualRef.current.quaternion.copy(craneQuat);
+  }, [craneWorldRotation, id]);
 
   // 在 Ref 有效時，註冊進 Store
   useEffect(() => {
     if (moveTableRef.current && moveTableApi) {
       setMoveTableRef(id, {
         ref: moveTableRef,
+        visualRef: moveTableVisualRef,
         api: moveTableApi,
         isReady: true,
       });
@@ -78,45 +89,62 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
   useFrame((_, delta) => {
     if (!moveTableApi) return;
 
+    const liveCraneState = useCraneStore.getState().getCraneState(id);
+    if (!liveCraneState) return;
+
+    const liveCranePosition = liveCraneState.currentCranePosition;
+    const liveTableOffset = liveCraneState.currentMoveTableLocalOffset;
+    const shouldMoveTable = !liveCraneState.isCraneMoving
+      && !liveTableOffset.equals(liveCraneState.targetMoveTableLocalOffset);
+    let nextTableOffset = liveTableOffset;
+
+    if (shouldMoveTable) {
+      const distance = liveTableOffset.distanceTo(liveCraneState.targetMoveTableLocalOffset);
+      const moveDistance = liveCraneState.moveTableSpeed * delta;
+
+      nextTableOffset = moveDistance >= distance
+        ? liveCraneState.targetMoveTableLocalOffset
+        : liveTableOffset.clone().add(
+          liveCraneState.targetMoveTableLocalOffset
+            .clone()
+            .sub(liveTableOffset)
+            .normalize()
+            .multiplyScalar(moveDistance)
+        );
+
+      updateMoveTableCurrentLocalOffset(id, nextTableOffset.toArray());
+    }
+
     const nextInputs = [
-      ...craneWorldPosition,
+      ...liveCranePosition.toArray(),
       ...craneWorldRotation,
-      ...currentMoveTableLocalOffset.toArray(),
+      ...nextTableOffset.toArray(),
     ];
     const inputsChanged = !lastPhysicsInputs.current || nextInputs.some(
       (value, index) => value !== lastPhysicsInputs.current[index]
     );
 
-    if (inputsChanged) {
-      const cranePos = new THREE.Vector3(...craneWorldPosition);
-      const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
-      const localOffset = currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat);
-      const worldPos = cranePos.add(localOffset);
+    const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
+    const localOffset = nextTableOffset.clone().applyQuaternion(craneQuat);
+    const worldPos = liveCranePosition.clone().add(localOffset);
 
+    if (moveTableVisualRef.current) {
+      moveTableVisualRef.current.position.copy(worldPos);
+      moveTableVisualRef.current.quaternion.copy(craneQuat);
+    }
+
+    if (inputsChanged) {
       moveTableApi.position.set(worldPos.x, worldPos.y, worldPos.z);
       moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w);
       lastPhysicsInputs.current = nextInputs;
     }
-
-    const shouldMoveTable = !isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset);
-    if (shouldMoveTable) {
-      const distance = currentMoveTableLocalOffset.distanceTo(targetMoveTableLocalOffset);
-      const moveDistance = moveTableSpeed * delta;
-
-      if (moveDistance >= distance) {
-        updateMoveTableCurrentLocalOffset(id, targetMoveTableLocalOffset.toArray());
-      } else {
-        const direction = targetMoveTableLocalOffset.clone().sub(currentMoveTableLocalOffset).normalize();
-        const newOffset = currentMoveTableLocalOffset.clone().add(direction.multiplyScalar(moveDistance));
-        updateMoveTableCurrentLocalOffset(id, newOffset.toArray());
-      }
-    }
-  });
+  }, -1);
 
   return (
     <>
+      <group ref={moveTableRef} visible={false} />
       {moveTableMesh && (
-        <group ref={moveTableRef}>
+        <group ref={moveTableVisualRef}>
           <primitive object={moveTableMesh} />
           {moveTableLocalProps?.args && (
             <mesh>

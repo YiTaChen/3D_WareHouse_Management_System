@@ -18,10 +18,10 @@ This file is a quick index. Detailed notes live in `functions/*.md`.
 - `src/components/ConveyorExtras.jsx`
   - `ConveyorExtras(...)` -> conveyor sensors and light color.
 - `src/components/Crane.jsx`
-  - `Crane({ id, modelPath, position, rotation })` -> crane body movement + move table + sensor.
+  - `Crane({ id, modelPath, rotation })` -> direct visible crane movement + hidden physics body + move table + sensor.
   - `getLocalBoundingBoxSize()` -> local bbox helper.
 - `src/components/MoveTable.jsx`
-  - `MoveTable({ id, craneWorldPosition, craneWorldRotation })` -> crane move table physics body.
+  - `MoveTable({ id, craneWorldRotation })` -> direct visible move table movement + hidden physics body.
 - `src/components/CraneInvisibleBulkSensor.jsx`
   - `CraneInvisibleBulkSensor(...)` -> crane sensor collision logic.
 - `src/components/BoxBindingUpdater.jsx`

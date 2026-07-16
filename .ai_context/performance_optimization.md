@@ -17,6 +17,7 @@ This document records the changes that reduced idle GPU/CPU/physics cost without
 - `a2ef27d Restore reliable conveyor transitions`: restored exact 16-segment per-roller colliders after approximate stopped-conveyor geometry blocked inbound transfer.
 - `2ee8372 Wake outbound boxes with conveyors`: wakes sleeping outbound box bodies when their conveyor starts.
 - `4a8d57f Drive boxes onto outbound exits`: briefly drives the final destination conveyor, stops it after confirmed arrival, and propagates failed mission state correctly.
+- 450-shelf animation follow-up: decoupled visible crane/move-table transforms from delayed Cannon worker transforms and made frame callback order explicit.
 
 ## Original performance problem
 
@@ -72,6 +73,8 @@ Typical idle state now has 152 static roller bodies rather than 152 continuously
 
 - `Crane.jsx` does movement work only while the crane has a target movement.
 - `MoveTable.jsx` sends position/quaternion updates only when crane position, crane rotation, or table offset changed.
+- Visible crane and move-table groups follow mission/store state directly; their hidden kinematic Cannon bodies still receive the same transforms for collision behavior.
+- Crane movement runs at `useFrame` priority `-2` and move-table following runs at `-1`. Keep this order so the table uses the crane's new position in the same frame.
 - `CraneInvisibleBulkSensor.jsx` avoids unchanged transform writes.
 - `Shelf.jsx` throttles culling checks to at most four times per second and skips recomputation when the camera and loaded batches did not change.
 - Broad, unused Zustand subscriptions and legacy handlers were removed from `App.jsx`.
@@ -104,6 +107,7 @@ The verified implementation groups the 18 contiguous X positions for each `(Y, Z
 - At the tested camera, desktop draw calls dropped from 1042 to 492 and a 390 x 844 mobile viewport dropped from 850 to 339.
 - Both desktop and mobile viewport tests held the intentional 30 FPS steady-state cap.
 - A development-only probe is available at `?perf=1`; it writes R3F FPS, max frame gap, draw calls, triangles, geometries, and textures to `data-warehouse-perf` on the root element.
+- The same probe writes mission/store positions, visible crane positions, visible move-table positions, targets, and moving flags to `data-warehouse-motion`.
 
 ### Mission timing baseline
 
@@ -115,6 +119,24 @@ Measured with a clean temporary SQLite database and isolated local frontend/back
 - Far/high `shelf090` (`x=36`, `y=8`, `z=-8`) inbound: 31.66 seconds.
 - `shelf090` outbound: 38.96 seconds.
 - The extra `shelf090` time is expected travel distance, not lag; mission FPS remained approximately 30 and both directions completed.
+
+Animation follow-up after decoupling visible transforms from Cannon worker feedback:
+
+- `shelf090` inbound: 31.23 seconds, minimum sampled FPS 29.04.
+- `shelf090` outbound: 38.14 seconds, minimum sampled FPS 29.98.
+- Maximum sampled visible crane/store position error: `0`.
+- Maximum sampled visible move-table/expected world position error after explicit frame ordering: `0`.
+
+### Crane and move-table animation contract
+
+At 450 shelves, mission/store state could advance normally while Cannon worker transform messages arrived late. The task completed and the equipment returned home, but the visible crane or move table appeared to pause or jump.
+
+- Keep visible GLTF groups separate from the hidden kinematic Cannon groups.
+- Update visible transforms from live `craneStore` state in `useFrame`; do not make visible equipment depend on Cannon worker feedback.
+- Send the same computed transform to Cannon so collisions remain aligned.
+- Do not add a declarative initial `position` prop to the move-table visual group. Parent rerenders can reapply it during motion and cause visible jumps.
+- Preserve callback priorities: crane `-2`, move table `-1`, binding/probes/default work `0`.
+- When debugging, compare `current` with `visual`, and `current + tableCurrent` with `tableVisual`, in `data-warehouse-motion`.
 
 Residual note: initial scene setup can show one roughly 300 ms frame gap while the warehouse is loading. Steady state and mission execution recover to 30 FPS; do not confuse that one-time load spike with mission-time lag.
 
@@ -200,4 +222,5 @@ For any conveyor, roller, physics timestep, sleep, collider, GLTF transform, or 
 7. Check turned/sloped route components (`conv14`, `conv16`, `conv17`).
 8. Treat `checkBoxOnEquipment` timeout as a failure even if the box appears visually close.
 9. Check browser console warnings/errors.
-10. Re-run all mission tests and the production build.
+10. During crane travel, verify the crane and move table move continuously and remain aligned; do not rely only on mission completion status.
+11. Re-run all mission tests and the production build.

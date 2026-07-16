@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { useCraneStore } from '../stores/craneStore';
 
 export default function PerformanceProbe({ enabled }) {
   const gl = useThree((state) => state.gl);
@@ -29,6 +30,25 @@ export default function PerformanceProbe({ enabled }) {
       textures: gl.info.memory.textures,
       sampledAt: Date.now(),
     });
+    document.documentElement.dataset.warehouseMotion = JSON.stringify(
+      Object.fromEntries(
+        Object.entries(useCraneStore.getState().craneStates).map(([id, crane]) => {
+          const craneRef = useCraneStore.getState().craneRefs[id]?.ref?.current;
+          const tableRef = crane.moveTableRef?.visualRef?.current;
+
+          return [id, {
+            current: crane.currentCranePosition.toArray(),
+            target: crane.targetCranePosition.toArray(),
+            visual: craneRef?.position.toArray() || null,
+            tableCurrent: crane.currentMoveTableLocalOffset.toArray(),
+            tableTarget: crane.targetMoveTableLocalOffset.toArray(),
+            tableVisual: tableRef?.position.toArray() || null,
+            craneMoving: crane.isCraneMoving,
+            tableMoving: crane.isMoveTableMoving,
+          }];
+        }),
+      ),
+    );
 
     sample.startedAt = now;
     sample.frames = 0;

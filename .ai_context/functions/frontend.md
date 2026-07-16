@@ -105,12 +105,13 @@ Do not replace stopped rollers with one box collider. That optimization was test
 
 ## `src/components/Crane.jsx`
 
-`Crane({ id, modelPath, position, rotation })`
+`Crane({ id, modelPath, rotation })`
 
 - Loads `/Crane_ver1.gltf` by default.
 - Clones crane scene and removes `movePlate` and `CraneInvisibleBulkSensor` from the visual body.
-- Creates a kinematic box body for crane.
-- Uses `useFrame` to move toward `targetCranePosition`.
+- Creates a hidden kinematic box body for crane collisions and a separate visible GLTF group.
+- Uses `useFrame` priority `-2` to move both store state and the visible group toward `targetCranePosition`, then sends the same position to Cannon.
+- Registers the visible ref in `craneStore.craneRefs` for diagnostics.
 - Renders `MoveTable` and `CraneInvisibleBulkSensor`.
 
 Helper:
@@ -125,12 +126,13 @@ Store dependencies:
 
 ## `src/components/MoveTable.jsx`
 
-`MoveTable({ id, craneWorldPosition, craneWorldRotation })`
+`MoveTable({ id, craneWorldRotation })`
 
 - Loads `/moveTable_ver2.gltf`.
-- Builds kinematic body for the crane move table.
-- Registers its ref/api with `craneStore.setMoveTableRef(id, data)`.
-- Uses current crane position plus local offset to compute move table world position.
+- Builds a hidden kinematic body and a separate visible group for the crane move table.
+- Registers its physics ref/api and visible ref with `craneStore.setMoveTableRef(id, data)`.
+- Uses current crane position plus local offset to compute move table world position at `useFrame` priority `-1`.
+- Updates the visible group directly before sending changed transforms to Cannon, avoiding worker-feedback animation stalls.
 - Works with `BoxBindingUpdater` for box carrying.
 
 ## `src/components/CraneInvisibleBulkSensor.jsx`

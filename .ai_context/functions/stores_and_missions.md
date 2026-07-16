@@ -100,7 +100,7 @@ Actions:
 State:
 
 - `craneStates`: object keyed by crane id.
-- `craneRefs`
+- `craneRefs`: visible crane refs used by the development motion probe.
 
 Each crane state:
 
@@ -114,7 +114,7 @@ Each crane state:
 - `moveTableSpeed`
 - `isCraneMoving`
 - `isMoveTableMoving`
-- `moveTableRef`
+- `moveTableRef`: physics ref/api plus `visualRef` for the visible move table.
 
 Helpers:
 
