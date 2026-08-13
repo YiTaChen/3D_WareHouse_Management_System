@@ -26,6 +26,8 @@ between test iterations, before the final clean run.
 
 ## Rail coverage
 
+- Active rail: low-profile grey `asrs_single_guide_rail_4m.glb`
+- Preserved alternative: train-style `asrs_ground_rail_4m.glb`
 - Segment centers: X = -4, 0, 4, 8, 12
 - Segment length: 4 m
 - Continuous rail extent: X = -6 through 14
@@ -34,6 +36,15 @@ between test iterations, before the final clean run.
 
 The rail therefore continues 1 m beyond the final shelf cell. Browser inspection
 confirmed crane003 remained centered over the rail while servicing shelf078.
+The 2026-08-13 visual revision changed only the displayed rail profile, keeping these
+centers and extents unchanged.
+
+## Single-guide-rail browser retest
+
+- All three crane lanes rendered the new narrow grey single guide rail.
+- No train-style sleepers or double running rail appeared in the runtime scene.
+- crane003 completed inbound and outbound at shelf078 after the rail asset switch.
+- The final browser log contained no warnings or errors.
 
 ## Clearance checks
 

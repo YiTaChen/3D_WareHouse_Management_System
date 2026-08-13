@@ -92,11 +92,28 @@ def validate_rail() -> None:
     assert_no_exported_collision_proxies()
 
 
+def validate_single_guide_rail() -> None:
+    import_glb("asrs_single_guide_rail_4m.glb")
+    require("ASRS_Single_Guide_Rail_4m")
+    require("GuideFoundation")
+    require("GuideWeb")
+    require("GuideHead")
+    guide_bounds = scene_mesh_bounds()
+    guide_length = guide_bounds[1].x - guide_bounds[0].x
+    guide_width = guide_bounds[1].y - guide_bounds[0].y
+    guide_height = guide_bounds[1].z - guide_bounds[0].z
+    assert 3.99 <= guide_length <= 4.01, guide_length
+    assert guide_width <= 0.35, guide_width
+    assert guide_height <= 0.15, guide_height
+    assert_no_exported_collision_proxies()
+
+
 def main() -> None:
     validate_body()
     validate_fork()
     validate_rail()
-    print("AS/RS GLB validation passed: 2 m cell, 1 m load, double-tine fork, 4 m modular rail")
+    validate_single_guide_rail()
+    print("AS/RS GLB validation passed: fitted crane/fork, preserved double rail, active low-profile single guide rail")
 
 
 if __name__ == "__main__":

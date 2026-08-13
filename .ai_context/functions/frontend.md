@@ -250,6 +250,6 @@ The following supersedes the older crane/move-table descriptions above:
 - MoveTable loads public/asrs_fork_table.glb. Its movePlate root lifts on local Y and extends toward either rack on local Z.
 - CraneInvisibleBulkSensor follows the moving fork offset, not just the crane body.
 - BoxBindingUpdater uses the configured 0.58 m Pallet_Load_Anchor offset, keeping a 1 m load centered between 1.22 m-spaced mast inner faces.
-- CraneRail loads independent public/asrs_ground_rail_4m.glb segments and repeats them every 4 m along X. Add segments to extend a route; do not scale or bind the rail to the crane.
+- CraneRail loads independent public/asrs_single_guide_rail_4m.glb segments and repeats them every 4 m along X. Add segments to extend a route; do not scale or bind the rail to the crane. The visually heavier public/asrs_ground_rail_4m.glb remains a preserved alternative and is not active at runtime.
 - The fitted fork collider is 0.86 x 0.12 x 0.90 m, with visible double tines only 0.60 m wide.
 - The operator inbound flow snaps and sleeps a released box at the selected shelf center after the physics mission, persists that settled position, and records the selected destination. Outbound wakes it through the normal crane/conveyor flow and clears that occupancy after exit. This prevents residual motion or transient overlapping sensor events from selecting the wrong crane lane.

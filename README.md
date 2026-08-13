@@ -252,7 +252,7 @@ These APIs power the top-right `DB` switcher. They are enabled automatically for
 
 ## Fitted AS/RS crane assets
 
-The warehouse uses a pallet stacker crane fitted to the existing 2 m shelf grid and 1 m box envelope. The crane body, double-tine fork, and grey 4 m modular rail are separate GLB assets, so the rail can be repeated indefinitely along X.
+The warehouse uses a pallet stacker crane fitted to the existing 2 m shelf grid and 1 m box envelope. The crane body, double-tine fork, and rail are separate GLB assets, so the rail can be repeated indefinitely along X. Runtime uses the subtle grey `asrs_single_guide_rail_4m.glb`; the wider train-style `asrs_ground_rail_4m.glb` remains available as a preserved alternative.
 
 Regenerate and verify:
 

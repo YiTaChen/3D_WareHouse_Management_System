@@ -42,11 +42,34 @@
     "repeat_axis_threejs": "X",
     "segment_length_m": 4.0,
     "rail_gauge_m": 0.9,
+    "style": "double_running_rail_with_sleepers",
+    "runtime_active": false,
+    "preserved_for_future_use": true
+  },
+  "single_guide_rail": {
+    "file": "asrs_single_guide_rail_4m.glb",
+    "root": "ASRS_Single_Guide_Rail_4m",
+    "repeat_axis_threejs": "X",
+    "segment_length_m": 4.0,
+    "maximum_width_m": 0.34,
+    "profile_height_m": 0.142,
+    "style": "low_profile_grey_single_guide",
+    "runtime_active": true,
     "placement": "segment center X = n * 4.0 with identical Y/Z/rotation/scale",
-    "runtime_centers_x_m": [-4, 0, 4, 8, 12],
-    "runtime_extent_x_m": [-6, 14],
+    "runtime_centers_x_m": [
+      -4,
+      0,
+      4,
+      8,
+      12
+    ],
+    "runtime_extent_x_m": [
+      -6,
+      14
+    ],
     "last_shelf_cell_outer_edge_x_m": 13
   },
+  "active_runtime_rail": "single_guide_rail",
   "clearance": {
     "centered_box_to_each_mast_m": 0.11,
     "fork_to_each_mast_m": 0.31,

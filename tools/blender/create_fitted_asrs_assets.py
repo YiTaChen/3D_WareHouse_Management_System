@@ -27,6 +27,7 @@ PREVIEW_DIR = ROOT / "assets" / "previews"
 BODY_GLB = PUBLIC / "asrs_stacker_crane_body.glb"
 FORK_GLB = PUBLIC / "asrs_fork_table.glb"
 RAIL_GLB = PUBLIC / "asrs_ground_rail_4m.glb"
+SINGLE_GUIDE_RAIL_GLB = PUBLIC / "asrs_single_guide_rail_4m.glb"
 MANIFEST = PUBLIC / "asrs_asset_manifest.json"
 BLEND = BLENDER_DIR / "asrs_stacker_crane_fitted.blend"
 PREVIEW = PREVIEW_DIR / "asrs_stacker_crane_fitted.png"
@@ -75,6 +76,9 @@ def materials() -> dict[str, bpy.types.Material]:
         "rail": material("Rail Grey", (0.16, 0.18, 0.20, 1.0), 0.90, 0.25),
         "rail_side": material("Rail Side", (0.07, 0.08, 0.09, 1.0), 0.82, 0.32),
         "sleeper": material("Rail Sleeper", (0.30, 0.31, 0.32, 1.0), 0.30, 0.52),
+        "guide_grey": material("Guide Rail Grey", (0.32, 0.35, 0.37, 1.0), 0.82, 0.30),
+        "guide_side": material("Guide Rail Side Grey", (0.21, 0.23, 0.25, 1.0), 0.76, 0.38),
+        "guide_anchor": material("Guide Rail Anchor Grey", (0.27, 0.29, 0.30, 1.0), 0.58, 0.46),
         "blue": material("Control Blue", (0.018, 0.10, 0.16, 1.0), 0.48, 0.34),
         "white": material("Cabinet White", (0.82, 0.84, 0.82, 1.0), 0.12, 0.43),
         "green": material("Indicator Green", (0.02, 0.62, 0.12, 1.0), 0.12, 0.28),
@@ -355,6 +359,38 @@ def build_rail(target: bpy.types.Collection, collider_target: bpy.types.Collecti
     return root
 
 
+def build_single_guide_rail(target: bpy.types.Collection) -> bpy.types.Object:
+    """Build a subtle floor-level guide rail without train-style sleepers."""
+    mat = materials()
+    root = empty("ASRS_Single_Guide_Rail_4m", target, size=0.18)
+    root["asset_type"] = "warehouse_fitted_single_guide_rail"
+    root["origin"] = "segment_center_at_floor"
+    root["units"] = "meters"
+    root["threejs_repeat_axis"] = "X"
+    root["segment_length_m"] = 4.0
+    root["profile_height_m"] = 0.142
+    root["maximum_width_m"] = 0.34
+    root["style"] = "low_profile_grey_single_guide"
+    root["placement_rule"] = "segment center X = n * 4.0"
+
+    # The 26 cm foundation and 14 cm head stay visually subordinate to the
+    # stacker crane. Short flush clamps replace the wide railway sleepers.
+    cube("GuideFoundation", (0.0, 0.0, 0.025), (4.0, 0.26, 0.035), mat["guide_anchor"], target, root, 0.008)
+    cube("GuideWeb", (0.0, 0.0, 0.074), (4.0, 0.08, 0.075), mat["guide_side"], target, root, 0.008)
+    cube("GuideHead", (0.0, 0.0, 0.124), (4.0, 0.14, 0.035), mat["guide_grey"], target, root, 0.010)
+    for index, x in enumerate((-1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75)):
+        cube(
+            f"GuideAnchorPlate_{index:02d}",
+            (x, 0.0, 0.018),
+            (0.10, 0.34, 0.022),
+            mat["guide_anchor"],
+            target,
+            root,
+            0.006,
+        )
+    return root
+
+
 def export_collection(target: bpy.types.Collection, path: Path) -> None:
     bpy.ops.object.select_all(action="DESELECT")
     for obj in target.all_objects:
@@ -449,11 +485,25 @@ def write_manifest() -> None:
             "repeat_axis_threejs": "X",
             "segment_length_m": 4.0,
             "rail_gauge_m": 0.90,
+            "style": "double_running_rail_with_sleepers",
+            "runtime_active": False,
+            "preserved_for_future_use": True,
+        },
+        "single_guide_rail": {
+            "file": SINGLE_GUIDE_RAIL_GLB.name,
+            "root": "ASRS_Single_Guide_Rail_4m",
+            "repeat_axis_threejs": "X",
+            "segment_length_m": 4.0,
+            "maximum_width_m": 0.34,
+            "profile_height_m": 0.142,
+            "style": "low_profile_grey_single_guide",
+            "runtime_active": True,
             "placement": "segment center X = n * 4.0 with identical Y/Z/rotation/scale",
             "runtime_centers_x_m": [-4, 0, 4, 8, 12],
             "runtime_extent_x_m": [-6, 14],
             "last_shelf_cell_outer_edge_x_m": 13,
         },
+        "active_runtime_rail": "single_guide_rail",
         "clearance": {
             "centered_box_to_each_mast_m": 0.11,
             "fork_to_each_mast_m": 0.31,
@@ -473,17 +523,19 @@ def main() -> None:
     body_collection = collection("ASRS_BODY_ASSET")
     fork_collection = collection("ASRS_FORK_ASSET")
     rail_collection = collection("ASRS_RAIL_ASSET")
+    single_guide_rail_collection = collection("ASRS_SINGLE_GUIDE_RAIL_ASSET")
     collider_collection = collection("ASRS_COLLISION_PROXIES")
     environment_collection = collection("PREVIEW_ONLY")
 
     body = build_body(body_collection, collider_collection)
     fork = build_fork(fork_collection, collider_collection)
     build_rail(rail_collection, collider_collection)
+    build_single_guide_rail(single_guide_rail_collection)
     fork.location = (4.0, -1.55, 4.10)
     body.location.x = 4.0
     for segment_x in (0.0, 4.0, 8.0):
         segment_collection = collection(f"RAIL_PREVIEW_{int(segment_x)}")
-        rail = build_rail(segment_collection)
+        rail = build_single_guide_rail(segment_collection)
         rail.location.x = segment_x
 
     # Export clean source collections before preview transforms can matter.
@@ -492,6 +544,12 @@ def main() -> None:
     export_collection(body_collection, BODY_GLB)
     export_collection(fork_collection, FORK_GLB)
     export_collection(rail_collection, RAIL_GLB)
+    export_collection(single_guide_rail_collection, SINGLE_GUIDE_RAIL_GLB)
+
+    # Keep both rail source collections editable in the .blend while rendering
+    # only the repeated active guide-rail preview segments.
+    rail_collection.hide_render = True
+    single_guide_rail_collection.hide_render = True
 
     body.location.x = 4.0
     fork.location = (4.0, -1.55, 4.10)
@@ -512,6 +570,7 @@ def main() -> None:
     print(f"Created {BODY_GLB}")
     print(f"Created {FORK_GLB}")
     print(f"Created {RAIL_GLB}")
+    print(f"Created {SINGLE_GUIDE_RAIL_GLB}")
     print(f"Created {MANIFEST}")
     print(f"Created {BLEND}")
     print(f"Created {PREVIEW}")

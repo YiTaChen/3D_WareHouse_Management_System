@@ -41,8 +41,13 @@ test('manifest and runtime use the same axes and dimensions', () => {
   assert.equal(manifest.fork.outer_width_m, CRANE_CONSTANTS.FORK_OUTER_WIDTH);
   assert.equal(manifest.fork.tine_length_m, CRANE_CONSTANTS.FORK_TINE_LENGTH);
   assert.equal(manifest.body.mast_inner_clearance_m, CRANE_CONSTANTS.MAST_INNER_CLEARANCE);
-  assert.equal(manifest.rail.repeat_axis_threejs, 'X');
-  assert.equal(manifest.rail.segment_length_m, 4);
+  assert.equal(manifest.active_runtime_rail, 'single_guide_rail');
+  assert.equal(manifest.single_guide_rail.repeat_axis_threejs, 'X');
+  assert.equal(manifest.single_guide_rail.segment_length_m, 4);
+  assert.equal(manifest.single_guide_rail.file, CRANE_CONSTANTS.ACTIVE_RAIL_MODEL_PATH.slice(1));
+  assert.equal(manifest.single_guide_rail.runtime_active, true);
+  assert.equal(manifest.rail.runtime_active, false);
+  assert.equal(manifest.rail.preserved_for_future_use, true);
 });
 
 test('crane base remains on rail while fork lift targets shelf level', () => {
@@ -64,11 +69,16 @@ test('modular rail reaches beyond the final shelf cell', () => {
   assert.equal(railStart, -6);
   assert.equal(railEnd, 14);
   assert.ok(railEnd > lastShelfOuterEdge);
-  assert.equal(manifest.rail.segment_length_m, RAIL_SEGMENT_LENGTH);
+  assert.equal(manifest.single_guide_rail.segment_length_m, RAIL_SEGMENT_LENGTH);
 });
 
 test('all generated runtime assets exist and are non-empty', async () => {
-  for (const asset of [manifest.body.file, manifest.fork.file, manifest.rail.file]) {
+  for (const asset of [
+    manifest.body.file,
+    manifest.fork.file,
+    manifest.single_guide_rail.file,
+    manifest.rail.file,
+  ]) {
     const details = await stat(new URL('../../public/' + asset, import.meta.url));
     assert.ok(details.size > 1_000, asset);
   }
