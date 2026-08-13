@@ -6,15 +6,15 @@ import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
 import MoveTable from './MoveTable';
 import CraneInvisibleBulkSensor from './CraneInvisibleBulkSensor';
+import { CRANE_CONSTANTS } from '../constants/craneConfig.js';
 
 
 export default function Crane({
   id,
   modelPath,
   moveTableModelPath,
-  bodyColliderSize = [1.7, 0.55, 1.1],
-  moveTableColliderSize = [0.86, 0.12, 0.9],
-  sensorSize = [0.92, 1, 0.92],
+  bodyColliderSize = [0.1, 0.1, 0.1],
+  moveTableColliderSize = [2, 0.02, 2],
   rotation,
 }) {
   const { scene } = useGLTF(modelPath || '/asrs_stacker_crane_body.glb');
@@ -63,7 +63,9 @@ export default function Crane({
     mass: 0, 
     material: 'CraneMeshBody',
     type: 'Kinematic', 
-    position: currentCranePosition.toArray(), // 初始位置從 store 獲取
+    // Only the new tall visual body is projected onto the ground rail. The
+    // logical Y used by the original plateTable mission remains untouched.
+    position: [currentCranePosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, currentCranePosition.z],
     rotation: rotation, 
     args: bodyColliderSize,
     userData: { id: `craneBody-${id}` }
@@ -72,7 +74,11 @@ export default function Crane({
   useEffect(() => {
     // 這個 useEffect 僅用於首次掛載時，確保物理體位置與 store 初始值同步
     if (craneApi && currentCranePosition && !hasSetInitialPosition.current) {
-      craneApi.position.set(currentCranePosition.x, currentCranePosition.y, currentCranePosition.z);
+      craneApi.position.set(
+        currentCranePosition.x,
+        CRANE_CONSTANTS.CRANE_BODY_RAIL_Y,
+        currentCranePosition.z,
+      );
       hasSetInitialPosition.current = true; 
       // console.log(`[Crane.jsx useEffect] Setting initial physical position for ${id} to:`, currentCranePosition.toArray());
     }
@@ -98,7 +104,7 @@ export default function Crane({
       );
 
     updateCraneCurrentPosition(id, newPosition.toArray());
-    craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
+    craneApi.position.set(newPosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, newPosition.z);
   });
 
 
@@ -132,7 +138,6 @@ export default function Crane({
           id={id}
           craneWorldPosition={currentCranePosition.toArray()}
           craneWorldRotation={rotation}
-          sensorSize={sensorSize}
         />
     </>  
   );

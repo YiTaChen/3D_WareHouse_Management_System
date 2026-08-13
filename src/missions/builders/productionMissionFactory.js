@@ -1,11 +1,5 @@
 import { getCraneOperatingZ, getShelfIsTakeLeft } from '../config/shelfRules.js';
 import {
-  CRANE_CONSTANTS,
-  getPortLiftRelativeOffset,
-  getShelfLiftRelativeOffset,
-  toCraneBasePosition,
-} from '../../constants/craneConfig.js';
-import {
   conveyorMoveToExit,
   conveyorMoveUntilBoxArrives,
   craneMoveTo,
@@ -24,39 +18,23 @@ const getMissionId = (missionName) => missionName.trim().replace(/\s+/g, '');
 
 const getCraneShelfPosition = (shelfPosition) => [
   shelfPosition[0],
-  CRANE_CONSTANTS.BASE_Y,
+  shelfPosition[1] - 2.2,
   getCraneOperatingZ(shelfPosition[2], 0),
 ];
 
-const getMovePlateOffsets = ({
-  shelfIsTakeLeft,
-  convIsTakeLeft,
-  shelfPosition,
-  convPortToCrane,
-}) => {
-  const shelfLiftOffset = getShelfLiftRelativeOffset(shelfPosition);
-  const portLiftOffset = getPortLiftRelativeOffset(convPortToCrane);
-  const upOffset = CRANE_CONSTANTS.PICK_AND_PUT_Y_OFFSET;
-  const sideOffset = CRANE_CONSTANTS.FORK_SIDE_REACH;
-  const homeOffset = CRANE_CONSTANTS.COLLECT_PLATE_Y_OFFSET;
+const getMovePlateOffsets = ({ shelfIsTakeLeft, convIsTakeLeft }) => {
+  const upOffset = 0.3;
+  const sideOffset = 2;
 
   return {
-    movePlateShelfUpOffset: [0, shelfLiftOffset + upOffset, 0],
-    movePlateShelfDownOffset: [0, homeOffset, 0],
-    movePlateShelfExtendOffset: shelfIsTakeLeft
-      ? [0, shelfLiftOffset, -sideOffset]
-      : [0, shelfLiftOffset, sideOffset],
-    movePlateShelfExtendAndUpOffset: shelfIsTakeLeft
-      ? [0, shelfLiftOffset + upOffset, -sideOffset]
-      : [0, shelfLiftOffset + upOffset, sideOffset],
-    movePlatePortUpOffset: [0, portLiftOffset + upOffset, 0],
-    movePlatePortDownOffset: [0, homeOffset, 0],
-    movePlatePortExtendOffset: convIsTakeLeft
-      ? [0, portLiftOffset, -sideOffset]
-      : [0, portLiftOffset, sideOffset],
-    movePlatePortExtendAndUpOffset: convIsTakeLeft
-      ? [0, portLiftOffset + upOffset, -sideOffset]
-      : [0, portLiftOffset + upOffset, sideOffset],
+    movePlateShelfUpOffset: [0, upOffset, 0],
+    movePlateShelfDownOffset: [0, 0, 0],
+    movePlateShelfExtendOffset: shelfIsTakeLeft ? [0, 0, -sideOffset] : [0, 0, sideOffset],
+    movePlateShelfExtendAndUpOffset: shelfIsTakeLeft ? [0, upOffset, -sideOffset] : [0, upOffset, sideOffset],
+    movePlatePortUpOffset: [0, upOffset, 0],
+    movePlatePortDownOffset: [0, 0, 0],
+    movePlatePortExtendOffset: convIsTakeLeft ? [0, 0, -sideOffset] : [0, 0, sideOffset],
+    movePlatePortExtendAndUpOffset: convIsTakeLeft ? [0, upOffset, -sideOffset] : [0, upOffset, sideOffset],
   };
 };
 
@@ -347,12 +325,7 @@ export const buildInboundProductionMission = ({
   const resolvedShelfIsTakeLeft = forceUseShelfIsTakeLeft
     ? shelfIsTakeLeft
     : getShelfIsTakeLeft(shelfPosition[2], true);
-  const offsets = getMovePlateOffsets({
-    shelfIsTakeLeft: resolvedShelfIsTakeLeft,
-    convIsTakeLeft,
-    shelfPosition,
-    convPortToCrane,
-  });
+  const offsets = getMovePlateOffsets({ shelfIsTakeLeft: resolvedShelfIsTakeLeft, convIsTakeLeft });
   const craneShelfPosition = getCraneShelfPosition(shelfPosition);
 
   return buildMissionShell({
@@ -363,7 +336,7 @@ export const buildInboundProductionMission = ({
         taskId: 'task2',
         taskName: '2. Crane move to port',
         craneId,
-        targetPosition: toCraneBasePosition(convPortToCrane),
+        targetPosition: convPortToCrane,
         craneSpeed,
       }),
       cranePickFromConveyor({
@@ -394,7 +367,7 @@ export const buildInboundProductionMission = ({
         taskId: 'task6',
         taskName: '6. Crane move to origin position',
         craneId,
-        initCranePosition: toCraneBasePosition(initCranePosition),
+        initCranePosition,
         craneSpeed,
       }),
     ],
@@ -424,12 +397,7 @@ export const buildOutboundProductionMission = ({
   const resolvedShelfIsTakeLeft = forceUseShelfIsTakeLeft
     ? shelfIsTakeLeft
     : getShelfIsTakeLeft(shelfPosition[2], true);
-  const offsets = getMovePlateOffsets({
-    shelfIsTakeLeft: resolvedShelfIsTakeLeft,
-    convIsTakeLeft,
-    shelfPosition,
-    convPortToCrane,
-  });
+  const offsets = getMovePlateOffsets({ shelfIsTakeLeft: resolvedShelfIsTakeLeft, convIsTakeLeft });
   const craneShelfPosition = getCraneShelfPosition(shelfPosition);
 
   return buildMissionShell({
@@ -455,7 +423,7 @@ export const buildOutboundProductionMission = ({
         taskId: 'task3',
         taskName: '3. Crane move to port',
         craneId,
-        targetPosition: toCraneBasePosition(convPortToCrane),
+        targetPosition: convPortToCrane,
         craneSpeed,
       }),
       cranePutOnConveyor({
@@ -470,7 +438,7 @@ export const buildOutboundProductionMission = ({
         taskId: 'task5',
         taskName: '5. Crane move to origin position',
         craneId,
-        initCranePosition: toCraneBasePosition(initCranePosition),
+        initCranePosition,
         craneSpeed,
       }),
       buildOutboundConveyorTask({

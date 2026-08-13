@@ -11,13 +11,24 @@
       "travel": "X",
       "vertical": "Y",
       "fork": "Z"
+    },
+    "legacy_plate_table_contract": {
+      "source": "main branch moveTable_ver2.gltf runtime",
+      "movement_offsets_changed": false,
+      "physics_collider_threejs_m": [
+        2.0,
+        0.02,
+        2.0
+      ],
+      "box_binding_vertical_offset_m": 0.6,
+      "visual_contact_surface_y_m": 0.1
     }
   },
   "body": {
     "file": "asrs_stacker_crane_body.glb",
     "root": "ASRS_Crane_Body",
     "dimensions_threejs_m": [
-      1.8,
+      1.9,
       7.2,
       1.28
     ],
@@ -30,11 +41,13 @@
     "outer_width_m": 0.6,
     "tine_length_m": 0.9,
     "physics_collider_threejs_m": [
-      0.86,
-      0.12,
-      0.9
+      2.0,
+      0.02,
+      2.0
     ],
-    "box_binding_vertical_offset_m": 0.58
+    "physics_contract": "preserved from main branch plateTable",
+    "visual_contact_surface_y_m": 0.1,
+    "box_binding_vertical_offset_m": 0.6
   },
   "rail": {
     "file": "asrs_ground_rail_4m.glb",
@@ -73,7 +86,7 @@
   "clearance": {
     "centered_box_to_each_mast_m": 0.11,
     "fork_to_each_mast_m": 0.31,
-    "body_to_adjacent_2m_cell_boundary_m": 0.1,
+    "body_to_adjacent_2m_cell_boundary_m": 0.05,
     "fork_width_margin_inside_1m_box_each_side_m": 0.2,
     "fork_length_margin_inside_1m_box_each_end_m": 0.05
   }

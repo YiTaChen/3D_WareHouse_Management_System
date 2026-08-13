@@ -2,10 +2,9 @@ import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
 import { useBoxStore } from '../stores/boxStore';
 import { useFrame } from '@react-three/fiber';
-import CraneData from '../data/CraneData';
 
 const BINDING_CONFIG = {
-  verticalOffset: 0.58,
+  verticalOffset: 0.6,
   maxBindingAttempts: 60,
   positionCheckTolerance: 0.001
 };
@@ -23,8 +22,6 @@ export default function BoxBindingUpdater  () {
       if (!boundCraneId) return;
 
       const craneState = getCraneState(boundCraneId);
-      const craneConfig = CraneData.cranes.find((crane) => crane.id === boundCraneId);
-      const verticalOffset = craneConfig?.bindingVerticalOffset ?? BINDING_CONFIG.verticalOffset;
       const boxRef = getBoxRef(boxId);
 
       if (!craneState || !craneState.currentCranePosition || !craneState.currentMoveTableLocalOffset || !boxRef?.api?.position?.set) return;
@@ -38,7 +35,7 @@ export default function BoxBindingUpdater  () {
 
         boxRef.api.position.set(
           moveWorld.x,
-          moveWorld.y + verticalOffset,
+          moveWorld.y + BINDING_CONFIG.verticalOffset,
           moveWorld.z
         );
         boxRef.api.velocity.set(0, 0, 0);

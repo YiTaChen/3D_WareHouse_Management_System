@@ -4,9 +4,8 @@ import { readFile, stat } from 'node:fs/promises';
 
 import {
   CRANE_CONSTANTS,
-  getShelfLiftRelativeOffset,
-  toCraneBasePosition,
 } from './craneConfig.js';
+import CraneData from '../data/CraneData.js';
 
 const manifest = JSON.parse(
   await readFile(new URL('../../public/asrs_asset_manifest.json', import.meta.url), 'utf8')
@@ -26,7 +25,7 @@ test('fitted crane and fork retain clearance inside warehouse cells', () => {
   assert.ok(MAST_INNER_CLEARANCE > BOX_SIZE);
   assert.ok(FORK_OUTER_WIDTH < BOX_SIZE);
   assert.ok(FORK_TINE_LENGTH < BOX_SIZE);
-  assert.ok((SHELF_GRID - BODY_WIDTH_IN_CELL) / 2 >= 0.099);
+  assert.ok((SHELF_GRID - BODY_WIDTH_IN_CELL) / 2 >= 0.049);
   assert.ok((MAST_INNER_CLEARANCE - BOX_SIZE) / 2 >= 0.109);
   assert.equal((BOX_SIZE - FORK_OUTER_WIDTH) / 2, 0.2);
 });
@@ -41,6 +40,9 @@ test('manifest and runtime use the same axes and dimensions', () => {
   assert.equal(manifest.fork.outer_width_m, CRANE_CONSTANTS.FORK_OUTER_WIDTH);
   assert.equal(manifest.fork.tine_length_m, CRANE_CONSTANTS.FORK_TINE_LENGTH);
   assert.equal(manifest.body.mast_inner_clearance_m, CRANE_CONSTANTS.MAST_INNER_CLEARANCE);
+  assert.deepEqual(manifest.fork.physics_collider_threejs_m, [2, 0.02, 2]);
+  assert.equal(manifest.fork.box_binding_vertical_offset_m, 0.6);
+  assert.equal(manifest.fork.visual_contact_surface_y_m, 0.1);
   assert.equal(manifest.active_runtime_rail, 'single_guide_rail');
   assert.equal(manifest.single_guide_rail.repeat_axis_threejs, 'X');
   assert.equal(manifest.single_guide_rail.segment_length_m, 4);
@@ -50,9 +52,25 @@ test('manifest and runtime use the same axes and dimensions', () => {
   assert.equal(manifest.rail.preserved_for_future_use, true);
 });
 
-test('crane base remains on rail while fork lift targets shelf level', () => {
-  assert.deepEqual(toCraneBasePosition([6, 5, 0]), [6, 0, 0]);
-  assert.equal(getShelfLiftRelativeOffset([6, 5, 2]), 4);
+test('new visuals preserve the main branch plateTable movement contract', () => {
+  assert.equal(CRANE_CONSTANTS.COLLECT_PLATE_Y_OFFSET, 0.1);
+  assert.equal(CRANE_CONSTANTS.PICK_AND_PUT_Y_OFFSET, 0.15);
+  assert.equal(CRANE_CONSTANTS.BOX_BINDING_VERTICAL_OFFSET, 0.6);
+  assert.equal(manifest.warehouse_contract.legacy_plate_table_contract.movement_offsets_changed, false);
+
+  CraneData.cranes.forEach((crane) => {
+    assert.equal(crane.position[1], 3);
+    assert.deepEqual(crane.movePlateOffset, [0, 1, 0]);
+    assert.equal(crane.moveTableInitialPosition[1], 3);
+    assert.deepEqual(crane.bodyColliderSize, [0.1, 0.1, 0.1]);
+    assert.deepEqual(crane.moveTableColliderSize, [2, 0.02, 2]);
+  });
+});
+
+test('fork contact surface matches the existing bound box bottom', () => {
+  const boxBottomFromMovePlate = CRANE_CONSTANTS.BOX_BINDING_VERTICAL_OFFSET
+    - CRANE_CONSTANTS.BOX_SIZE / 2;
+  assert.ok(Math.abs(boxBottomFromMovePlate - manifest.fork.visual_contact_surface_y_m) < 1e-9);
 });
 
 test('modular rail reaches beyond the final shelf cell', () => {

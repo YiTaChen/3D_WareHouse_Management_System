@@ -100,18 +100,14 @@ export const stepFunctions = {
   },
 
   craneBindingBox: async ({ craneId, boxId }) => {
-    const boxStore = useBoxStore.getState();
-    const bindFn = boxStore.setBoxBoundToMoveplate;
+    const bindFn = useBoxStore.getState().setBoxBoundToMoveplate;
 
     if (!bindFn) {
       console.warn('[craneBindingBox] 無法取得 setBoxBoundToMoveplate');
       return false;
     }
 
-    // 清除貨架/輸送帶留下的動量，避免收叉後貨物偏離中心。
-    boxStore.wakeUpBox(boxId);
-    boxStore.setBoxVelocity(boxId, [0, 0, 0]);
-    boxStore.setBoxAngularVelocity(boxId, [0, 0, 0]);
+    // 執行綁定
     bindFn(boxId, craneId);
 
     // 模擬等待：固定等待 1 秒
@@ -121,25 +117,18 @@ export const stepFunctions = {
   },
 
   craneUnBindingBox: async ({ boxId }) => {
-    const boxStore = useBoxStore.getState();
-    const unbindFn = boxStore.clearBoxBoundToMoveplate;
+    const unbindFn = useBoxStore.getState().clearBoxBoundToMoveplate;
 
     if (!unbindFn) {
       console.warn('[craneBindingBox] 無法取得 clearBoxBoundToMoveplate');
       return false;
     }
 
-    // 在釋放前先消除角動量，讓貨物只沿 Y 落到層板/輸送帶，
-    // 不會滑到相鄰格位或後方貨架感測器。
-    boxStore.setBoxVelocity(boxId, [0, 0, 0]);
-    boxStore.setBoxAngularVelocity(boxId, [0, 0, 0]);
+    // 執行綁定
     unbindFn(boxId);
 
-    // 等待貨物落穩後再次清除微小動量。保持動態，讓層板接觸
-    // 可以完成最後的垂直落位。
+    // 模擬等待：固定等待 1 秒
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    boxStore.setBoxVelocity(boxId, [0, 0, 0]);
-    boxStore.setBoxAngularVelocity(boxId, [0, 0, 0]);
 
     return true;
   },

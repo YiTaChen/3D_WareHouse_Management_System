@@ -64,7 +64,13 @@ def validate_body() -> None:
     scene_bounds = scene_mesh_bounds()
     body_width = scene_bounds[1].x - scene_bounds[0].x
     assert mast_gap >= 1.20, mast_gap
-    assert body_width <= 1.81, body_width
+    assert body_width <= 1.91, body_width
+    # Electrical equipment and counterweight must sit outside the pallet
+    # corridor, beyond their adjacent mast outer faces.
+    cabinet_bounds = object_bounds(require("ControlCabinet"))
+    counterweight_bounds = object_bounds(require("Counterweight"))
+    assert cabinet_bounds[0].x > right_bounds[1].x, (cabinet_bounds, right_bounds)
+    assert counterweight_bounds[1].x < left_bounds[0].x, (counterweight_bounds, left_bounds)
     assert_no_exported_collision_proxies()
 
 
@@ -78,8 +84,12 @@ def validate_fork() -> None:
     ]
     fork_width = max(bounds[1].x for bounds in tine_bounds) - min(bounds[0].x for bounds in tine_bounds)
     fork_length = max(bounds[1].y for bounds in tine_bounds) - min(bounds[0].y for bounds in tine_bounds)
+    tine_contact_y = max(bounds[1].z for bounds in tine_bounds)
+    anchor = require("Pallet_Load_Anchor")
     assert fork_width <= 0.61, fork_width
     assert fork_length <= 0.91, fork_length
+    assert abs(tine_contact_y - 0.10) <= 0.001, tine_contact_y
+    assert abs(anchor.matrix_world.translation.z - 0.60) <= 0.001, anchor.matrix_world.translation.z
     assert_no_exported_collision_proxies()
 
 

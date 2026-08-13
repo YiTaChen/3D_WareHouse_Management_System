@@ -189,7 +189,7 @@ def build_body(target: bpy.types.Collection, collider_target: bpy.types.Collecti
     root["threejs_fork_axis"] = "Z"
     root["shelf_grid_m"] = 2.0
     root["box_envelope_m"] = [1.0, 1.0, 1.0]
-    root["body_dimensions_threejs_m"] = [1.8, 7.2, 1.28]
+    root["body_dimensions_threejs_m"] = [1.9, 7.2, 1.28]
     root["mast_inner_clearance_m"] = 1.22
 
     # Chassis is less than the 2 m aisle cell and follows the 0.9 m rail gauge.
@@ -227,48 +227,58 @@ def build_body(target: bpy.types.Collection, collider_target: bpy.types.Collecti
         cube(f"MastColumn_{side}", (x, 0.28, 3.86), (0.22, 0.34, 6.62), mat["yellow"], target, root, 0.04)
         cube(f"LiftGuide_{side}", (x * 0.84, 0.08, 3.82), (0.065, 0.075, 6.38), mat["silver"], target, root, 0.014)
         cube(f"GuideBacking_{side}", (x * 0.84, 0.13, 3.82), (0.13, 0.13, 6.46), mat["charcoal"], target, root, 0.014)
-    cube("MastTopCrossbeam", (0.0, 0.28, 7.12), (1.66, 0.48, 0.26), mat["yellow_dark"], target, root, 0.06)
+    # Keep the top structure above a 1 m box on the highest shelf.
+    cube("MastTopCrossbeam", (0.0, 0.28, 7.10), (1.66, 0.48, 0.14), mat["yellow_dark"], target, root, 0.04)
     cube("MastLowerCrossbeam", (0.0, 0.28, 0.91), (1.66, 0.50, 0.30), mat["yellow_dark"], target, root, 0.05)
-    beam_between("RearBrace_A", (-0.82, 0.51, 1.05), (0.82, 0.51, 1.82), 0.09, mat["charcoal"], target, root)
-    beam_between("RearBrace_B", (0.82, 0.51, 1.82), (-0.82, 0.51, 2.59), 0.09, mat["charcoal"], target, root)
-    beam_between("RearBrace_C", (-0.82, 0.51, 2.59), (0.82, 0.51, 3.36), 0.09, mat["charcoal"], target, root)
+    # Diagonal bracing stays outside the +/-0.5 m load corridor instead of
+    # crossing behind the pallet between the two masts.
+    for x in (-0.86, 0.86):
+        side = "L" if x < 0 else "R"
+        beam_between(f"SideBrace_A_{side}", (x, 0.10, 1.08), (x, 0.57, 2.18), 0.07, mat["charcoal"], target, root)
+        beam_between(f"SideBrace_B_{side}", (x, 0.57, 2.18), (x, 0.10, 3.30), 0.07, mat["charcoal"], target, root)
 
-    cylinder(
-        "LiftTopSheave",
-        (0.0, 0.02, 6.88),
-        0.21,
-        0.50,
-        mat["charcoal"],
-        target,
-        root,
-        rotation=(0.0, math.radians(90), 0.0),
-        vertices=28,
-    )
-    cylinder(
-        "LiftTopSheaveHub",
-        (0.0, 0.02, 6.88),
-        0.07,
-        0.56,
-        mat["silver"],
-        target,
-        root,
-        rotation=(0.0, math.radians(90), 0.0),
-        vertices=18,
-    )
-    cube("Counterweight", (0.0, 0.50, 4.05), (0.45, 0.20, 1.05), mat["charcoal"], target, root, 0.055)
+    # Split the sheave and balance/control equipment across the mast exteriors.
+    for x in (-0.72, 0.72):
+        side = "L" if x < 0 else "R"
+        cylinder(
+            f"LiftTopSheave_{side}",
+            (x, 0.02, 6.82),
+            0.17,
+            0.16,
+            mat["charcoal"],
+            target,
+            root,
+            rotation=(0.0, math.radians(90), 0.0),
+            vertices=28,
+        )
+        cylinder(
+            f"LiftTopSheaveHub_{side}",
+            (x, 0.02, 6.82),
+            0.055,
+            0.19,
+            mat["silver"],
+            target,
+            root,
+            rotation=(0.0, math.radians(90), 0.0),
+            vertices=18,
+        )
+    cube("Counterweight", (-0.885, 0.30, 4.05), (0.10, 0.42, 1.05), mat["charcoal"], target, root, 0.025)
 
-    cube("ControlCabinet", (0.0, 0.45, 1.35), (0.78, 0.30, 0.92), mat["white"], target, root, 0.065)
-    cube("ControlScreen", (0.17, 0.285, 1.48), (0.22, 0.025, 0.16), mat["blue"], target, root, 0.02)
+    # The cabinet is mounted beyond the right mast outer face (X > 0.83),
+    # leaving the full central pallet path empty while remaining inside the
+    # 2 m travel cell.
+    cube("ControlCabinet", (0.885, 0.30, 1.35), (0.10, 0.42, 0.92), mat["white"], target, root, 0.025)
+    cube("ControlScreen", (0.942, 0.22, 1.25), (0.018, 0.18, 0.18), mat["blue"], target, root, 0.008)
     for index, lamp_mat in enumerate((mat["green"], mat["yellow"], mat["red"])):
         cylinder(
             f"StatusLamp_{index}",
-            (-0.23 + 0.12 * index, 0.275, 1.61),
-            0.03,
-            0.03,
+            (0.944, 0.20, 1.50 + 0.12 * index),
+            0.025,
+            0.018,
             lamp_mat,
             target,
             root,
-            rotation=(math.radians(90), 0.0, 0.0),
+            rotation=(0.0, math.radians(90), 0.0),
             vertices=14,
         )
     for x in (-0.68, 0.68):
@@ -293,11 +303,12 @@ def build_fork(target: bpy.types.Collection, collider_target: bpy.types.Collecti
     mat = materials()
     root = empty("movePlate", target, size=0.28)
     root["asset_type"] = "warehouse_fitted_double_tine_fork"
-    root["origin"] = "load_bottom_center"
+    root["origin"] = "kinematic_body_center"
     root["units"] = "meters"
     root["threejs_extension_axis"] = "Z"
     root["fork_outer_width_m"] = 0.60
     root["fork_tine_length_m"] = 0.90
+    root["fork_contact_surface_y_m"] = 0.10
     root["supported_box_m"] = [1.0, 1.0, 1.0]
 
     # X is fork spacing, Y becomes Three.js Z, and Z becomes Three.js Y.
@@ -307,14 +318,15 @@ def build_fork(target: bpy.types.Collection, collider_target: bpy.types.Collecti
         side = "L" if x < 0 else "R"
         cube(f"ForkLowerRail_{side}", (x, 0.0, -0.02), (0.13, 0.88, 0.07), mat["rail_side"], target, root, 0.018)
         cube(f"ForkTelescopicStage_{side}", (x, 0.0, 0.025), (0.11, 0.86, 0.055), mat["silver"], target, root, 0.016)
-        cube(f"ForkTine_{side}", (x, 0.0, 0.065), (0.10, 0.90, 0.055), mat["yellow"], target, root, 0.016)
-        cube(f"ForkTip_Pos_{side}", (x, 0.42, 0.07), (0.115, 0.08, 0.045), mat["yellow"], target, root, 0.014)
-        cube(f"ForkTip_Neg_{side}", (x, -0.42, 0.07), (0.115, 0.08, 0.045), mat["yellow"], target, root, 0.014)
-    cube("ForkMovingCrossbar", (0.0, 0.0, 0.02), (0.70, 0.20, 0.17), mat["yellow"], target, root, 0.035)
-    cube("ForkLoadSensorVisual", (0.0, 0.0, 0.11), (0.23, 0.24, 0.055), mat["blue"], target, root, 0.02)
+        cube(f"ForkTine_{side}", (x, 0.0, 0.070), (0.10, 0.90, 0.060), mat["yellow"], target, root, 0.016)
+        cube(f"ForkTip_Pos_{side}", (x, 0.42, 0.075), (0.115, 0.08, 0.050), mat["yellow"], target, root, 0.014)
+        cube(f"ForkTip_Neg_{side}", (x, -0.42, 0.075), (0.115, 0.08, 0.050), mat["yellow"], target, root, 0.014)
+    cube("ForkMovingCrossbar", (0.0, 0.0, 0.015), (0.70, 0.20, 0.16), mat["yellow"], target, root, 0.03)
+    cube("ForkLoadSensorVisual", (0.0, 0.0, 0.065), (0.23, 0.24, 0.040), mat["blue"], target, root, 0.014)
     anchor = empty("Pallet_Load_Anchor", target, root, size=0.18)
+    anchor.location.z = 0.60
     anchor["supported_load_m"] = [1.0, 1.0, 1.0]
-    anchor["binding_vertical_offset_m"] = 0.58
+    anchor["binding_vertical_offset_m"] = 0.60
 
     if collider_target is not None:
         collider_root = empty("Fork_Collision_Proxies", collider_target, root)
@@ -425,8 +437,8 @@ def build_preview_environment(target: bpy.types.Collection) -> None:
         for z in (2.0, 4.0, 6.0):
             cube(f"RackBeam_{y}_{z}", (4.0, y, z), (6.2, 0.18, 0.16), rack_orange, target, bevel_width=0.015)
     # A 1 m cargo envelope on the extended fork makes clearance visible.
-    cube("PreviewPallet", (4.0, -1.55, 4.20), (1.0, 0.86, 0.12), wood, target, bevel_width=0.025)
-    cube("PreviewCargo", (4.0, -1.55, 4.77), (1.0, 1.0, 1.0), carton, target, bevel_width=0.04)
+    cube("PreviewPallet", (4.0, -1.55, 4.26), (1.0, 0.86, 0.12), wood, target, bevel_width=0.025)
+    cube("PreviewCargo", (4.0, -1.55, 4.82), (1.0, 1.0, 1.0), carton, target, bevel_width=0.04)
 
     world = bpy.context.scene.world
     world.use_nodes = True
@@ -463,11 +475,18 @@ def write_manifest() -> None:
             "box_envelope_m": [1.0, 1.0, 1.0],
             "aisle_clear_width_m": 2.0,
             "axes_threejs": {"travel": "X", "vertical": "Y", "fork": "Z"},
+            "legacy_plate_table_contract": {
+                "source": "main branch moveTable_ver2.gltf runtime",
+                "movement_offsets_changed": False,
+                "physics_collider_threejs_m": [2.0, 0.02, 2.0],
+                "box_binding_vertical_offset_m": 0.60,
+                "visual_contact_surface_y_m": 0.10,
+            },
         },
         "body": {
             "file": BODY_GLB.name,
             "root": "ASRS_Crane_Body",
-            "dimensions_threejs_m": [1.8, 7.2, 1.28],
+            "dimensions_threejs_m": [1.9, 7.2, 1.28],
             "mast_inner_clearance_m": 1.22,
         },
         "fork": {
@@ -476,8 +495,10 @@ def write_manifest() -> None:
             "load_anchor": "Pallet_Load_Anchor",
             "outer_width_m": 0.60,
             "tine_length_m": 0.90,
-            "physics_collider_threejs_m": [0.86, 0.12, 0.90],
-            "box_binding_vertical_offset_m": 0.58,
+            "physics_collider_threejs_m": [2.0, 0.02, 2.0],
+            "physics_contract": "preserved from main branch plateTable",
+            "visual_contact_surface_y_m": 0.10,
+            "box_binding_vertical_offset_m": 0.60,
         },
         "rail": {
             "file": RAIL_GLB.name,
@@ -507,7 +528,7 @@ def write_manifest() -> None:
         "clearance": {
             "centered_box_to_each_mast_m": 0.11,
             "fork_to_each_mast_m": 0.31,
-            "body_to_adjacent_2m_cell_boundary_m": 0.10,
+            "body_to_adjacent_2m_cell_boundary_m": 0.05,
             "fork_width_margin_inside_1m_box_each_side_m": 0.20,
             "fork_length_margin_inside_1m_box_each_end_m": 0.05,
         },

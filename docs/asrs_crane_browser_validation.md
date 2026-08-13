@@ -2,27 +2,53 @@
 
 Date: 2026-08-13
 
-Branch: agent/fit-asrs-pallet-crane
+Branch: `agent/fit-asrs-pallet-crane`
 
-Environment: local Vite frontend, local Express backend, fresh SQLite demo database.
+## Clean deployment
+
+The final browser regression used an isolated deployment rather than the earlier
+long-running development state:
+
+- Frontend: `http://127.0.0.1:5183`
+- Backend: `http://localhost:3012`
+- Database: new temporary SQLite file at
+  `/private/tmp/asrs-crane-clean-3012.sqlite`
+- Initial inventory: 0 boxes, 90 available shelves
+
+The earlier `5173` run and its pre-existing boxes were excluded from the final
+result. The clean page was loaded with no cargo before the first mission.
 
 ## Completed browser scenarios
 
-| Crane | Shelf | X | Scenario | Result |
-| --- | --- | ---: | --- | --- |
-| crane001 | shelf001 | 2 | inbound | completed |
-| crane001 | shelf002 | 4 | adjacent inbound while shelf001 occupied | completed |
-| crane001 | shelf001 | 2 | outbound | completed |
-| crane001 | shelf002 | 4 | adjacent outbound | completed |
-| crane002 | shelf037 | 2 | inbound | completed |
-| crane002 | shelf037 | 2 | outbound | completed |
-| crane003 | shelf078 | 12 | final-cell inbound | completed |
-| crane003 | shelf078 | 12 | final-cell outbound | completed |
+| Crane | Shelf | Scenario | Result |
+| --- | --- | --- | --- |
+| crane001 | shelf001 | inbound | completed |
+| crane001 | shelf002 | adjacent inbound while shelf001 occupied | completed |
+| crane002 | shelf037 | inbound | completed |
+| crane003 | shelf078 | final-cell inbound | completed |
+| crane001 | shelf001 | outbound | completed |
+| crane001 | shelf002 | adjacent outbound | completed |
+| crane002 | shelf037 | outbound | completed |
+| crane003 | shelf078 | final-cell outbound | completed |
 
-The adjacent inbound positions persisted exactly as [2, 3, -8] and [4, 3, -8].
-The final test run produced no new browser warnings or errors. Three earlier warnings
-in the retained browser log were stale box components created by resetting SQLite
-between test iterations, before the final clean run.
+After the four outbound missions, the browser inventory reported 0 boxes,
+0 occupied shelves, and 90 available shelves. No warning or error was recorded
+for the clean `5183` deployment.
+
+## Visual and clearance observations
+
+- Mid-mission screenshots confirmed cargo traveled between the two mast columns
+  on all three cranes rather than through a column or the exterior cabinet.
+- The white control cabinet is outside the right mast; the counterweight is
+  outside the left mast. The central 1 m cargo corridor is clear.
+- The visible double fork is 0.60 m wide and 0.90 m long, inside the 1 m pallet
+  footprint. Consecutive shelf001/shelf002 missions both completed without
+  displacing the neighboring cargo.
+- The replacement fork's visible upper contact surface is local Y=0.10. The
+  unchanged 0.6 binding offset places the bottom of a 1 m box at the same Y=0.10.
+- The original `main` plateTable physics collider remains `[2, 0.02, 2]`.
+  Production mission coordinates, binding/unbinding behavior, and persistence
+  behavior remain the `main` implementation.
 
 ## Rail coverage
 
@@ -34,23 +60,18 @@ between test iterations, before the final clean run.
 - Final shelf center: X = 12
 - Final shelf cell outer edge: X = 13
 
-The rail therefore continues 1 m beyond the final shelf cell. Browser inspection
-confirmed crane003 remained centered over the rail while servicing shelf078.
-The 2026-08-13 visual revision changed only the displayed rail profile, keeping these
-centers and extents unchanged.
+The rail extends 1 m past the last shelf cell. Browser observation during the
+shelf078 inbound and outbound missions confirmed crane003 stayed centered above
+the single rail at the final cell.
 
-## Single-guide-rail browser retest
+## Automated verification
 
-- All three crane lanes rendered the new narrow grey single guide rail.
-- No train-style sleepers or double running rail appeared in the runtime scene.
-- crane003 completed inbound and outbound at shelf078 after the rail asset switch.
-- The final browser log contained no warnings or errors.
+- `npm run test:crane-fit`
+- `npm run test:mission-builder`
+- `npm run test:mission-production-factory`
+- `npm run test:mission-runner`
+- `npm run build`
+- `blender --background --factory-startup --python tools/blender/validate_fitted_asrs_assets.py`
 
-## Clearance checks
-
-- 1 m load remains centered between 1.22 m mast inner faces.
-- Visible fork width is 0.60 m.
-- Fork tine length is 0.90 m.
-- Consecutive shelf001/shelf002 storage did not contact or displace the adjacent load.
-- The selected destination shelf is recorded after placement so transient overlapping
-  sensor events cannot route a later outbound mission to the wrong crane lane.
+The fit test explicitly asserts the unchanged `main` plateTable offsets, initial
+logical crane positions, collider dimensions, and box binding offset.

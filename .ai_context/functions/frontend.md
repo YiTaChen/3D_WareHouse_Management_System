@@ -246,10 +246,11 @@ Model contract:
 
 The following supersedes the older crane/move-table descriptions above:
 
-- Crane loads public/asrs_stacker_crane_body.glb from CraneData and keeps the body at ground-rail Y=0 during production missions.
-- MoveTable loads public/asrs_fork_table.glb. Its movePlate root lifts on local Y and extends toward either rack on local Z.
-- CraneInvisibleBulkSensor follows the moving fork offset, not just the crane body.
-- BoxBindingUpdater uses the configured 0.58 m Pallet_Load_Anchor offset, keeping a 1 m load centered between 1.22 m-spaced mast inner faces.
+- Crane loads public/asrs_stacker_crane_body.glb from CraneData. `Crane.jsx` projects only this tall visual/placeholder body collider to ground-rail Y=0; it does not modify the logical crane position consumed by the original plateTable mission flow.
+- MoveTable loads public/asrs_fork_table.glb. Its movePlate root keeps the original `main` local offset, world-coordinate calculation, and `[2, 0.02, 2]` physics collider.
+- CraneInvisibleBulkSensor and its mission behavior remain identical to `main`.
+- BoxBindingUpdater keeps the original 0.6 m offset. With a 1 m box, its bottom is local Y=0.10, exactly matching the replacement fork's visible upper contact surface.
 - CraneRail loads independent public/asrs_single_guide_rail_4m.glb segments and repeats them every 4 m along X. Add segments to extend a route; do not scale or bind the rail to the crane. The visually heavier public/asrs_ground_rail_4m.glb remains a preserved alternative and is not active at runtime.
-- The fitted fork collider is 0.86 x 0.12 x 0.90 m, with visible double tines only 0.60 m wide.
-- The operator inbound flow snaps and sleeps a released box at the selected shelf center after the physics mission, persists that settled position, and records the selected destination. Outbound wakes it through the normal crane/conveyor flow and clears that occupancy after exit. This prevents residual motion or transient overlapping sensor events from selecting the wrong crane lane.
+- The replacement fork visual is 0.60 m wide and 0.90 m long, but its invisible physics collider intentionally remains the original plateTable `[2, 0.02, 2]` contract.
+- Production missions, OperatorPanel placement, BoxStore persistence, binding/unbinding, and mission step adapters retain `main` behavior. The visual integration must not snap cargo or alter established inbound/outbound coordinates.
+- The white control cabinet is outside the right mast and the counterweight is outside the left mast, leaving the central 1 m load corridor clear throughout lift travel.

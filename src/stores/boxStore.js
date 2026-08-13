@@ -332,8 +332,8 @@ export const useBoxStore = create((set, get) => ({
   },
 
   // update box position data when box moving is finished 
-  updateBoxCurrentPositionServer: async (boxId, persistedPosition) => {
-    const pos = persistedPosition || get().getBoxWorldPosition(boxId);
+  updateBoxCurrentPositionServer: async (boxId) => {
+    const pos = get().getBoxWorldPosition(boxId); // [x, y, z]
     if (!pos) {
       console.warn(`無法取得 ${boxId} 的位置`);
       return;
@@ -347,7 +347,7 @@ export const useBoxStore = create((set, get) => ({
         },
         body: JSON.stringify({
           position_x: pos[0],
-          position_y: persistedPosition ? pos[1] : pos[1] + 0.5,
+          position_y: pos[1]+0.5, // 調整 y 軸位置，避免 Box 進入地板
           position_z: pos[2],
         }),
       });
@@ -555,18 +555,6 @@ wakeUpBox: (boxId) => {
       api.angularVelocity.set(...angularVelocity);
       // console.log(`Angular velocity of Box ${boxId} set to`, angularVelocity);
     }
-  },
-
-  setBoxWorldPosition: (boxId, position) => {
-    const ref = get().boxRefs[boxId];
-    if (!Array.isArray(position) || position.length !== 3 || !ref?.api?.position?.set) {
-      return false;
-    }
-    ref.api.position.set(...position);
-    ref.api.velocity?.set(0, 0, 0);
-    ref.api.angularVelocity?.set(0, 0, 0);
-    ref.api.wakeUp?.();
-    return true;
   },
 
   stopBoxMotion: (boxId) => {

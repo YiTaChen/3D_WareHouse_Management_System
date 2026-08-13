@@ -28,9 +28,7 @@ const flattenStepFields = (mission) =>
       stepId: step.id,
       name: step.name,
       functionKey: step.functionKey,
-      params: ['moveCrane', 'moveCraneTable'].includes(step.functionKey)
-        ? { craneName: step.params.craneName, speed: step.params.speed }
-        : step.params,
+      params: step.params,
     })),
   );
 
@@ -141,63 +139,4 @@ test('crane2 sets the destination direction before starting it', () => {
 
   assert.ok(speedIndex < startIndex);
   assert.equal(steps[startIndex].params.waitMs, 100);
-});
-
-test('all crane body travel stays on the fixed ground rail', () => {
-  const missions = [
-    buildInboundProductionMission({
-      ...crane001InboundMissionParamTemplate,
-      ...runtimeInput,
-    }),
-    buildOutboundProductionMission({
-      ...crane003_OutboundMissionTemplate,
-      ...runtimeInput,
-    }),
-  ];
-
-  for (const mission of missions) {
-    const moves = mission.tasks
-      .flatMap((task) => task.steps)
-      .filter((step) => step.functionKey === 'moveCrane');
-    assert.ok(moves.length > 0);
-    moves.forEach((step) => assert.equal(step.params.targetPosition[1], 0));
-  }
-});
-
-test('shelf handling lifts the fork while keeping cargo between the masts', () => {
-  const mission = buildInboundProductionMission({
-    ...crane001InboundMissionParamTemplate,
-    ...runtimeInput,
-  });
-  const shelfTask = mission.tasks.find((task) => task.id === 'task5');
-  const offsets = shelfTask.steps
-    .filter((step) => step.functionKey === 'moveCraneTable')
-    .map((step) => step.params.offset);
-
-  assert.deepEqual(offsets, [
-    [0, 4.3, 0],
-    [0, 4.3, 2],
-    [0, 4, 2],
-    [0, 1, 0],
-  ]);
-});
-
-test('raised Port5 conveyor uses fork lift instead of lifting the crane body', () => {
-  const mission = buildOutboundProductionMission({
-    ...crane003_OutboundMissionTemplate,
-    ...runtimeInput,
-  });
-  const portMove = mission.tasks.find((task) => task.id === 'task3').steps[0];
-  const portTask = mission.tasks.find((task) => task.id === 'task4');
-  const offsets = portTask.steps
-    .filter((step) => step.functionKey === 'moveCraneTable')
-    .map((step) => step.params.offset);
-
-  assert.deepEqual(portMove.params.targetPosition, [-4, 0, 6]);
-  assert.deepEqual(offsets, [
-    [0, 2.3, 0],
-    [0, 2.3, 2],
-    [0, 2, 2],
-    [0, 1, 0],
-  ]);
 });

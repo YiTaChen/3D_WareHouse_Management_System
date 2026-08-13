@@ -211,11 +211,11 @@ Files:
 
 Flow:
 
-1. Production missions move the crane base only along X and flatten every body target to Y=0.
-2. The move table lifts on local Y to the selected shelf or raised port.
-3. The double-tine fork extends 2 m on local Z toward the selected rack row.
-4. The load trigger and bound box follow the fork. Load X remains centered between the mast columns.
-5. The fork lowers, releases or collects the box, retracts to Z=0, and returns to its Y=1 travel position.
+1. Production missions retain the original `main` crane targets and plateTable offsets without coordinate rewriting.
+2. `Crane.jsx` projects only the tall replacement body onto rail Y=0 while the logical crane position remains unchanged.
+3. The replacement movePlate follows the original plateTable physics body and lifts/extends using the existing mission flow.
+4. The load trigger and bound box retain the original 0.6 m binding offset. The visible fork contact surface is aligned to the resulting 1 m box bottom at local Y=0.10.
+5. The double-tine visual is kept inside the 1 m pallet footprint, and the body cabinet/counterweight remain outside the central load corridor.
 6. Separate 4 m rail segments can be repeated along X without changing the crane asset.
 
-Fit limits: 2 m shelf cell, 1 m load, 1.80 m body width, 1.22 m mast inner gap, 0.60 m fork width, and 0.90 m tine length.
+Fit limits: 2 m shelf cell, 1 m load, 1.90 m body width, 1.22 m mast inner gap, 0.60 m fork width, and 0.90 m tine length.
