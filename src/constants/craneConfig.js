@@ -26,6 +26,8 @@ export const CRANE_CONSTANTS = {
   MAST_INNER_CLEARANCE: 1.22,
   FORK_OUTER_WIDTH: 0.6,
   FORK_TINE_LENGTH: 0.9,
+  RAIL_SEGMENT_LENGTH: 4,
+  RAIL_SEGMENT_CENTERS: [-4, 0, 4, 8, 12],
 };
 
 export const toCraneBasePosition = ([x, , z]) => [x, CRANE_CONSTANTS.BASE_Y, z];

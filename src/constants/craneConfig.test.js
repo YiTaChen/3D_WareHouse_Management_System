@@ -50,6 +50,23 @@ test('crane base remains on rail while fork lift targets shelf level', () => {
   assert.equal(getShelfLiftRelativeOffset([6, 5, 2]), 4);
 });
 
+test('modular rail reaches beyond the final shelf cell', () => {
+  const {
+    RAIL_SEGMENT_CENTERS,
+    RAIL_SEGMENT_LENGTH,
+    SHELF_GRID,
+  } = CRANE_CONSTANTS;
+  const railStart = Math.min(...RAIL_SEGMENT_CENTERS) - RAIL_SEGMENT_LENGTH / 2;
+  const railEnd = Math.max(...RAIL_SEGMENT_CENTERS) + RAIL_SEGMENT_LENGTH / 2;
+  const lastShelfCenter = 12;
+  const lastShelfOuterEdge = lastShelfCenter + SHELF_GRID / 2;
+
+  assert.equal(railStart, -6);
+  assert.equal(railEnd, 14);
+  assert.ok(railEnd > lastShelfOuterEdge);
+  assert.equal(manifest.rail.segment_length_m, RAIL_SEGMENT_LENGTH);
+});
+
 test('all generated runtime assets exist and are non-empty', async () => {
   for (const asset of [manifest.body.file, manifest.fork.file, manifest.rail.file]) {
     const details = await stat(new URL('../../public/' + asset, import.meta.url));

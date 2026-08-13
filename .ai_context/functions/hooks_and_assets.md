@@ -163,6 +163,7 @@ Runtime files:
 - public/asrs_asset_manifest.json; dimensions, axes, and clearance contract
 
 Three.js axes are X travel, Y lift, and Z fork extension. Rail segments are centered every 4 m along X.
+The current runtime centers are -4, 0, 4, 8, and 12, producing a continuous X extent of -6 through 14. The last shelf center is X=12 and its outer cell edge is X=13, so the rail continues 1 m beyond the final cell.
 
 Source and verification:
 

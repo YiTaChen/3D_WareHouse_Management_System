@@ -44,6 +44,9 @@ function InboundDemo() {
   const setMission = useMissionStore((state) => state.setMission);
   const getEmptyShelfListByZ = useShelfStore((state) => state.getEmptyShelfListByZ);
   const setHighlightPosition = useUIStore((state) => state.setHighlightPosition);
+  const setBoxCollidingWithEquipment = useBoxEquipStore(
+    (state) => state.setBoxCollidingWithEquipment,
+  );
 
   const [shelfOptions, setShelfOptions] = useState([]);
   const [selectedShelfId, setSelectedShelfId] = useState('');
@@ -94,6 +97,21 @@ function InboundDemo() {
       if (completedMission?.status !== 'done') {
         throw new Error('Inbound mission stopped before completion.');
       }
+      const boxStore = useBoxStore.getState();
+      const settledPosition = [
+        selectedShelf.position[0],
+        selectedShelf.position[1] - 0.48,
+        selectedShelf.position[2],
+      ];
+      boxStore.setBoxWorldPosition(boxId, settledPosition);
+      boxStore.stopBoxMotion(boxId);
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
+      await boxStore.updateBoxCurrentPositionServer(boxId, selectedShelf.position);
+      // Physics sensors may overlap briefly while the fork lowers. The
+      // operator-selected destination is the authoritative final slot.
+      setBoxCollidingWithEquipment(boxId, selectedShelf.id);
       setStatus('Inbound mission completed.');
     } catch (error) {
       console.error('[OperatorPanel] Failed to run inbound mission:', error);
@@ -152,6 +170,7 @@ function OutboundDemo() {
   const getBoxIdByEquip = useBoxEquipStore((state) => state.getBoxIdbyEquipId);
   const getShelfPosition = useShelfStore((state) => state.getShelfPosition);
   const setHighlightPosition = useUIStore((state) => state.setHighlightPosition);
+  const clearBoxCollision = useBoxEquipStore((state) => state.clearBoxCollision);
 
   const [shelfIds, setShelfIds] = useState([]);
   const [selectedShelfId, setSelectedShelfId] = useState('');
@@ -202,6 +221,7 @@ function OutboundDemo() {
       if (completedMission?.status !== 'done') {
         throw new Error('Outbound mission stopped before the box reached the exit.');
       }
+      clearBoxCollision(selectedBoxId);
       setStatus('Outbound mission completed.');
     } catch (error) {
       console.error('[OperatorPanel] Failed to run outbound mission:', error);

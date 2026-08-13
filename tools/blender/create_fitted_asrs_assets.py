@@ -450,6 +450,9 @@ def write_manifest() -> None:
             "segment_length_m": 4.0,
             "rail_gauge_m": 0.90,
             "placement": "segment center X = n * 4.0 with identical Y/Z/rotation/scale",
+            "runtime_centers_x_m": [-4, 0, 4, 8, 12],
+            "runtime_extent_x_m": [-6, 14],
+            "last_shelf_cell_outer_edge_x_m": 13,
         },
         "clearance": {
             "centered_box_to_each_mast_m": 0.11,

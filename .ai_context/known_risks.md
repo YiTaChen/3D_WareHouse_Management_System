@@ -119,3 +119,4 @@
 - Production mission body targets must remain Y=0. Shelf and raised-port height belongs in move-table offsets.
 - The 1 m load must remain centered in X. Guaranteed static clearances are 0.11 m per mast side, 0.20 m per fork-width side, and 0.05 m per tine-length end.
 - npm run test:crane-fit and the Blender import validator cover task coordinates and static geometry, but do not replace a deterministic browser physics end-to-end suite.
+- Binding/unbinding must clear linear and angular velocity. Without this, a released dynamic box can drift into an adjacent shelf sensor and route a later outbound mission to the wrong crane.
