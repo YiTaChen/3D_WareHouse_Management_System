@@ -111,3 +111,11 @@
 - No API regression tests for route order, aggregation, or soft delete.
 - No DB migration tests.
 - No transaction/partial failure tests.
+
+## AS/RS crane fit contract
+
+- Asset names ASRS_Crane_Body, movePlate, Pallet_Load_Anchor, and ASRS_Ground_Rail_4m are application contracts.
+- Warehouse axes are X travel, Y fork lift, and Z fork extension. Moving the full tall crane on Y will reintroduce mast/load clipping.
+- Production mission body targets must remain Y=0. Shelf and raised-port height belongs in move-table offsets.
+- The 1 m load must remain centered in X. Guaranteed static clearances are 0.11 m per mast side, 0.20 m per fork-width side, and 0.05 m per tine-length end.
+- npm run test:crane-fit and the Blender import validator cover task coordinates and static geometry, but do not replace a deterministic browser physics end-to-end suite.

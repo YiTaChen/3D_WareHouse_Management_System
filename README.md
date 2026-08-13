@@ -249,3 +249,18 @@ These APIs power the top-right `DB` switcher. They are enabled automatically for
 - Warehouse Layout Reference: https://www.amsc-usa.com/blog/warehouse-types-and-how-to-choose/
 
 ---
+
+## Fitted AS/RS crane assets
+
+The warehouse uses a pallet stacker crane fitted to the existing 2 m shelf grid and 1 m box envelope. The crane body, double-tine fork, and grey 4 m modular rail are separate GLB assets, so the rail can be repeated indefinitely along X.
+
+Regenerate and verify:
+
+    blender --background --factory-startup --python tools/blender/create_fitted_asrs_assets.py
+    blender --background --factory-startup --python tools/blender/validate_fitted_asrs_assets.py
+    npm run test:crane-fit
+    npm run test:mission-production-factory
+
+Editable source: assets/blender/asrs_stacker_crane_fitted.blend
+
+Reference render: assets/previews/asrs_stacker_crane_fitted.png

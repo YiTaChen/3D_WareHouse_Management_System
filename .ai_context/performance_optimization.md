@@ -158,3 +158,17 @@ For any conveyor, roller, physics timestep, sleep, collider, GLTF transform, or 
 8. Treat `checkBoxOnEquipment` timeout as a failure even if the box appears visually close.
 9. Check browser console warnings/errors.
 10. Re-run all mission tests and the production build.
+
+## 2026-08-13 fitted AS/RS crane note
+
+- Each lane renders five static 4 m rail clones. Rails have no Cannon bodies because mission coordinates constrain the kinematic crane base.
+- The crane adds one low chassis collider, one moving fork collider, and one moving load trigger. Tall decorative mast meshes do not create per-part physics bodies.
+- MoveTable and its sensor write Cannon transforms only when the crane transform or fork local offset changes.
+- Keep rail segments separate from the crane. Extend the route by adding 4 m segments, not by scaling the crane or adding a long dynamic collider.
+
+Crane regression commands:
+
+    npm run test:crane-fit
+    npm run test:mission-production-factory
+    blender --background --factory-startup --python tools/blender/validate_fitted_asrs_assets.py
+    npm run build

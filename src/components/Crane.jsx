@@ -8,11 +8,17 @@ import MoveTable from './MoveTable';
 import CraneInvisibleBulkSensor from './CraneInvisibleBulkSensor';
 
 
-export default function Crane({ id, modelPath, rotation }) {
-  const { scene } = useGLTF(modelPath || '/Crane_ver1.gltf'); 
+export default function Crane({
+  id,
+  modelPath,
+  moveTableModelPath,
+  bodyColliderSize = [1.7, 0.55, 1.1],
+  moveTableColliderSize = [0.86, 0.12, 0.9],
+  sensorSize = [0.92, 1, 0.92],
+  rotation,
+}) {
+  const { scene } = useGLTF(modelPath || '/asrs_stacker_crane_body.glb');
 
-  const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
-  
   const {
     currentCranePosition,
     targetCranePosition,
@@ -59,7 +65,7 @@ export default function Crane({ id, modelPath, rotation }) {
     type: 'Kinematic', 
     position: currentCranePosition.toArray(), // 初始位置從 store 獲取
     rotation: rotation, 
-    args: [0.1, 0.1, 0.1], 
+    args: bodyColliderSize,
     userData: { id: `craneBody-${id}` }
   })); 
 
@@ -118,14 +124,15 @@ export default function Crane({ id, modelPath, rotation }) {
         id={id}
         craneWorldPosition={currentCranePosition.toArray()} 
         craneWorldRotation={rotation} 
-        modelPath={modelPath} 
+        modelPath={moveTableModelPath}
+        colliderSize={moveTableColliderSize}
       />
 
       <CraneInvisibleBulkSensor
           id={id}
           craneWorldPosition={currentCranePosition.toArray()}
           craneWorldRotation={rotation}
-          setCraneSensorDetected={setCraneSensorDetected}
+          sensorSize={sensorSize}
         />
     </>  
   );

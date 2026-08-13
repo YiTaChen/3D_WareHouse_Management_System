@@ -7,16 +7,22 @@ import { useFrame } from '@react-three/fiber';
 import { CraneData } from '../data/CraneData';
 
 // 幫助取得 local 尺寸
-function getLocalBoundingBoxSize(mesh) {
-  if (!mesh || !mesh.geometry) return [1, 1, 1];
-  const bbox = new THREE.Box3().setFromObject(mesh);
+function getLocalBoundingBoxSize(object) {
+  if (!object) return [1, 1, 1];
+  const bbox = new THREE.Box3().setFromObject(object);
   const size = new THREE.Vector3();
   bbox.getSize(size);
   return size.toArray();
 }
 
-export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }) {
-  const { scene } = useGLTF('/moveTable_ver2.gltf');
+export default function MoveTable({
+  id,
+  craneWorldPosition,
+  craneWorldRotation,
+  modelPath = '/asrs_fork_table.glb',
+  colliderSize,
+}) {
+  const { scene } = useGLTF(modelPath);
 
   // 取出 movePlate Mesh 與碰撞體尺寸
   const { moveTableMesh, moveTableLocalProps } = useMemo(() => {
@@ -25,12 +31,12 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
       console.warn('movePlate mesh not found in GLTF');
       return { moveTableMesh: null, moveTableLocalProps: { args: [1, 1, 1] } };
     }
-    const size = getLocalBoundingBoxSize(mesh);
+    const size = colliderSize || getLocalBoundingBoxSize(mesh);
     return {
-      moveTableMesh: mesh.clone(),
+      moveTableMesh: mesh.clone(true),
       moveTableLocalProps: { args: size },
     };
-  }, [scene]);
+  }, [scene, colliderSize]);
 
 
   const moveTableInitialPosition = useMemo(() => {
@@ -118,12 +124,6 @@ export default function MoveTable({ id, craneWorldPosition, craneWorldRotation }
       {moveTableMesh && (
         <group ref={moveTableRef}>
           <primitive object={moveTableMesh} />
-          {moveTableLocalProps?.args && (
-            <mesh>
-              <boxGeometry args={moveTableLocalProps.args} />
-              <meshBasicMaterial color="orange" wireframe opacity={0.5} transparent />
-            </mesh>
-          )}
         </group>
       )}
     </>

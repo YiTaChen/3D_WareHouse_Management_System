@@ -197,3 +197,25 @@ Files:
 Rule:
 
 - Any DB/API contract change should update backend model, route, frontend store mapping, UI consumer, and this `.ai_context` documentation.
+
+## Fitted pallet stacker crane flow
+
+Files:
+
+- src/components/Crane.jsx
+- src/components/MoveTable.jsx
+- src/components/CraneInvisibleBulkSensor.jsx
+- src/components/CraneRail.jsx
+- src/constants/craneConfig.js
+- src/missions/builders/productionMissionFactory.js
+
+Flow:
+
+1. Production missions move the crane base only along X and flatten every body target to Y=0.
+2. The move table lifts on local Y to the selected shelf or raised port.
+3. The double-tine fork extends 2 m on local Z toward the selected rack row.
+4. The load trigger and bound box follow the fork. Load X remains centered between the mast columns.
+5. The fork lowers, releases or collects the box, retracts to Z=0, and returns to its Y=1 travel position.
+6. Separate 4 m rail segments can be repeated along X without changing the crane asset.
+
+Fit limits: 2 m shelf cell, 1 m load, 1.80 m body width, 1.22 m mast inner gap, 0.60 m fork width, and 0.90 m tine length.

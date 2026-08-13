@@ -1,0 +1,54 @@
+{
+  "warehouse_contract": {
+    "shelf_grid_m": 2.0,
+    "box_envelope_m": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "aisle_clear_width_m": 2.0,
+    "axes_threejs": {
+      "travel": "X",
+      "vertical": "Y",
+      "fork": "Z"
+    }
+  },
+  "body": {
+    "file": "asrs_stacker_crane_body.glb",
+    "root": "ASRS_Crane_Body",
+    "dimensions_threejs_m": [
+      1.8,
+      7.2,
+      1.28
+    ],
+    "mast_inner_clearance_m": 1.22
+  },
+  "fork": {
+    "file": "asrs_fork_table.glb",
+    "root": "movePlate",
+    "load_anchor": "Pallet_Load_Anchor",
+    "outer_width_m": 0.6,
+    "tine_length_m": 0.9,
+    "physics_collider_threejs_m": [
+      0.86,
+      0.12,
+      0.9
+    ],
+    "box_binding_vertical_offset_m": 0.58
+  },
+  "rail": {
+    "file": "asrs_ground_rail_4m.glb",
+    "root": "ASRS_Ground_Rail_4m",
+    "repeat_axis_threejs": "X",
+    "segment_length_m": 4.0,
+    "rail_gauge_m": 0.9,
+    "placement": "segment center X = n * 4.0 with identical Y/Z/rotation/scale"
+  },
+  "clearance": {
+    "centered_box_to_each_mast_m": 0.11,
+    "fork_to_each_mast_m": 0.31,
+    "body_to_adjacent_2m_cell_boundary_m": 0.1,
+    "fork_width_margin_inside_1m_box_each_side_m": 0.2,
+    "fork_length_margin_inside_1m_box_each_end_m": 0.05
+  }
+}

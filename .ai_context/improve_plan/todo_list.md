@@ -16,6 +16,12 @@
 - [ ] 將目前偏工程/測試用途的控制介面整理成適合面試展示的簡化操作員介面。
   - Plan: `todo_list_planAndFeature/demo_operator_ui_plan.md`
 
+## Fitted AS/RS Pallet Crane
+
+- [x] 以符合 1 m 貨物與 2 m 櫃位的雙立柱棧板式堆垛機取代舊 plate table 視覺。
+- [x] 吊車底座保持在 Y=0 軌道，叉台負責貨架/高低輸送口升降與正負 Z 伸叉。
+- [x] 新增獨立可重複部署的 4 m 灰色軌道，以及模型間隙與入出庫路徑測試。
+
 ## Notes
 
 - 新項目請保持小而可執行。

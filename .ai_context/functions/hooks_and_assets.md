@@ -152,3 +152,24 @@ Model child-name contracts:
   - `ShelfInvisibleBulkSensor`
   - `table`
   - `Leg_`
+
+## Fitted AS/RS assets
+
+Runtime files:
+
+- public/asrs_stacker_crane_body.glb; required root ASRS_Crane_Body
+- public/asrs_fork_table.glb; required root movePlate and load anchor Pallet_Load_Anchor
+- public/asrs_ground_rail_4m.glb; required root ASRS_Ground_Rail_4m
+- public/asrs_asset_manifest.json; dimensions, axes, and clearance contract
+
+Three.js axes are X travel, Y lift, and Z fork extension. Rail segments are centered every 4 m along X.
+
+Source and verification:
+
+- assets/blender/asrs_stacker_crane_fitted.blend
+- assets/previews/asrs_stacker_crane_fitted.png
+- tools/blender/create_fitted_asrs_assets.py
+- tools/blender/validate_fitted_asrs_assets.py
+- npm run test:crane-fit
+
+CraneData now also supplies body/fork model paths, fitted collider sizes, sensor size, and bindingVerticalOffset.

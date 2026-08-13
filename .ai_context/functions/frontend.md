@@ -241,3 +241,14 @@ Model contract:
 
 - Experimental binding UI.
 - Known mismatch with `useObjectBindingPosition`.
+
+## 2026-08-13 fitted AS/RS crane update
+
+The following supersedes the older crane/move-table descriptions above:
+
+- Crane loads public/asrs_stacker_crane_body.glb from CraneData and keeps the body at ground-rail Y=0 during production missions.
+- MoveTable loads public/asrs_fork_table.glb. Its movePlate root lifts on local Y and extends toward either rack on local Z.
+- CraneInvisibleBulkSensor follows the moving fork offset, not just the crane body.
+- BoxBindingUpdater uses the configured 0.58 m Pallet_Load_Anchor offset, keeping a 1 m load centered between 1.22 m-spaced mast inner faces.
+- CraneRail loads independent public/asrs_ground_rail_4m.glb segments and repeats them every 4 m along X. Add segments to extend a route; do not scale or bind the rail to the crane.
+- The fitted fork collider is 0.86 x 0.12 x 0.90 m, with visible double tines only 0.60 m wide.
