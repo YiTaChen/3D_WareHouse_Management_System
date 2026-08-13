@@ -41,9 +41,13 @@ for the clean `5183` deployment.
   on all three cranes rather than through a column or the exterior cabinet.
 - The white control cabinet is outside the right mast; the counterweight is
   outside the left mast. The central 1 m cargo corridor is clear.
-- The visible double fork is 0.60 m wide and 0.90 m long, inside the 1 m pallet
-  footprint. Consecutive shelf001/shelf002 missions both completed without
-  displacing the neighboring cargo.
+- The visible double fork is 0.60 m wide and 1.30 m long. It supports the full
+  1 m cargo depth with 0.15 m visual overhang at each end while remaining
+  inside the unchanged 2 m plateTable physics envelope. Consecutive
+  shelf001/shelf002 missions both completed without displacing neighboring cargo.
+- While cargo is bound, its quaternion is aligned to the crane and residual
+  angular velocity is cleared so the load remains level rather than hovering
+  at a slight rotating angle.
 - The replacement fork's visible upper contact surface is local Y=0.10. The
   unchanged 0.6 binding offset places the bottom of a 1 m box at the same Y=0.10.
 - The original `main` plateTable physics collider remains `[2, 0.02, 2]`.

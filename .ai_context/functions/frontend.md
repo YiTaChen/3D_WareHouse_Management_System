@@ -251,6 +251,7 @@ The following supersedes the older crane/move-table descriptions above:
 - CraneInvisibleBulkSensor and its mission behavior remain identical to `main`.
 - BoxBindingUpdater keeps the original 0.6 m offset. With a 1 m box, its bottom is local Y=0.10, exactly matching the replacement fork's visible upper contact surface.
 - CraneRail loads independent public/asrs_single_guide_rail_4m.glb segments and repeats them every 4 m along X. Add segments to extend a route; do not scale or bind the rail to the crane. The visually heavier public/asrs_ground_rail_4m.glb remains a preserved alternative and is not active at runtime.
-- The replacement fork visual is 0.60 m wide and 0.90 m long, but its invisible physics collider intentionally remains the original plateTable `[2, 0.02, 2]` contract.
+- The replacement fork visual is 0.60 m wide and 1.30 m long, giving a 1 m load full-depth support while staying inside the original plateTable `[2, 0.02, 2]` physics contract.
+- BoxBindingUpdater aligns a bound load's quaternion to the crane and clears residual angular velocity every frame, preventing the carried box from appearing tilted or slowly rotating. Its position offset remains the original 0.6 m.
 - Production missions, OperatorPanel placement, BoxStore persistence, binding/unbinding, and mission step adapters retain `main` behavior. The visual integration must not snap cargo or alter established inbound/outbound coordinates.
 - The white control cabinet is outside the right mast and the counterweight is outside the left mast, leaving the central 1 m load corridor clear throughout lift travel.

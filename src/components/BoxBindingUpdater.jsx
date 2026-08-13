@@ -38,7 +38,17 @@ export default function BoxBindingUpdater  () {
           moveWorld.y + BINDING_CONFIG.verticalOffset,
           moveWorld.z
         );
+        // A bound load is part of the fork assembly visually. Keep it level
+        // with the crane instead of allowing residual physics rotation to
+        // leave the box tilted or slowly spinning while it is being carried.
+        boxRef.api.quaternion?.set(
+          craneQuat.x,
+          craneQuat.y,
+          craneQuat.z,
+          craneQuat.w
+        );
         boxRef.api.velocity.set(0, 0, 0);
+        boxRef.api.angularVelocity?.set(0, 0, 0);
       } catch (err) {
         console.warn(`[BoxBindingUpdater] Failed to bind ${boxId}:`, err);
       }

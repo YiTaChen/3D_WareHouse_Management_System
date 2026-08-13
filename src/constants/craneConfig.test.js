@@ -24,10 +24,12 @@ test('fitted crane and fork retain clearance inside warehouse cells', () => {
   assert.ok(BODY_WIDTH_IN_CELL < SHELF_GRID);
   assert.ok(MAST_INNER_CLEARANCE > BOX_SIZE);
   assert.ok(FORK_OUTER_WIDTH < BOX_SIZE);
-  assert.ok(FORK_TINE_LENGTH < BOX_SIZE);
+  assert.ok(FORK_TINE_LENGTH > BOX_SIZE);
+  assert.ok(FORK_TINE_LENGTH < manifest.fork.physics_collider_threejs_m[2]);
   assert.ok((SHELF_GRID - BODY_WIDTH_IN_CELL) / 2 >= 0.049);
   assert.ok((MAST_INNER_CLEARANCE - BOX_SIZE) / 2 >= 0.109);
   assert.equal((BOX_SIZE - FORK_OUTER_WIDTH) / 2, 0.2);
+  assert.ok((manifest.fork.physics_collider_threejs_m[2] - FORK_TINE_LENGTH) / 2 >= 0.349);
 });
 
 test('manifest and runtime use the same axes and dimensions', () => {

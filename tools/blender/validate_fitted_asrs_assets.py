@@ -87,7 +87,7 @@ def validate_fork() -> None:
     tine_contact_y = max(bounds[1].z for bounds in tine_bounds)
     anchor = require("Pallet_Load_Anchor")
     assert fork_width <= 0.61, fork_width
-    assert fork_length <= 0.91, fork_length
+    assert 1.29 <= fork_length <= 1.31, fork_length
     assert abs(tine_contact_y - 0.10) <= 0.001, tine_contact_y
     assert abs(anchor.matrix_world.translation.z - 0.60) <= 0.001, anchor.matrix_world.translation.z
     assert_no_exported_collision_proxies()

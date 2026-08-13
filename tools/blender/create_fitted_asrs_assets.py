@@ -307,20 +307,20 @@ def build_fork(target: bpy.types.Collection, collider_target: bpy.types.Collecti
     root["units"] = "meters"
     root["threejs_extension_axis"] = "Z"
     root["fork_outer_width_m"] = 0.60
-    root["fork_tine_length_m"] = 0.90
+    root["fork_tine_length_m"] = 1.30
     root["fork_contact_surface_y_m"] = 0.10
     root["supported_box_m"] = [1.0, 1.0, 1.0]
 
     # X is fork spacing, Y becomes Three.js Z, and Z becomes Three.js Y.
-    cube("ForkCarrier", (0.0, 0.0, -0.13), (1.08, 0.84, 0.16), mat["yellow_dark"], target, root, 0.04)
-    cube("ForkCarrierCenter", (0.0, 0.0, -0.045), (0.56, 0.72, 0.08), mat["charcoal"], target, root, 0.025)
+    cube("ForkCarrier", (0.0, 0.0, -0.13), (1.08, 1.10, 0.16), mat["yellow_dark"], target, root, 0.04)
+    cube("ForkCarrierCenter", (0.0, 0.0, -0.045), (0.56, 0.96, 0.08), mat["charcoal"], target, root, 0.025)
     for x in (-0.25, 0.25):
         side = "L" if x < 0 else "R"
-        cube(f"ForkLowerRail_{side}", (x, 0.0, -0.02), (0.13, 0.88, 0.07), mat["rail_side"], target, root, 0.018)
-        cube(f"ForkTelescopicStage_{side}", (x, 0.0, 0.025), (0.11, 0.86, 0.055), mat["silver"], target, root, 0.016)
-        cube(f"ForkTine_{side}", (x, 0.0, 0.070), (0.10, 0.90, 0.060), mat["yellow"], target, root, 0.016)
-        cube(f"ForkTip_Pos_{side}", (x, 0.42, 0.075), (0.115, 0.08, 0.050), mat["yellow"], target, root, 0.014)
-        cube(f"ForkTip_Neg_{side}", (x, -0.42, 0.075), (0.115, 0.08, 0.050), mat["yellow"], target, root, 0.014)
+        cube(f"ForkLowerRail_{side}", (x, 0.0, -0.02), (0.13, 1.20, 0.07), mat["rail_side"], target, root, 0.018)
+        cube(f"ForkTelescopicStage_{side}", (x, 0.0, 0.025), (0.11, 1.25, 0.055), mat["silver"], target, root, 0.016)
+        cube(f"ForkTine_{side}", (x, 0.0, 0.070), (0.10, 1.30, 0.060), mat["yellow"], target, root, 0.016)
+        cube(f"ForkTip_Pos_{side}", (x, 0.61, 0.075), (0.115, 0.10, 0.050), mat["yellow"], target, root, 0.014)
+        cube(f"ForkTip_Neg_{side}", (x, -0.61, 0.075), (0.115, 0.10, 0.050), mat["yellow"], target, root, 0.014)
     cube("ForkMovingCrossbar", (0.0, 0.0, 0.015), (0.70, 0.20, 0.16), mat["yellow"], target, root, 0.03)
     cube("ForkLoadSensorVisual", (0.0, 0.0, 0.065), (0.23, 0.24, 0.040), mat["blue"], target, root, 0.014)
     anchor = empty("Pallet_Load_Anchor", target, root, size=0.18)
@@ -494,7 +494,7 @@ def write_manifest() -> None:
             "root": "movePlate",
             "load_anchor": "Pallet_Load_Anchor",
             "outer_width_m": 0.60,
-            "tine_length_m": 0.90,
+            "tine_length_m": 1.30,
             "physics_collider_threejs_m": [2.0, 0.02, 2.0],
             "physics_contract": "preserved from main branch plateTable",
             "visual_contact_surface_y_m": 0.10,
@@ -530,7 +530,8 @@ def write_manifest() -> None:
             "fork_to_each_mast_m": 0.31,
             "body_to_adjacent_2m_cell_boundary_m": 0.05,
             "fork_width_margin_inside_1m_box_each_side_m": 0.20,
-            "fork_length_margin_inside_1m_box_each_end_m": 0.05,
+            "fork_tine_overhang_beyond_1m_box_each_end_m": 0.15,
+            "fork_length_margin_inside_2m_plate_collider_each_end_m": 0.35,
         },
     }
     MANIFEST.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")

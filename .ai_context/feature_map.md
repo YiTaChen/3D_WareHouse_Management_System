@@ -218,4 +218,5 @@ Flow:
 5. The double-tine visual is kept inside the 1 m pallet footprint, and the body cabinet/counterweight remain outside the central load corridor.
 6. Separate 4 m rail segments can be repeated along X without changing the crane asset.
 
-Fit limits: 2 m shelf cell, 1 m load, 1.90 m body width, 1.22 m mast inner gap, 0.60 m fork width, and 0.90 m tine length.
+Fit limits: 2 m shelf cell/plateTable envelope, 1 m load, 1.90 m body width,
+1.22 m mast inner gap, 0.60 m fork width, and 1.30 m visible tine length.
