@@ -2,6 +2,12 @@ import { useCraneStore } from '../../stores/craneStore';
 import { useBoxStore } from '../../stores/boxStore';
 import { useBoxEquipStore } from '../../stores/boxEquipStore';
 import { useConveyorStore } from '../../stores/conveyorStore';
+import {
+  applyBoxBindingTransform,
+  getBoxBindingTransform,
+  isPositionWithinTolerance,
+  waitForBoxPosition,
+} from '../../components/boxBinding.js';
 
 const checkBoxOnEquipment = async ({ boxId, equipmentId, tryCount = 0 }) => {
   const getEquipmentForBox = useBoxEquipStore.getState().getEquipmentForBox;
@@ -29,6 +35,37 @@ const checkBoxOnEquipment = async ({ boxId, equipmentId, tryCount = 0 }) => {
       return false;
     }
   }
+};
+
+const synchronizeBoxWithCrane = async ({ boxId, craneId }) => {
+  const craneState = useCraneStore.getState().craneStates[craneId];
+  const boxStore = useBoxStore.getState();
+  const boxApi = boxStore.getBoxRef(boxId)?.api;
+  const transform = getBoxBindingTransform(craneState);
+
+  if (!craneState || craneState.isCraneMoving || craneState.isMoveTableMoving) {
+    console.warn(`[boxBinding] ${craneId} 尚未停止，拒絕切換 Box ${boxId} 綁定狀態`);
+    return false;
+  }
+  if (!boxApi?.position?.set || !boxApi.position.subscribe || !transform) {
+    console.warn(`[boxBinding] Box ${boxId} 或 ${craneId} 的 physics ref 尚未就緒`);
+    return false;
+  }
+
+  const currentWorldPosition = boxStore.getBoxWorldPosition(boxId);
+  if (isPositionWithinTolerance(currentWorldPosition, transform.position)) {
+    boxApi.wakeUp?.();
+    return applyBoxBindingTransform(boxApi, transform);
+  }
+
+  const confirmation = waitForBoxPosition({
+    subscribe: (listener) => boxApi.position.subscribe(listener),
+    expectedPosition: transform.position,
+  });
+
+  boxApi.wakeUp?.();
+  if (!applyBoxBindingTransform(boxApi, transform)) return false;
+  return confirmation;
 };
 
 export const stepFunctions = {
@@ -100,35 +137,45 @@ export const stepFunctions = {
   },
 
   craneBindingBox: async ({ craneId, boxId }) => {
-    const bindFn = useBoxStore.getState().setBoxBoundToMoveplate;
+    const boxStore = useBoxStore.getState();
+    const bindFn = boxStore.setBoxBoundToMoveplate;
+    const unbindFn = boxStore.clearBoxBoundToMoveplate;
 
-    if (!bindFn) {
-      console.warn('[craneBindingBox] 無法取得 setBoxBoundToMoveplate');
+    if (!boxId || !craneId || !bindFn || !unbindFn) {
+      console.warn('[craneBindingBox] 缺少 box/crane ID 或 binding action');
       return false;
     }
 
-    // 執行綁定
     bindFn(boxId, craneId);
+    const confirmed = await synchronizeBoxWithCrane({ boxId, craneId });
 
-    // 模擬等待：固定等待 1 秒
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (!confirmed) {
+      unbindFn(boxId);
+      console.warn(`[craneBindingBox] Box ${boxId} 未實際到達 ${craneId} platetable，已取消綁定`);
+      return false;
+    }
 
     return true;
   },
 
-  craneUnBindingBox: async ({ boxId }) => {
-    const unbindFn = useBoxStore.getState().clearBoxBoundToMoveplate;
+  craneUnBindingBox: async ({ craneId, boxId }) => {
+    const boxStore = useBoxStore.getState();
+    const unbindFn = boxStore.clearBoxBoundToMoveplate;
+    const boundCraneId = boxStore.getBoxBoundMoveplate(boxId);
 
-    if (!unbindFn) {
-      console.warn('[craneBindingBox] 無法取得 clearBoxBoundToMoveplate');
+    if (!boxId || !unbindFn || !boundCraneId || (craneId && craneId !== boundCraneId)) {
+      console.warn(`[craneUnBindingBox] Box ${boxId} 沒有對應的有效綁定`);
       return false;
     }
 
-    // 執行綁定
-    unbindFn(boxId);
+    const confirmed = await synchronizeBoxWithCrane({ boxId, craneId: boundCraneId });
+    if (!confirmed) {
+      console.warn(`[craneUnBindingBox] Box ${boxId} 釋放位置未確認，保留綁定並停止 mission`);
+      return false;
+    }
 
-    // 模擬等待：固定等待 1 秒
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    unbindFn(boxId);
+    useBoxStore.getState().getBoxRef(boxId)?.api?.wakeUp?.();
 
     return true;
   },

@@ -37,6 +37,8 @@ Root: the repository directory that contains `.ai_context/`; do not depend on a 
 - `MoveTable.jsx`：吊車移動平台。
 - `CraneInvisibleBulkSensor.jsx`：吊車隱形 sensor。
 - `BoxBindingUpdater.jsx`：box 綁定到 move table 後，每 frame 同步位置。
+- `boxBinding.js`：box/platetable 共用 transform、位置容差與 Cannon 綁定確認工具。
+- `boxBinding.test.js`：綁定 transform、motion reset、typed-array position acknowledgment 與 timeout 回歸測試。
 - `Shelf.jsx`：貨架批次渲染、collider、sensor。
 - `ShelveMultiInstances.jsx`：多實例貨架實驗/替代渲染。
 - `Materials.jsx`：Cannon material/contact material。
