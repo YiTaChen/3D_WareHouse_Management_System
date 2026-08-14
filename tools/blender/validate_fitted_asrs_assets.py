@@ -77,6 +77,8 @@ def validate_body() -> None:
 def validate_fork() -> None:
     import_glb("asrs_fork_table.glb")
     require("movePlate")
+    fixed = require("ForkFixedAssembly")
+    extending = require("ForkExtendingTines")
     require("Pallet_Load_Anchor")
     tine_bounds = [
         object_bounds(require("ForkTine_L")),
@@ -86,8 +88,15 @@ def validate_fork() -> None:
     fork_length = max(bounds[1].y for bounds in tine_bounds) - min(bounds[0].y for bounds in tine_bounds)
     tine_contact_y = max(bounds[1].z for bounds in tine_bounds)
     anchor = require("Pallet_Load_Anchor")
+    fixed_guides = [
+        object_bounds(require("ForkFixedGuide_L")),
+        object_bounds(require("ForkFixedGuide_R")),
+    ]
+    fixed_guide_width = max(bounds[1].x for bounds in fixed_guides) - min(bounds[0].x for bounds in fixed_guides)
+    assert extending.parent == fixed, extending.parent
     assert fork_width <= 0.61, fork_width
     assert 1.29 <= fork_length <= 1.31, fork_length
+    assert 0.82 <= fixed_guide_width <= 0.86, fixed_guide_width
     assert abs(tine_contact_y - 0.10) <= 0.001, tine_contact_y
     assert abs(anchor.matrix_world.translation.z - 0.60) <= 0.001, anchor.matrix_world.translation.z
     assert_no_exported_collision_proxies()

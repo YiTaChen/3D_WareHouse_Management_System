@@ -27,3 +27,13 @@ export const CRANE_CONSTANTS = {
   RAIL_SEGMENT_LENGTH: 4,
   RAIL_SEGMENT_CENTERS: [-4, 0, 4, 8, 12],
 };
+
+// Keep one end of each inner tine inside the fixed guide while its far end
+// reaches the same Z target as the original plateTable. This is visual only;
+// the mission offset and physics collider continue to use the full extension.
+export const getForkVisualExtensionTransform = (extensionZ) => ({
+  positionZ: extensionZ / 2,
+  scaleZ: (
+    CRANE_CONSTANTS.FORK_TINE_LENGTH + Math.abs(extensionZ)
+  ) / CRANE_CONSTANTS.FORK_TINE_LENGTH,
+});

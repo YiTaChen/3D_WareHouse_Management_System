@@ -302,6 +302,8 @@ def build_body(target: bpy.types.Collection, collider_target: bpy.types.Collecti
 def build_fork(target: bpy.types.Collection, collider_target: bpy.types.Collection | None = None) -> bpy.types.Object:
     mat = materials()
     root = empty("movePlate", target, size=0.28)
+    fixed = empty("ForkFixedAssembly", target, root, size=0.22)
+    extending = empty("ForkExtendingTines", target, fixed, size=0.18)
     root["asset_type"] = "warehouse_fitted_double_tine_fork"
     root["origin"] = "kinematic_body_center"
     root["units"] = "meters"
@@ -312,18 +314,21 @@ def build_fork(target: bpy.types.Collection, collider_target: bpy.types.Collecti
     root["supported_box_m"] = [1.0, 1.0, 1.0]
 
     # X is fork spacing, Y becomes Three.js Z, and Z becomes Three.js Y.
-    cube("ForkCarrier", (0.0, 0.0, -0.13), (1.08, 1.10, 0.16), mat["yellow_dark"], target, root, 0.04)
-    cube("ForkCarrierCenter", (0.0, 0.0, -0.045), (0.56, 0.96, 0.08), mat["charcoal"], target, root, 0.025)
+    cube("ForkCarrier", (0.0, 0.0, -0.13), (1.08, 1.10, 0.16), mat["yellow_dark"], target, fixed, 0.04)
+    cube("ForkCarrierCenter", (0.0, 0.0, -0.045), (0.56, 0.96, 0.08), mat["charcoal"], target, fixed, 0.025)
     for x in (-0.25, 0.25):
         side = "L" if x < 0 else "R"
-        cube(f"ForkLowerRail_{side}", (x, 0.0, -0.02), (0.13, 1.20, 0.07), mat["rail_side"], target, root, 0.018)
-        cube(f"ForkTelescopicStage_{side}", (x, 0.0, 0.025), (0.11, 1.25, 0.055), mat["silver"], target, root, 0.016)
-        cube(f"ForkTine_{side}", (x, 0.0, 0.070), (0.10, 1.30, 0.060), mat["yellow"], target, root, 0.016)
-        cube(f"ForkTip_Pos_{side}", (x, 0.61, 0.075), (0.115, 0.10, 0.050), mat["yellow"], target, root, 0.014)
-        cube(f"ForkTip_Neg_{side}", (x, -0.61, 0.075), (0.115, 0.10, 0.050), mat["yellow"], target, root, 0.014)
-    cube("ForkMovingCrossbar", (0.0, 0.0, 0.015), (0.70, 0.20, 0.16), mat["yellow"], target, root, 0.03)
-    cube("ForkLoadSensorVisual", (0.0, 0.0, 0.065), (0.23, 0.24, 0.040), mat["blue"], target, root, 0.014)
-    anchor = empty("Pallet_Load_Anchor", target, root, size=0.18)
+        cube(f"ForkLowerRail_{side}", (x, 0.0, -0.02), (0.13, 1.20, 0.07), mat["rail_side"], target, fixed, 0.018)
+        cube(f"ForkTelescopicStage_{side}", (x, 0.0, 0.025), (0.11, 1.25, 0.055), mat["silver"], target, fixed, 0.016)
+        cube(f"ForkTine_{side}", (x, 0.0, 0.070), (0.10, 1.30, 0.060), mat["yellow"], target, extending, 0.016)
+    # Two tightly spaced outer guides stay attached to the carrier. They make
+    # the inner pair read as telescoping forks instead of a floating platform.
+    for x in (-0.38, 0.38):
+        side = "L" if x < 0 else "R"
+        cube(f"ForkFixedGuide_{side}", (x, 0.0, 0.070), (0.09, 1.30, 0.060), mat["yellow_dark"], target, fixed, 0.014)
+    cube("ForkMovingCrossbar", (0.0, 0.0, 0.015), (0.70, 0.20, 0.16), mat["yellow"], target, fixed, 0.03)
+    cube("ForkLoadSensorVisual", (0.0, 0.0, 0.065), (0.23, 0.24, 0.040), mat["blue"], target, fixed, 0.014)
+    anchor = empty("Pallet_Load_Anchor", target, extending, size=0.18)
     anchor.location.z = 0.60
     anchor["supported_load_m"] = [1.0, 1.0, 1.0]
     anchor["binding_vertical_offset_m"] = 0.60
@@ -499,6 +504,10 @@ def write_manifest() -> None:
             "physics_contract": "preserved from main branch plateTable",
             "visual_contact_surface_y_m": 0.10,
             "box_binding_vertical_offset_m": 0.60,
+            "fixed_visual_group": "ForkFixedAssembly",
+            "extending_visual_group": "ForkExtendingTines",
+            "fixed_outer_guides": ["ForkFixedGuide_L", "ForkFixedGuide_R"],
+            "extension_visualization": "inner tines stay anchored and lengthen along local Z; carrier and outer guides ignore Z extension",
         },
         "rail": {
             "file": RAIL_GLB.name,
@@ -574,7 +583,13 @@ def main() -> None:
     single_guide_rail_collection.hide_render = True
 
     body.location.x = 4.0
-    fork.location = (4.0, -1.55, 4.10)
+    # Preview the same anchored telescoping transform used by MoveTable.jsx:
+    # the fixed carrier stays at the mast while the inner pair reaches cargo.
+    preview_extension = -1.55
+    fork.location = (4.0, 0.0, 4.10)
+    extending = bpy.data.objects.get("ForkExtendingTines")
+    extending.location.y = preview_extension / 2
+    extending.scale.y = (1.30 + abs(preview_extension)) / 1.30
     build_preview_environment(environment_collection)
     write_manifest()
 

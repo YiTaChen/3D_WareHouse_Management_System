@@ -48,6 +48,11 @@ for the clean `5183` deployment.
 - While cargo is bound, its quaternion is aligned to the crane and residual
   angular velocity is cleared so the load remains level rather than hovering
   at a slight rotating angle.
+- The lower carrier and two outer guide tines use `ForkFixedAssembly`: they
+  follow crane travel/lift but ignore plateTable Z extension. Only the two inner
+  tines in `ForkExtendingTines` extend toward the rack. Their visual length and
+  midpoint change together so their near end remains inside the fixed guides;
+  the load therefore never appears supported by a detached floating platform.
 - The replacement fork's visible upper contact surface is local Y=0.10. The
   unchanged 0.6 binding offset places the bottom of a 1 m box at the same Y=0.10.
 - The original `main` plateTable physics collider remains `[2, 0.02, 2]`.

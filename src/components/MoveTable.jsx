@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
 import { CraneData } from '../data/CraneData';
+import { getForkVisualExtensionTransform } from '../constants/craneConfig.js';
 
 // 幫助取得 local 尺寸
 function getLocalBoundingBoxSize(object) {
@@ -24,16 +25,28 @@ export default function MoveTable({
 }) {
   const { scene } = useGLTF(modelPath);
 
-  // 取出 movePlate Mesh 與碰撞體尺寸
-  const { moveTableMesh, moveTableLocalProps } = useMemo(() => {
-    const mesh = scene.getObjectByName('movePlate');
-    if (!mesh) {
+  // Split the replacement asset into a fixed carriage/guide assembly and the
+  // two inner extending tines. The original plateTable physics body remains a
+  // single invisible kinematic collider at the full mission offset.
+  const { fixedAssemblyMesh, extendingTinesMesh, moveTableLocalProps } = useMemo(() => {
+    const movePlate = scene.getObjectByName('movePlate');
+    const fixedAssembly = movePlate?.getObjectByName('ForkFixedAssembly');
+    const extendingTines = movePlate?.getObjectByName('ForkExtendingTines');
+    if (!movePlate || !fixedAssembly || !extendingTines) {
       console.warn('movePlate mesh not found in GLTF');
-      return { moveTableMesh: null, moveTableLocalProps: { args: [1, 1, 1] } };
+      return {
+        fixedAssemblyMesh: null,
+        extendingTinesMesh: null,
+        moveTableLocalProps: { args: [1, 1, 1] },
+      };
     }
-    const size = colliderSize || getLocalBoundingBoxSize(mesh);
+    const size = colliderSize || getLocalBoundingBoxSize(movePlate);
+    const fixedClone = fixedAssembly.clone(true);
+    const nestedExtendingClone = fixedClone.getObjectByName('ForkExtendingTines');
+    nestedExtendingClone?.parent?.remove(nestedExtendingClone);
     return {
-      moveTableMesh: mesh.clone(true),
+      fixedAssemblyMesh: fixedClone,
+      extendingTinesMesh: extendingTines.clone(true),
       moveTableLocalProps: { args: size },
     };
   }, [scene, colliderSize]);
@@ -67,6 +80,8 @@ export default function MoveTable({
     userData: { id: `movePlate-${id}`, args: moveTableLocalProps.args },
   }));
   const lastPhysicsInputs = useRef(null);
+  const fixedAssemblyRef = useRef(null);
+  const extendingTinesRef = useRef(null);
 
   // 在 Ref 有效時，註冊進 Store
   useEffect(() => {
@@ -99,8 +114,28 @@ export default function MoveTable({
       const localOffset = currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat);
       const worldPos = cranePos.add(localOffset);
 
+      // The fixed lower platform and outer guide tines share lift/travel with
+      // the plateTable but deliberately ignore its local Z extension.
+      const fixedLocalOffset = currentMoveTableLocalOffset.clone();
+      const extensionZ = fixedLocalOffset.z;
+      fixedLocalOffset.z = 0;
+      const fixedWorldPos = new THREE.Vector3(...craneWorldPosition).add(
+        fixedLocalOffset.applyQuaternion(craneQuat)
+      );
+
       moveTableApi.position.set(worldPos.x, worldPos.y, worldPos.z);
       moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w);
+
+      if (fixedAssemblyRef.current) {
+        fixedAssemblyRef.current.position.copy(fixedWorldPos);
+        fixedAssemblyRef.current.quaternion.copy(craneQuat);
+      }
+
+      if (extendingTinesRef.current) {
+        const { positionZ, scaleZ } = getForkVisualExtensionTransform(extensionZ);
+        extendingTinesRef.current.position.set(0, 0, positionZ);
+        extendingTinesRef.current.scale.set(1, 1, scaleZ);
+      }
       lastPhysicsInputs.current = nextInputs;
     }
 
@@ -121,9 +156,13 @@ export default function MoveTable({
 
   return (
     <>
-      {moveTableMesh && (
-        <group ref={moveTableRef}>
-          <primitive object={moveTableMesh} />
+      <group ref={moveTableRef} />
+      {fixedAssemblyMesh && extendingTinesMesh && (
+        <group ref={fixedAssemblyRef}>
+          <primitive object={fixedAssemblyMesh} />
+          <group ref={extendingTinesRef}>
+            <primitive object={extendingTinesMesh} />
+          </group>
         </group>
       )}
     </>

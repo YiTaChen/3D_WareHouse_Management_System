@@ -4,6 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 
 import {
   CRANE_CONSTANTS,
+  getForkVisualExtensionTransform,
 } from './craneConfig.js';
 import CraneData from '../data/CraneData.js';
 
@@ -73,6 +74,25 @@ test('fork contact surface matches the existing bound box bottom', () => {
   const boxBottomFromMovePlate = CRANE_CONSTANTS.BOX_BINDING_VERTICAL_OFFSET
     - CRANE_CONSTANTS.BOX_SIZE / 2;
   assert.ok(Math.abs(boxBottomFromMovePlate - manifest.fork.visual_contact_surface_y_m) < 1e-9);
+});
+
+test('inner tines stay connected to fixed guides for both extension directions', () => {
+  const baseLength = CRANE_CONSTANTS.FORK_TINE_LENGTH;
+
+  for (const extensionZ of [-2, 0, 2]) {
+    const { positionZ, scaleZ } = getForkVisualExtensionTransform(extensionZ);
+    const visualLength = baseLength * scaleZ;
+    const nearEnd = positionZ - visualLength / 2;
+    const farEnd = positionZ + visualLength / 2;
+
+    if (extensionZ >= 0) {
+      assert.ok(nearEnd <= -baseLength / 2 + 1e-9);
+      assert.ok(farEnd >= extensionZ + baseLength / 2 - 1e-9);
+    } else {
+      assert.ok(nearEnd <= extensionZ - baseLength / 2 + 1e-9);
+      assert.ok(farEnd >= baseLength / 2 - 1e-9);
+    }
+  }
 });
 
 test('modular rail reaches beyond the final shelf cell', () => {

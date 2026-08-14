@@ -47,7 +47,14 @@
     ],
     "physics_contract": "preserved from main branch plateTable",
     "visual_contact_surface_y_m": 0.1,
-    "box_binding_vertical_offset_m": 0.6
+    "box_binding_vertical_offset_m": 0.6,
+    "fixed_visual_group": "ForkFixedAssembly",
+    "extending_visual_group": "ForkExtendingTines",
+    "fixed_outer_guides": [
+      "ForkFixedGuide_L",
+      "ForkFixedGuide_R"
+    ],
+    "extension_visualization": "inner tines stay anchored and lengthen along local Z; carrier and outer guides ignore Z extension"
   },
   "rail": {
     "file": "asrs_ground_rail_4m.glb",
