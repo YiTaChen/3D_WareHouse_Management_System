@@ -5,6 +5,7 @@ import { readFile, stat } from 'node:fs/promises';
 import {
   CRANE_CONSTANTS,
   getForkVisualExtensionTransform,
+  writeFixedForkCraneBase,
 } from './craneConfig.js';
 import CraneData from '../data/CraneData.js';
 
@@ -93,6 +94,23 @@ test('inner tines stay connected to fixed guides for both extension directions',
       assert.ok(farEnd >= baseLength / 2 - 1e-9);
     }
   }
+});
+
+test('fixed fork follows physical crane travel while preserving legacy lift Y', () => {
+  const physicalTarget = {};
+  assert.deepEqual(
+    writeFixedForkCraneBase(
+      physicalTarget,
+      [8, 4.15, -6],
+      { x: 7.9, y: 0, z: -6 },
+    ),
+    { x: 7.9, y: 4.15, z: -6 },
+  );
+  const fallbackTarget = {};
+  assert.deepEqual(
+    writeFixedForkCraneBase(fallbackTarget, [8, 4.15, -6]),
+    { x: 8, y: 4.15, z: -6 },
+  );
 });
 
 test('modular rail reaches beyond the final shelf cell', () => {

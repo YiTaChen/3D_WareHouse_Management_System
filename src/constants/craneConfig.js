@@ -37,3 +37,17 @@ export const getForkVisualExtensionTransform = (extensionZ) => ({
     CRANE_CONSTANTS.FORK_TINE_LENGTH + Math.abs(extensionZ)
   ) / CRANE_CONSTANTS.FORK_TINE_LENGTH,
 });
+
+// The crane body is projected onto ground Y=0, while the legacy plateTable
+// keeps its logical vertical coordinate. Use the body's live X/Z so the new
+// fixed visual cannot be left behind during travel, but preserve logical Y.
+export const writeFixedForkCraneBase = (
+  target,
+  logicalCranePosition,
+  physicalCranePosition = null,
+) => {
+  target.x = physicalCranePosition?.x ?? logicalCranePosition[0];
+  target.y = logicalCranePosition[1];
+  target.z = physicalCranePosition?.z ?? logicalCranePosition[2];
+  return target;
+};

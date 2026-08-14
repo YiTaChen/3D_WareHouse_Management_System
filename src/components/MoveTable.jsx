@@ -5,7 +5,10 @@ import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
 import { CraneData } from '../data/CraneData';
-import { getForkVisualExtensionTransform } from '../constants/craneConfig.js';
+import {
+  getForkVisualExtensionTransform,
+  writeFixedForkCraneBase,
+} from '../constants/craneConfig.js';
 
 // 幫助取得 local 尺寸
 function getLocalBoundingBoxSize(object) {
@@ -18,6 +21,7 @@ function getLocalBoundingBoxSize(object) {
 
 export default function MoveTable({
   id,
+  craneBodyRef,
   craneWorldPosition,
   craneWorldRotation,
   modelPath = '/asrs_fork_table.glb',
@@ -82,6 +86,13 @@ export default function MoveTable({
   const lastPhysicsInputs = useRef(null);
   const fixedAssemblyRef = useRef(null);
   const extendingTinesRef = useRef(null);
+  const fixedVisualScratch = useMemo(() => ({
+    craneEuler: new THREE.Euler(),
+    craneQuaternion: new THREE.Quaternion(),
+    physicalCranePosition: new THREE.Vector3(),
+    fixedLocalOffset: new THREE.Vector3(),
+    fixedWorldPosition: new THREE.Vector3(),
+  }), []);
 
   // 在 Ref 有效時，註冊進 Store
   useEffect(() => {
@@ -114,29 +125,41 @@ export default function MoveTable({
       const localOffset = currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat);
       const worldPos = cranePos.add(localOffset);
 
-      // The fixed lower platform and outer guide tines share lift/travel with
-      // the plateTable but deliberately ignore its local Z extension.
-      const fixedLocalOffset = currentMoveTableLocalOffset.clone();
-      const extensionZ = fixedLocalOffset.z;
-      fixedLocalOffset.z = 0;
-      const fixedWorldPos = new THREE.Vector3(...craneWorldPosition).add(
-        fixedLocalOffset.applyQuaternion(craneQuat)
-      );
-
       moveTableApi.position.set(worldPos.x, worldPos.y, worldPos.z);
       moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w);
-
-      if (fixedAssemblyRef.current) {
-        fixedAssemblyRef.current.position.copy(fixedWorldPos);
-        fixedAssemblyRef.current.quaternion.copy(craneQuat);
-      }
-
-      if (extendingTinesRef.current) {
-        const { positionZ, scaleZ } = getForkVisualExtensionTransform(extensionZ);
-        extendingTinesRef.current.position.set(0, 0, positionZ);
-        extendingTinesRef.current.scale.set(1, 1, scaleZ);
-      }
       lastPhysicsInputs.current = nextInputs;
+    }
+
+    // Follow the live kinematic body every frame. Store/React updates can land
+    // a frame later than Cannon's body movement; using only changed props here
+    // can leave the detached visual at an old travel position.
+    const craneQuat = fixedVisualScratch.craneQuaternion.setFromEuler(
+      fixedVisualScratch.craneEuler.set(...craneWorldRotation)
+    );
+    const physicalCranePosition = craneBodyRef?.current
+      ? craneBodyRef.current.getWorldPosition(fixedVisualScratch.physicalCranePosition)
+      : null;
+    const fixedWorldPos = writeFixedForkCraneBase(
+      fixedVisualScratch.fixedWorldPosition,
+      craneWorldPosition,
+      physicalCranePosition,
+    );
+    const fixedLocalOffset = fixedVisualScratch.fixedLocalOffset.copy(
+      currentMoveTableLocalOffset
+    );
+    const extensionZ = fixedLocalOffset.z;
+    fixedLocalOffset.z = 0;
+    fixedWorldPos.add(fixedLocalOffset.applyQuaternion(craneQuat));
+
+    if (fixedAssemblyRef.current) {
+      fixedAssemblyRef.current.position.copy(fixedWorldPos);
+      fixedAssemblyRef.current.quaternion.copy(craneQuat);
+    }
+
+    if (extendingTinesRef.current) {
+      const { positionZ, scaleZ } = getForkVisualExtensionTransform(extensionZ);
+      extendingTinesRef.current.position.set(0, 0, positionZ);
+      extendingTinesRef.current.scale.set(1, 1, scaleZ);
     }
 
     const shouldMoveTable = !isCraneMoving && !currentMoveTableLocalOffset.equals(targetMoveTableLocalOffset);

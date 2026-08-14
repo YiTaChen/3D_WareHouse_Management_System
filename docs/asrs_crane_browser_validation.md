@@ -53,6 +53,10 @@ for the clean `5183` deployment.
   tines in `ForkExtendingTines` extend toward the rack. Their visual length and
   midpoint change together so their near end remains inside the fixed guides;
   the load therefore never appears supported by a detached floating platform.
+- `ForkFixedAssembly` samples the live kinematic crane body on every rendered
+  frame for travel X/Z, while retaining the legacy logical Y used for lift. It
+  therefore cannot remain at a previous rack or port position while the mast
+  continues along the rail.
 - The replacement fork's visible upper contact surface is local Y=0.10. The
   unchanged 0.6 binding offset places the bottom of a 1 m box at the same Y=0.10.
 - The original `main` plateTable physics collider remains `[2, 0.02, 2]`.

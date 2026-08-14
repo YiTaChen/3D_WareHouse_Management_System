@@ -128,6 +128,7 @@ export default function Crane({
        {/* 傳遞 Crane 的當前**物理世界位置**和旋轉給 MoveTable 和 Sensor 組件 */}
       <MoveTable
         id={id}
+        craneBodyRef={craneRef}
         craneWorldPosition={currentCranePosition.toArray()} 
         craneWorldRotation={rotation} 
         modelPath={moveTableModelPath}
