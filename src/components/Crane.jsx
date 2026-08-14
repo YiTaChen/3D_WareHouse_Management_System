@@ -15,14 +15,13 @@ export default function Crane({ id, modelPath, rotation }) {
   
   const {
     currentCranePosition,
-    targetCranePosition,
-    craneMoveSpeed,
-    isMoveTableMoving, 
   } = useCraneStore(state => state.getCraneState(id));
 
   const updateCraneCurrentPosition = useCraneStore(state => state.updateCraneCurrentPosition);
+  const setCraneRef = useCraneStore(state => state.setCraneRef);
 
   const hasSetInitialPosition = useRef(false);
+  const craneVisualRef = useRef(null);
 
   const craneBodyVisualMesh = useMemo(() => {
       if (!scene) {
@@ -72,33 +71,51 @@ export default function Crane({ id, modelPath, rotation }) {
     }
   }, [craneApi, id, currentCranePosition]); 
 
+  useEffect(() => {
+    setCraneRef(id, { ref: craneVisualRef });
+    return () => setCraneRef(id, null);
+  }, [id, setCraneRef]);
+
   // ----------------- useFrame for Crane's movement -----------------
   useFrame((_, delta) => {
-    if (!craneApi || !craneApi.position || !targetCranePosition) {
+    const liveCraneState = useCraneStore.getState().getCraneState(id);
+    if (!liveCraneState || !craneApi || !craneApi.position) {
       return;
     }
 
-    const shouldMove = !currentCranePosition.equals(targetCranePosition) && !isMoveTableMoving;
+    const liveCurrentPosition = liveCraneState.currentCranePosition;
+    const liveTargetPosition = liveCraneState.targetCranePosition;
+    const shouldMove = !liveCurrentPosition.equals(liveTargetPosition)
+      && !liveCraneState.isMoveTableMoving;
+
     if (!shouldMove) {
+      craneVisualRef.current?.position.copy(liveCurrentPosition);
       return;
     }
 
-    const distance = currentCranePosition.distanceTo(targetCranePosition);
-    const moveStep = craneMoveSpeed * delta;
+    const distance = liveCurrentPosition.distanceTo(liveTargetPosition);
+    const moveStep = liveCraneState.craneMoveSpeed * delta;
     const newPosition = moveStep >= distance
-      ? targetCranePosition
-      : currentCranePosition.clone().add(
-        targetCranePosition.clone().sub(currentCranePosition).normalize().multiplyScalar(moveStep)
+      ? liveTargetPosition
+      : liveCurrentPosition.clone().add(
+        liveTargetPosition.clone().sub(liveCurrentPosition).normalize().multiplyScalar(moveStep)
       );
 
+    // Keep the visible model responsive even when the Cannon worker is busy.
+    craneVisualRef.current?.position.copy(newPosition);
     updateCraneCurrentPosition(id, newPosition.toArray());
     craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
-  });
+  }, -2);
 
 
   return (
     <>
-      <group ref={craneRef}> 
+      <group ref={craneRef} visible={false} />
+      <group
+        ref={craneVisualRef}
+        position={currentCranePosition.toArray()}
+        rotation={rotation}
+      >
         {craneBodyVisualMesh && (
           <primitive 
               object={craneBodyVisualMesh} 
@@ -113,12 +130,10 @@ export default function Crane({ id, modelPath, rotation }) {
         </mesh> */}
       </group>
 
-       {/* 傳遞 Crane 的當前**物理世界位置**和旋轉給 MoveTable 和 Sensor 組件 */}
+       {/* MoveTable reads live crane position from the store; the sensor still receives it explicitly. */}
       <MoveTable
         id={id}
-        craneWorldPosition={currentCranePosition.toArray()} 
         craneWorldRotation={rotation} 
-        modelPath={modelPath} 
       />
 
       <CraneInvisibleBulkSensor

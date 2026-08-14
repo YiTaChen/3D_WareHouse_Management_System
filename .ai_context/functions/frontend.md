@@ -18,6 +18,7 @@ Performance behavior:
 - Disables antialiasing and shadows on low-power devices.
 - Configures Cannon with sleeping, SAP broadphase, two max substeps, a 1/30 step, and `shouldInvalidate={false}`.
 - Mounts `Ground` through `Scene` only; do not add a duplicate ground body in `App`.
+- In development, `?perf=1` mounts `PerformanceProbe` and exposes R3F timing/render counts through the root `data-warehouse-perf` attribute.
 
 ## `src/components/Scene.jsx`
 
@@ -104,12 +105,13 @@ Do not replace stopped rollers with one box collider. That optimization was test
 
 ## `src/components/Crane.jsx`
 
-`Crane({ id, modelPath, position, rotation })`
+`Crane({ id, modelPath, rotation })`
 
 - Loads `/Crane_ver1.gltf` by default.
 - Clones crane scene and removes `movePlate` and `CraneInvisibleBulkSensor` from the visual body.
-- Creates a kinematic box body for crane.
-- Uses `useFrame` to move toward `targetCranePosition`.
+- Creates a hidden kinematic box body for crane collisions and a separate visible GLTF group.
+- Uses `useFrame` priority `-2` to move both store state and the visible group toward `targetCranePosition`, then sends the same position to Cannon.
+- Registers the visible ref in `craneStore.craneRefs` for diagnostics.
 - Renders `MoveTable` and `CraneInvisibleBulkSensor`.
 
 Helper:
@@ -124,12 +126,13 @@ Store dependencies:
 
 ## `src/components/MoveTable.jsx`
 
-`MoveTable({ id, craneWorldPosition, craneWorldRotation })`
+`MoveTable({ id, craneWorldRotation })`
 
 - Loads `/moveTable_ver2.gltf`.
-- Builds kinematic body for the crane move table.
-- Registers its ref/api with `craneStore.setMoveTableRef(id, data)`.
-- Uses current crane position plus local offset to compute move table world position.
+- Builds a hidden kinematic body and a separate visible group for the crane move table.
+- Registers its physics ref/api and visible ref with `craneStore.setMoveTableRef(id, data)`.
+- Uses current crane position plus local offset to compute move table world position at `useFrame` priority `-1`.
+- Updates the visible group directly before sending changed transforms to Cannon, avoiding worker-feedback animation stalls.
 - Works with `BoxBindingUpdater` for box carrying.
 
 ## `src/components/CraneInvisibleBulkSensor.jsx`
@@ -156,7 +159,6 @@ This is the current practical binding mechanism used by missions.
 
 Key exports:
 
-- `Shelf(...)`
 - `BatchedShelfLoader(...)`
 - `QuickShelfBatch(...)`
 - `VisualCullingShelfBatch(...)`
@@ -165,13 +167,16 @@ Purpose:
 
 - Loads shelf model.
 - Batches shelf rendering to reduce initial cost.
-- Builds static colliders for shelf table/legs.
-- Builds sensor trigger for shelf occupancy.
-- Collision updates shelf sensor state and box/equipment mapping.
+- Renders shelf tables/legs as five instanced meshes and updates instance matrices for visually visible shelves.
+- Groups the 450 shelf locations into 25 `(Y, Z)` rows.
+- Builds one continuous static table body and one trigger body per row, approximately 50 bodies instead of 900 per-shelf bodies.
+- A row collision uses the box's current world X to resolve the exact shelf ID and update shelf/box equipment state.
+- Layout grouping and ID mapping helpers live in `src/components/shelfLayout.js` with `npm run test:shelf-layout` coverage.
 
 Model contract:
 
 - Depends on child names such as `ShelfInvisibleBulkSensor`, `table`, `Leg_`.
+- The current aggregation assumes each row has contiguous shelves along X with matching Y, Z, and rotation. Update `shelfLayout.js` and its tests if that geometry changes.
 
 ## `src/components/Materials.jsx`
 

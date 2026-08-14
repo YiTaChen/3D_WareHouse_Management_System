@@ -41,6 +41,13 @@ Common changes:
 - Add crane: edit `CraneData.js`, then check `craneStore.js`, mission templates.
 - Add shelf layout: edit `ShelfData.js`, then check `shelfStore.js`, mission UI.
 
+Current shelf scale:
+
+- `ShelfData.js` creates 18 x 5 x 5 = 450 shelf locations.
+- `Shelf.jsx` draws them with five instanced meshes and aggregates physics into 25 rows / approximately 50 bodies.
+- `shelfLayout.js` preserves exact shelf IDs inside each aggregated row; run `npm run test:shelf-layout` after layout or sensor changes.
+- Do not restore table/sensor bodies per shelf. The resulting approximately 900 bodies caused inbound physics to lag and fail at `conv3` even while render FPS appeared normal.
+
 ## Box creation
 
 Files:

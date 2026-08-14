@@ -89,6 +89,11 @@
 - GLTF child names are application logic contracts.
   - Model edits can silently break sensors/rollers/move tables/shelves.
 
+- The 450-shelf layout depends on aggregated row physics and instanced visuals.
+  - Do not restore one table body plus one trigger per shelf; approximately 900 shelf bodies caused Cannon mission-time lag and inbound failure at `conv3` despite a stable render FPS.
+  - Row sensor mapping must resolve the box's live world X through `boxStore.getBoxWorldPosition()` so positions such as `shelf090` do not collapse to the first shelf in the row.
+  - Run `npm run test:shelf-layout` and the near/far inbound/outbound checks in `performance_optimization.md` after changing shelf spacing, rotation, model parts, culling, or sensor logic.
+
 ### Conveyor roller axis and transfer contract
 
 - The roller cylinder geometry in `plateform_conveyor_ver5.gltf` is authored along local Y and the roller node is already rotated into conveyor space.
