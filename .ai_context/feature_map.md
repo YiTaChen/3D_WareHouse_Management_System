@@ -135,14 +135,17 @@ Files:
 
 - `src/stores/boxStore.js`
 - `src/components/BoxBindingUpdater.jsx`
+- `src/components/boxBinding.js`
 - `src/hooks/useObjectBindingPosition.js`
 - `src/missions/craneMissionData.js`
 
 Flow:
 
-1. Mission step `craneBindingBox` calls `setBoxBoundToMoveplate(boxId, craneId)`.
-2. `BoxBindingUpdater` moves bound box to move table world position each frame.
-3. Mission step `craneUnBindingBox` calls `clearBoxBoundToMoveplate(boxId)`.
+1. Mission step `craneBindingBox` validates the box/crane physics refs and records the binding.
+2. The adapter applies the authoritative move-table transform immediately and waits for the Cannon position subscription to confirm the box arrived.
+3. `BoxBindingUpdater` keeps a confirmed bound box aligned to the move table each frame.
+4. Mission step `craneUnBindingBox` re-confirms the final release transform before clearing the binding.
+5. A missing ref or position-confirmation timeout returns `false`, so the mission stops instead of continuing an empty pickup or releasing at a stale position.
 
 Risk:
 
