@@ -278,6 +278,12 @@ Mission templates:
   - `updateBoxCurrentPositionServerHandler`
   - `removeBoxCurrentPositionServerHandler`
 
+Binding correctness:
+
+- `craneBindingBox` no longer treats a Zustand binding-map write plus a fixed delay as success. It validates refs, applies the box transform, and waits for the Cannon position subscription to acknowledge the target.
+- `craneUnBindingBox` confirms the final platetable release position before clearing the binding.
+- Either step returns `false` on missing refs, moving crane/table state, or timeout, which makes the runner stop with an error instead of allowing a later teleport.
+
 Important boundary:
 
 - `craneMissionData.js` should contain mission/template logic only.

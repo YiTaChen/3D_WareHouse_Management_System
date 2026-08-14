@@ -150,7 +150,8 @@ Store dependencies:
 - Runs inside Canvas/Physics.
 - Reads `boxStore.boxBoundToMoveplate`.
 - For each bound box, finds the crane move table ref and box physics api.
-- Forces box position to move table world position plus vertical offset.
+- Uses the shared `boxBinding.js` transform to force box position/quaternion to the move table world transform plus vertical offset and clear residual motion.
+- Production binding/unbinding adapters use the same transform and wait for Cannon position confirmation before the mission may advance.
 
 This is the current practical binding mechanism used by missions.
 
