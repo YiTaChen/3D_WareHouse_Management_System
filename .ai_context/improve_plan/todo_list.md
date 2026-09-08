@@ -44,3 +44,8 @@
 - [x] Verify complete browser routes and record outcomes in `docs/conveyor-idle-drift-validation.md`.
 
 - [ ] Resolve or reproduce the intermittent high-shelf release confirmation timeout before claiming exhaustive regression-free verification. See the validation report.
+
+## Inbound inlet preparation
+
+- [x] Soft-disable and hide existing inlet boxes before creating a replacement;
+  protect other ports, use live positions, block duplicate clicks and abort on API failure.

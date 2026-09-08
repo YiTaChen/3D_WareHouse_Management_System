@@ -4,6 +4,7 @@ import * as THREE from 'three';
 
 import { useBoxEquipStore } from './boxEquipStore'; // 引入 useBoxEquipStore
 import { API_BASE_URL } from '../config/apiConfig';
+import { clearInboundPort } from '../utils/inboundPortCleanup.js';
 import { createBoxDataLoader } from '../utils/boxLoadCleanup.js';
 
 
@@ -265,14 +266,33 @@ export const useBoxStore = create((set, get) => ({
     
   },
 
-  // Persist the disabled flag before unmounting its visible mesh and physics body.
-  disableGroundBox: async boxId => {
-    if (!get().boxesData[boxId]) return;
+  isPreparingInbound: false,
+
+  prepareInboundPort: portId => clearInboundPort({
+    portId,
+    load: async () => {
+      const response = await fetch(`${API_BASE_URL}/boxPositions/mapFullData`);
+      if (!response.ok) throw new Error('Could not check inbound port. Please retry.');
+      return response.json();
+    },
+    localBoxes: () => get().boxesData,
+    getLivePosition: id => get().getBoxWorldPosition(id),
+    isBound: id => Boolean(get().boxBoundToMoveplate[id]),
+    disable: id => get().disableBox(id),
+  }),
+
+  // Persist first; removal unmounts both the visible mesh and physics body.
+  disableBox: async boxId => {
     const response = await fetch(`${API_BASE_URL}/boxes/${encodeURIComponent(boxId)}/remove`, {
       method: 'PATCH',
     });
-    if (!response.ok) throw new Error(`Ground box cleanup failed: ${response.status}`);
+    if (!response.ok) throw new Error(`Box cleanup failed: ${response.status}`);
     get().removeBox(boxId);
+    useBoxEquipStore.getState().clearBoxCollision(boxId);
+  },
+
+  disableGroundBox: async boxId => {
+    if (get().boxesData[boxId]) await get().disableBox(boxId);
   },
 
   removeBox: (boxId) => set((state) => {

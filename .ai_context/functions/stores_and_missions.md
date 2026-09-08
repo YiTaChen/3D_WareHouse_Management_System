@@ -340,3 +340,14 @@ Recommendation:
 ## Ground box persistence
 
 `disableGroundBox(id)` PATCHes `/boxes/:id/remove` before calling local `removeBox`. The existing `isRemoved` filter excludes that box on future loads. Ground monitoring retries failed requests every six seconds while contact remains; records and contents are retained.
+
+## Inbound inlet replacement
+
+OperatorPanel awaits `prepareInboundPort(portId)` before creating its demo box.
+The helper reads fresh active server inventory and merges local inventory,
+uses live world positions when available, and soft-disables boxes overlapping
+only that inlet's 2 x 2 m bed/drop corridor. Crane-bound boxes are protected.
+`disableBox` persists `isRemoved`, removes the mesh/body and clears equipment
+mapping. Ground cleanup delegates to this shared action. API failure aborts
+inbound before replacement creation. `isPreparingInbound` prevents duplicate
+inbound actions across panel remounts; React gets two frames to remove old bodies.

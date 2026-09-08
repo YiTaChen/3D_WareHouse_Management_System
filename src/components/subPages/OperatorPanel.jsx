@@ -68,18 +68,25 @@ function InboundDemo() {
 
   const selectedShelf = shelfOptions.find((shelf) => shelf.id === selectedShelfId);
   const selectedPortId = getInboundPortForShelfZ(getShelfZ(selectedShelf?.position));
-  const isRunning = mission?.status === 'running';
+  const isPreparingInbound = useBoxStore(state => state.isPreparingInbound);
+  const isRunning = mission?.status === 'running' || isPreparingInbound;
 
   const runInbound = async () => {
-    if (!selectedShelf || !selectedPortId || isRunning) return;
+    if (!selectedShelf || !selectedPortId || isRunning || useBoxStore.getState().isPreparingInbound) return;
+    useBoxStore.setState({ isPreparingInbound: true });
 
     try {
+      setStatus('Clearing inbound port...');
+      await useBoxStore.getState().prepareInboundPort(selectedPortId);
+      // Allow React/Cannon to unmount old bodies before adding the replacement.
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       setStatus('Creating demo box...');
       setHighlightPosition(selectedShelf.position);
 
       const boxId = `demo-box-${Date.now()}`;
       const boxPosition = getPortSpawnPosition(selectedPortId, 'inbound');
       await addBox(boxId, createDemoBoxData(boxId, boxPosition));
+      if (!useBoxStore.getState().boxesData[boxId]) throw new Error('Could not create inbound box.');
 
       setStatus('Building inbound mission...');
       const nextMission = buildInboundMission({
@@ -98,6 +105,8 @@ function InboundDemo() {
     } catch (error) {
       console.error('[OperatorPanel] Failed to run inbound mission:', error);
       setStatus(error instanceof Error ? error.message : 'Inbound mission failed.');
+    } finally {
+      useBoxStore.setState({ isPreparingInbound: false });
     }
   };
 
@@ -177,7 +186,8 @@ function OutboundDemo() {
   );
   const selectedPortId = getOutboundPortForShelfZ(getShelfZ(selectedShelfPosition));
   const selectedBoxId = selectedShelfId ? getBoxIdByEquip(selectedShelfId) : null;
-  const isRunning = mission?.status === 'running';
+  const isPreparingInbound = useBoxStore(state => state.isPreparingInbound);
+  const isRunning = mission?.status === 'running' || isPreparingInbound;
 
   useEffect(() => {
     if (selectedShelfPosition) setHighlightPosition(selectedShelfPosition);

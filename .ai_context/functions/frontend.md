@@ -288,3 +288,10 @@ This lets 30 Hz contacts settle without changing roller geometry or forcing box
 transforms/sleep. Material switches with the existing Static/Kinematic rebuild.
 `PerformanceProbe` additionally exposes box world transforms and conveyor
 running flags in `data-warehouse-boxes` for development diagnostics.
+
+### Operator inbound entrance cleanup
+
+Run Inbound first checks and clears its selected inlet, then creates one box
+and runs the normal mission. Clearing/creating/running holds a shared inbound
+busy flag. A failed inventory read or soft-disable is shown in Status and
+prevents creation. Other inlet and downstream boxes retain their state.

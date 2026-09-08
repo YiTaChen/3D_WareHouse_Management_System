@@ -141,3 +141,10 @@ Stopped rollers use a dedicated contact material with relaxation 20 to suppress
 30 Hz contact creep. Preserve the separate running material. The GLTF-based
 fixture tests rest and wake-up but does not replace full-scene seam, slope,
 crane and mission checks documented in conveyor-idle-drift-validation.md.
+
+## Inbound entrance scope
+
+Entrance cleanup uses current 2 x 2 m, ground-level inlet beds and 1 m boxes,
+including the drop corridor up to spawn Y + 0.5. Update its geometry when ports
+change. The UI lock is within one browser; the server has no multi-client port
+reservation, so simultaneous visitors are not serialized by this feature.
