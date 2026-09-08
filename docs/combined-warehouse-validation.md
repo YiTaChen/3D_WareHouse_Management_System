@@ -1,6 +1,6 @@
 # Combined warehouse validation
 
-Validated locally on 2026-09-07. GitHub main publication authorized on 2026-09-08; no hosted application deployment.
+Validated locally on 2026-09-07. GitHub main published on 2026-09-08. Firebase Hosting updated on 2026-09-08 at the user's request.
 
 Merged remote main `5fc0549` and local `agent/fit-asrs-pallet-crane` `047fcd8`.
 Preserved 450 shelf locations, 25 aggregated physics rows, instanced shelf
@@ -52,3 +52,7 @@ Filming code is provided separately and is not enabled in the production app.
 ## 2026-09-08 publication validation
 
 35 Node checks passed again. A fresh 62-second recording uses the integrated main source, unchanged production physics and one box. Both shelf056 inbound and outbound missions completed. The README lists the latest demo first and the corrected 70-second evolution film second. Filming code is isolated under `tools/video/latest`; no filming code is mounted in production.
+
+## Firebase release and video opening
+
+The integrated application was built with the existing Render API URL and deployed to Firebase project `r3f-gravity-apply-test`. The live page loaded the crane assets and existing inventory with no browser errors. The latest-demo MP4 now omits its first two seconds (60 seconds total), with a visible warehouse frame at the start. The 70-second evolution film is unchanged.

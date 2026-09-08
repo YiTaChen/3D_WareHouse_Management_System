@@ -4,9 +4,9 @@
 
 A fresh recording of the integrated `main` version: 450 storage locations, optimized shelf rendering and physics, and the latest fitted crane mesh with synchronized travel, lift and telescopic forks. Follow one box through automated inbound storage and outbound retrieval.
 
-https://github.com/user-attachments/assets/75d21e07-e9d5-4084-870f-a2c4fedaab75
+https://github.com/user-attachments/assets/fd94d928-7ac8-4260-b74b-02f994be4dce
 
-**[▶ Watch the latest demo — 62 seconds](https://github.com/user-attachments/assets/75d21e07-e9d5-4084-870f-a2c4fedaab75)** · 1080p / 30 fps · Real project footage
+**[▶ Watch the latest demo — 60 seconds](https://github.com/user-attachments/assets/fd94d928-7ac8-4260-b74b-02f994be4dce)** · 1080p / 30 fps · Real project footage
 
 ## Project Evolution — From Prototype to Optimized Automation
 
@@ -285,7 +285,7 @@ Reference render: assets/previews/asrs_stacker_crane_fitted.png
 
 ## Integrated 450-location AS/RS version
 
-The local integrated version combines the 18 × 5 × 5 shelf layout, instanced
+The integrated main version combines the 18 × 5 × 5 shelf layout, instanced
 rack visuals and aggregated row physics with the fitted AS/RS crane and
 anchored telescopic forks. Rails cover the full 36 m storage length, and the
 11.7 m mast clears the highest storage level.

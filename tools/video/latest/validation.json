@@ -3,14 +3,16 @@
   "videos": [
     {
       "file": "warehouse-latest-demo.mp4",
-      "sha256": "09e9db807b199115ac3d585415ee97e0b437f73637db8d8dc3436d5012321b42",
-      "bytes": 20482199,
-      "duration": 62,
+      "sha256": "2a7d2d6e47d32b38889555c37cdec6e34f9d840ebb8eac6ff6c25d5857edfef5",
+      "bytes": 21983459,
+      "duration": 60,
       "width": 1920,
       "height": 1080,
       "fps": 30,
       "codec": "H.264",
-      "url": "https://github.com/user-attachments/assets/75d21e07-e9d5-4084-870f-a2c4fedaab75"
+      "url": "https://github.com/user-attachments/assets/fd94d928-7ac8-4260-b74b-02f994be4dce",
+      "trimmedLeadingSeconds": 2,
+      "firstFrame": "Verified visible warehouse and crane"
     },
     {
       "file": "warehouse-project-intro.mp4",
@@ -56,15 +58,6 @@
       ]
     }
   ],
-  "browserPlayback": {
-    "duration": 62,
-    "width": 1920,
-    "height": 1080,
-    "currentTime": 62,
-    "ended": true,
-    "decodedFrames": 1860,
-    "droppedFrames": 2
-  },
   "checks": {
     "nodeTestsPassed": 35,
     "lintErrors": 0,
