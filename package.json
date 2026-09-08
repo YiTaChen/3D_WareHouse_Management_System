@@ -16,6 +16,7 @@
     "test:mission-runner": "node --test src/missions/runtime/missionRunner.test.js",
     "test:shelf-layout": "node --test src/components/shelfLayout.test.js",
     "test:box-binding": "node --test src/components/boxBinding.test.js",
+    "test:crane-fit": "node --test src/constants/craneConfig.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

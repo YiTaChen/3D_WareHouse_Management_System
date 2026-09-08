@@ -152,3 +152,33 @@ Model child-name contracts:
   - `ShelfInvisibleBulkSensor`
   - `table`
   - `Leg_`
+
+## Fitted AS/RS assets
+
+Runtime files:
+
+- public/asrs_stacker_crane_body.glb; required root ASRS_Crane_Body
+- public/asrs_fork_table.glb; required root movePlate and load anchor Pallet_Load_Anchor
+- public/asrs_single_guide_rail_4m.glb; active low-profile grey guide rail, required root ASRS_Single_Guide_Rail_4m
+- public/asrs_ground_rail_4m.glb; preserved train-style double rail, required root ASRS_Ground_Rail_4m
+- public/asrs_asset_manifest.json; dimensions, axes, and clearance contract
+
+Three.js axes are X travel, Y lift, and Z fork extension. Active single-guide-rail segments are centered every 4 m along X.
+The current runtime centers are -4, 0, 4, 8, and 12, producing a continuous X extent of -6 through 14. The last shelf center is X=12 and its outer cell edge is X=13, so the rail continues 1 m beyond the final cell.
+
+Visual-only compatibility contract:
+
+- `COLLECT_PLATE_Y_OFFSET=0.1`, `PICK_AND_PUT_Y_OFFSET=0.15`, logical crane Y positions, mission targets, and box persistence remain identical to `main`.
+- The original plateTable physics collider remains `[2, 0.02, 2]`; the smaller fork dimensions describe visible geometry only.
+- The original bound-box center offset remains 0.6 m, so a 1 m box bottom and the fork visual contact surface both resolve to local Y=0.10.
+- Only the tall crane body is rendered at rail Y=0. The movePlate, sensor, and cargo continue to use the established logical coordinate system.
+
+Source and verification:
+
+- assets/blender/asrs_stacker_crane_fitted.blend
+- assets/previews/asrs_stacker_crane_fitted.png
+- tools/blender/create_fitted_asrs_assets.py
+- tools/blender/validate_fitted_asrs_assets.py
+- npm run test:crane-fit
+
+CraneData supplies body/fork model paths while explicitly preserving the original body placeholder collider, movePlate collider, sensor behavior, and binding offset.

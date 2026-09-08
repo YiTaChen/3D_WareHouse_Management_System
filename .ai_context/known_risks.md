@@ -116,3 +116,13 @@
 - No API regression tests for route order, aggregation, or soft delete.
 - No DB migration tests.
 - No transaction/partial failure tests.
+
+## AS/RS crane fit contract
+
+- Asset names ASRS_Crane_Body, movePlate, Pallet_Load_Anchor, ASRS_Single_Guide_Rail_4m, and the preserved ASRS_Ground_Rail_4m are application contracts.
+- Warehouse axes are X travel, Y fork lift, and Z fork extension. The logical crane and move-table coordinates must remain identical to `main`; the tall visual body alone is projected onto rail Y=0 inside `Crane.jsx`.
+- Do not flatten production mission targets or change `COLLECT_PLATE_Y_OFFSET`, `PICK_AND_PUT_Y_OFFSET`, the original `[2, 0.02, 2]` plate-table collider, or the 0.6 box-binding offset to accommodate the new model. Those values are the established plateTable mechanics contract.
+- The 1 m load must remain centered in X. Guaranteed static clearances are 0.11 m per mast side, 0.20 m per fork-width side, and 0.05 m per tine-length end.
+- npm run test:crane-fit and the Blender import validator cover task coordinates and static geometry, but do not replace a deterministic browser physics end-to-end suite.
+- Binding/unbinding and shelf placement must retain `main` behavior; the visual integration must not snap boxes, rewrite persisted positions, or inject velocity changes.
+- The active single guide rail is 0.34 m wide and 0.142 m high. Keep it separate from the crane body and preserve the 4 m repeat length when changing its visual profile.

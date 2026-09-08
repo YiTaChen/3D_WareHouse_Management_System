@@ -249,3 +249,27 @@ These APIs power the top-right `DB` switcher. They are enabled automatically for
 - Warehouse Layout Reference: https://www.amsc-usa.com/blog/warehouse-types-and-how-to-choose/
 
 ---
+
+## Fitted AS/RS crane assets
+
+The warehouse uses a pallet stacker crane fitted to the existing 2 m shelf grid and 1 m box envelope. The crane body, double-tine fork, and rail are separate GLB assets, so the rail can be repeated indefinitely along X. Runtime uses the subtle grey `asrs_single_guide_rail_4m.glb`; the wider train-style `asrs_ground_rail_4m.glb` remains available as a preserved alternative.
+
+Regenerate and verify:
+
+    blender --background --factory-startup --python tools/blender/create_fitted_asrs_assets.py
+    blender --background --factory-startup --python tools/blender/validate_fitted_asrs_assets.py
+    npm run test:crane-fit
+    npm run test:mission-production-factory
+
+Editable source: assets/blender/asrs_stacker_crane_fitted.blend
+
+Reference render: assets/previews/asrs_stacker_crane_fitted.png
+
+## Integrated 450-location AS/RS version
+
+The local integrated version combines the 18 × 5 × 5 shelf layout, instanced
+rack visuals and aggregated row physics with the fitted AS/RS crane and
+anchored telescopic forks. Rails cover the full 36 m storage length, and the
+11.7 m mast clears the highest storage level.
+
+Validation details: [combined warehouse validation](docs/combined-warehouse-validation.md).

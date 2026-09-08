@@ -6,13 +6,19 @@ import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
 import MoveTable from './MoveTable';
 import CraneInvisibleBulkSensor from './CraneInvisibleBulkSensor';
+import { CRANE_CONSTANTS } from '../constants/craneConfig.js';
 
 
-export default function Crane({ id, modelPath, rotation }) {
-  const { scene } = useGLTF(modelPath || '/Crane_ver1.gltf'); 
+export default function Crane({
+  id,
+  modelPath,
+  moveTableModelPath,
+  bodyColliderSize = [0.1, 0.1, 0.1],
+  moveTableColliderSize = [2, 0.02, 2],
+  rotation,
+}) {
+  const { scene } = useGLTF(modelPath || '/asrs_stacker_crane_body.glb');
 
-  const setCraneSensorDetected = useCraneStore(state => state.setCraneSensorDetected);
-  
   const {
     currentCranePosition,
   } = useCraneStore(state => state.getCraneState(id));
@@ -29,7 +35,7 @@ export default function Crane({ id, modelPath, rotation }) {
         return null;
       }
 
-      const clone = scene.clone(true); 
+      const clone = scene.clone(true);
 
       const objectsToDetach = [];
       clone.traverse((obj) => {
@@ -43,33 +49,39 @@ export default function Crane({ id, modelPath, rotation }) {
           }
       });
 
-      clone.position.set(0, 0, 0); 
+      clone.position.set(0, 0, 0);
       clone.rotation.set(0, 0, 0);
-      clone.updateMatrixWorld(true); 
+      clone.updateMatrixWorld(true);
       return clone;
-    }, [scene]); 
+    }, [scene]);
 
     // console.log(`[Crane.jsx] Crane ${id} is rendering. currentCranePosition from store:`, currentCranePosition.toArray());
 
   // ----------------- Crane 整體物理體 -----------------
   const [craneRef, craneApi] = useBox(() => ({
-    mass: 0, 
+    mass: 0,
     material: 'CraneMeshBody',
-    type: 'Kinematic', 
-    position: currentCranePosition.toArray(), // 初始位置從 store 獲取
-    rotation: rotation, 
-    args: [0.1, 0.1, 0.1], 
+    type: 'Kinematic',
+    // Only the new tall visual body is projected onto the ground rail. The
+    // logical Y used by the original plateTable mission remains untouched.
+    position: [currentCranePosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, currentCranePosition.z],
+    rotation: rotation,
+    args: bodyColliderSize,
     userData: { id: `craneBody-${id}` }
-  })); 
+  }));
 
   useEffect(() => {
     // 這個 useEffect 僅用於首次掛載時，確保物理體位置與 store 初始值同步
     if (craneApi && currentCranePosition && !hasSetInitialPosition.current) {
-      craneApi.position.set(currentCranePosition.x, currentCranePosition.y, currentCranePosition.z);
-      hasSetInitialPosition.current = true; 
+      craneApi.position.set(
+        currentCranePosition.x,
+        CRANE_CONSTANTS.CRANE_BODY_RAIL_Y,
+        currentCranePosition.z,
+      );
+      hasSetInitialPosition.current = true;
       // console.log(`[Crane.jsx useEffect] Setting initial physical position for ${id} to:`, currentCranePosition.toArray());
     }
-  }, [craneApi, id, currentCranePosition]); 
+  }, [craneApi, id, currentCranePosition]);
 
   useEffect(() => {
     setCraneRef(id, { ref: craneVisualRef });
@@ -89,7 +101,7 @@ export default function Crane({ id, modelPath, rotation }) {
       && !liveCraneState.isMoveTableMoving;
 
     if (!shouldMove) {
-      craneVisualRef.current?.position.copy(liveCurrentPosition);
+      craneVisualRef.current?.position.set(liveCurrentPosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, liveCurrentPosition.z);
       return;
     }
 
@@ -102,9 +114,9 @@ export default function Crane({ id, modelPath, rotation }) {
       );
 
     // Keep the visible model responsive even when the Cannon worker is busy.
-    craneVisualRef.current?.position.copy(newPosition);
+    craneVisualRef.current?.position.set(newPosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, newPosition.z);
     updateCraneCurrentPosition(id, newPosition.toArray());
-    craneApi.position.set(newPosition.x, newPosition.y, newPosition.z);
+    craneApi.position.set(newPosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, newPosition.z);
   }, -2);
 
 
@@ -113,19 +125,19 @@ export default function Crane({ id, modelPath, rotation }) {
       <group ref={craneRef} visible={false} />
       <group
         ref={craneVisualRef}
-        position={currentCranePosition.toArray()}
+        position={[currentCranePosition.x, CRANE_CONSTANTS.CRANE_BODY_RAIL_Y, currentCranePosition.z]}
         rotation={rotation}
       >
         {craneBodyVisualMesh && (
-          <primitive 
-              object={craneBodyVisualMesh} 
-              position={[0,0,0]} 
+          <primitive
+              object={craneBodyVisualMesh}
+              position={[0,0,0]}
               rotation={[0,0,0]}
           />
         )}
         {/* 可以考慮添加一個可視化的物理體來確認其位置是否正確 */}
         {/* <mesh>
-            <boxGeometry args={[3, 5, 3]} /> 
+            <boxGeometry args={[3, 5, 3]} />
             <meshBasicMaterial color="red" wireframe opacity={0.5} transparent />
         </mesh> */}
       </group>
@@ -133,15 +145,16 @@ export default function Crane({ id, modelPath, rotation }) {
        {/* MoveTable reads live crane position from the store; the sensor still receives it explicitly. */}
       <MoveTable
         id={id}
-        craneWorldRotation={rotation} 
+        craneWorldRotation={rotation}
+        modelPath={moveTableModelPath}
+        colliderSize={moveTableColliderSize}
       />
 
       <CraneInvisibleBulkSensor
           id={id}
           craneWorldPosition={currentCranePosition.toArray()}
           craneWorldRotation={rotation}
-          setCraneSensorDetected={setCraneSensorDetected}
         />
-    </>  
+    </>
   );
 }

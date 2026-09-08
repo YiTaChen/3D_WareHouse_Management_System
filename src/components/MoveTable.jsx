@@ -1,36 +1,57 @@
-import React, { useMemo, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useCraneStore } from '../stores/craneStore';
 import { useFrame } from '@react-three/fiber';
 import { CraneData } from '../data/CraneData';
+import {
+  getForkVisualExtensionTransform,
+  writeFixedForkCraneBase,
+} from '../constants/craneConfig.js';
 
 // 幫助取得 local 尺寸
-function getLocalBoundingBoxSize(mesh) {
-  if (!mesh || !mesh.geometry) return [1, 1, 1];
-  const bbox = new THREE.Box3().setFromObject(mesh);
+function getLocalBoundingBoxSize(object) {
+  if (!object) return [1, 1, 1];
+  const bbox = new THREE.Box3().setFromObject(object);
   const size = new THREE.Vector3();
   bbox.getSize(size);
   return size.toArray();
 }
 
-export default function MoveTable({ id, craneWorldRotation }) {
-  const { scene } = useGLTF('/moveTable_ver2.gltf');
+export default function MoveTable({
+  id,
+  craneWorldRotation,
+  modelPath = '/asrs_fork_table.glb',
+  colliderSize,
+}) {
+  const { scene } = useGLTF(modelPath);
 
-  // 取出 movePlate Mesh 與碰撞體尺寸
-  const { moveTableMesh, moveTableLocalProps } = useMemo(() => {
-    const mesh = scene.getObjectByName('movePlate');
-    if (!mesh) {
+  // Split the replacement asset into a fixed carriage/guide assembly and the
+  // two inner extending tines. The original plateTable physics body remains a
+  // single invisible kinematic collider at the full mission offset.
+  const { fixedAssemblyMesh, extendingTinesMesh, moveTableLocalProps } = useMemo(() => {
+    const movePlate = scene.getObjectByName('movePlate');
+    const fixedAssembly = movePlate?.getObjectByName('ForkFixedAssembly');
+    const extendingTines = movePlate?.getObjectByName('ForkExtendingTines');
+    if (!movePlate || !fixedAssembly || !extendingTines) {
       console.warn('movePlate mesh not found in GLTF');
-      return { moveTableMesh: null, moveTableLocalProps: { args: [1, 1, 1] } };
+      return {
+        fixedAssemblyMesh: null,
+        extendingTinesMesh: null,
+        moveTableLocalProps: { args: [1, 1, 1] },
+      };
     }
-    const size = getLocalBoundingBoxSize(mesh);
+    const size = colliderSize || getLocalBoundingBoxSize(movePlate);
+    const fixedClone = fixedAssembly.clone(true);
+    const nestedExtendingClone = fixedClone.getObjectByName('ForkExtendingTines');
+    nestedExtendingClone?.parent?.remove(nestedExtendingClone);
     return {
-      moveTableMesh: mesh.clone(),
+      fixedAssemblyMesh: fixedClone,
+      extendingTinesMesh: extendingTines.clone(true),
       moveTableLocalProps: { args: size },
     };
-  }, [scene]);
+  }, [scene, colliderSize]);
 
 
   const moveTableInitialPosition = useMemo(() => {
@@ -58,19 +79,12 @@ export default function MoveTable({ id, craneWorldRotation }) {
   }));
   const lastPhysicsInputs = useRef(null);
   const moveTableVisualRef = useRef(null);
-
-  useLayoutEffect(() => {
-    const craneState = useCraneStore.getState().getCraneState(id);
-    if (!craneState || !moveTableVisualRef.current) return;
-
-    const craneQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(...craneWorldRotation));
-    const worldPosition = craneState.currentCranePosition.clone().add(
-      craneState.currentMoveTableLocalOffset.clone().applyQuaternion(craneQuat),
-    );
-
-    moveTableVisualRef.current.position.copy(worldPosition);
-    moveTableVisualRef.current.quaternion.copy(craneQuat);
-  }, [craneWorldRotation, id]);
+  const fixedAssemblyRef = useRef(null);
+  const extendingTinesRef = useRef(null);
+  const fixedVisualScratch = useMemo(() => ({
+    fixedLocalOffset: new THREE.Vector3(),
+    fixedWorldPosition: new THREE.Vector3(),
+  }), []);
 
   // 在 Ref 有效時，註冊進 Store
   useEffect(() => {
@@ -138,20 +152,40 @@ export default function MoveTable({ id, craneWorldRotation }) {
       moveTableApi.quaternion.set(craneQuat.x, craneQuat.y, craneQuat.z, craneQuat.w);
       lastPhysicsInputs.current = nextInputs;
     }
+
+    // Crane (-2) and fork (-1) share the current mission state; never mix
+    // delayed Cannon X/Z with current logical lift Y under the 450-cell load.
+    const fixedWorldPos = writeFixedForkCraneBase(
+      fixedVisualScratch.fixedWorldPosition, liveCranePosition.toArray(),
+    );
+    const fixedLocalOffset = fixedVisualScratch.fixedLocalOffset.copy(nextTableOffset);
+    const extensionZ = fixedLocalOffset.z;
+    fixedLocalOffset.z = 0;
+    fixedWorldPos.add(fixedLocalOffset.applyQuaternion(craneQuat));
+
+    if (fixedAssemblyRef.current) {
+      fixedAssemblyRef.current.position.copy(fixedWorldPos);
+      fixedAssemblyRef.current.quaternion.copy(craneQuat);
+    }
+
+    if (extendingTinesRef.current) {
+      const { positionZ, scaleZ } = getForkVisualExtensionTransform(extensionZ);
+      extendingTinesRef.current.position.set(0, 0, positionZ);
+      extendingTinesRef.current.scale.set(1, 1, scaleZ);
+    }
+
   }, -1);
 
   return (
     <>
       <group ref={moveTableRef} visible={false} />
-      {moveTableMesh && (
-        <group ref={moveTableVisualRef}>
-          <primitive object={moveTableMesh} />
-          {moveTableLocalProps?.args && (
-            <mesh>
-              <boxGeometry args={moveTableLocalProps.args} />
-              <meshBasicMaterial color="orange" wireframe opacity={0.5} transparent />
-            </mesh>
-          )}
+      <group ref={moveTableVisualRef} visible={false} />
+      {fixedAssemblyMesh && extendingTinesMesh && (
+        <group ref={fixedAssemblyRef}>
+          <primitive object={fixedAssemblyMesh} />
+          <group ref={extendingTinesRef}>
+            <primitive object={extendingTinesMesh} />
+          </group>
         </group>
       )}
     </>

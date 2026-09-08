@@ -6,6 +6,7 @@ import ShelfData from '../data/ShelfData';
 import Crane from './Crane'; // 引入 Crane 組件
 import CraneData from '../data/CraneData'; // 引入 Crane 資料
 import { VisualCullingShelfBatch } from './Shelf';
+import CraneRail from './CraneRail';
 
 
 export default function Scene() {
@@ -60,12 +61,19 @@ export default function Scene() {
 
       {/* <ShelveMultiInstances /> 現在只渲染這一個組件 */}
 
+      {CraneData.cranes.map((crane) => (
+        <CraneRail key={'rail-' + crane.id} laneZ={crane.position[2]} />
+      ))}
+
       {CraneData.cranes.map((s) => (
         <Crane
           key={s.id}
           id={s.id}
-          modelPath="/Crane_ver1.gltf"
-          // position={s.position}
+          modelPath={s.modelPath}
+          moveTableModelPath={s.moveTableModelPath}
+          bodyColliderSize={s.bodyColliderSize}
+          moveTableColliderSize={s.moveTableColliderSize}
+          sensorSize={s.sensorSize}
           rotation={s.rotation}
         />
       ))}

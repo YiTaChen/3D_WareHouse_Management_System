@@ -224,3 +224,36 @@ For any conveyor, roller, physics timestep, sleep, collider, GLTF transform, or 
 9. Check browser console warnings/errors.
 10. During crane travel, verify the crane and move table move continuously and remain aligned; do not rely only on mission completion status.
 11. Re-run all mission tests and the production build.
+
+## 2026-08-13 fitted AS/RS crane note
+
+- Each lane renders eleven static 4 m rail clones for the 450-location layout. Rails have no Cannon bodies because mission coordinates constrain the kinematic crane base.
+- The crane adds one low chassis collider, one moving fork collider, and one moving load trigger. Tall decorative mast meshes do not create per-part physics bodies.
+- MoveTable and its sensor write Cannon transforms only when the crane transform or fork local offset changes.
+- Keep rail segments separate from the crane. Extend the route by adding 4 m segments, not by scaling the crane or adding a long dynamic collider.
+
+Crane regression commands:
+
+    npm run test:crane-fit
+    npm run test:mission-production-factory
+    blender --background --factory-startup --python tools/blender/validate_fitted_asrs_assets.py
+    npm run build
+
+## 2026-09-07 local integration
+
+Combined `5fc0549` (450 locations and load reduction) with local crane branch
+`047fcd8` (fitted AS/RS model and anchored telescopic tines). Crane visuals use
+current mission state at frame priority -2, then the carriage and fork use that
+same state at -1. Both stay independent of delayed Cannon worker feedback.
+The hidden move-table transform remains available for binding diagnostics; the
+shared confirmed box binding implementation from main is retained.
+
+The body stays on ground Y=0. Rail centers now span -4 through 36 (extent -6
+through 38), and the authored mast/guides are extended to 11.7 m to clear cargo
+on the fifth level. Base, cabinet, fork dimensions and physics offsets are
+unchanged. The Blender generator and manifest describe the updated assets.
+
+For regression and filming, obtain mission shelf coordinates with
+`useShelfStore.getState().getShelfPosition(id)`; raw `ShelfData.position` omits
+the UI's +3 Y conversion. Treat a completed task at the wrong shelf as failure.
+See `docs/combined-warehouse-validation.md` for observed results.

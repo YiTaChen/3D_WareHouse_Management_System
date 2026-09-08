@@ -22,8 +22,8 @@ function getLocalBoundingBoxSize(mesh) {
 
 
 export default function CraneInvisibleBulkSensor({ id, craneWorldPosition, craneWorldRotation }) {
-  
-  
+
+
   // const { scene } = useGLTF('/Crane_ver1.gltf'); // 載入完整的 Crane 模型來提取感測器部分
   const { scene: fullCraneScene } = useGLTF('/Crane_ver1.gltf');
 
@@ -95,7 +95,7 @@ export default function CraneInvisibleBulkSensor({ id, craneWorldPosition, crane
       const boxId = e.body.userData?.appId;
       if (boxId) {
         setCraneSensorDetected(id, 'BulkSensorDetected', true);
-        clearBoxCollision(boxId); // clear last one 
+        clearBoxCollision(boxId); // clear last one
         setBoxCollidingWithEquipment(boxId, id); // add current one
 
         // console.log(`Crane ${id}: Box ID ${boxId} (Name: ${boxData?.name}) Content: ${boxData?.content}) entered Crane Bulk Sensor.`);

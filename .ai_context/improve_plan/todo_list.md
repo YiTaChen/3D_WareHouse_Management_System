@@ -16,7 +16,19 @@
 - [ ] 將目前偏工程/測試用途的控制介面整理成適合面試展示的簡化操作員介面。
   - Plan: `todo_list_planAndFeature/demo_operator_ui_plan.md`
 
+## Fitted AS/RS Pallet Crane
+
+- [x] 以符合 1 m 貨物與 2 m 櫃位的雙立柱棧板式堆垛機取代舊 plate table 視覺。
+- [x] 僅將新吊車本體視覺投影到 Y=0 軌道；保留 `main` 的 plateTable 邏輯座標、碰撞盒與所有入出庫偏移。
+- [x] 新增獨立可重複部署的 4 m 灰色軌道，以及模型間隙與入出庫路徑測試。
+
 ## Notes
 
 - 新項目請保持小而可執行。
 - 若項目有詳細計畫，請放到 `todo_list_planAndFeature/`。
+
+## 450-location AS/RS integration
+
+- [x] Combine shelf instancing/row physics and latest anchored fork visuals.
+- [x] Extend guide rails and mast to cover the enlarged layout.
+- [x] Record browser regression outcomes in combined-warehouse-validation.md.

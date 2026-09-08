@@ -1,0 +1,107 @@
+{
+  "warehouse_contract": {
+    "shelf_grid_m": 2.0,
+    "box_envelope_m": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "aisle_clear_width_m": 2.0,
+    "axes_threejs": {
+      "travel": "X",
+      "vertical": "Y",
+      "fork": "Z"
+    },
+    "legacy_plate_table_contract": {
+      "source": "main branch moveTable_ver2.gltf runtime",
+      "movement_offsets_changed": false,
+      "physics_collider_threejs_m": [
+        2.0,
+        0.02,
+        2.0
+      ],
+      "box_binding_vertical_offset_m": 0.6,
+      "visual_contact_surface_y_m": 0.1
+    }
+  },
+  "body": {
+    "file": "asrs_stacker_crane_body.glb",
+    "root": "ASRS_Crane_Body",
+    "dimensions_threejs_m": [
+      1.9,
+      11.7,
+      1.28
+    ],
+    "mast_inner_clearance_m": 1.22
+  },
+  "fork": {
+    "file": "asrs_fork_table.glb",
+    "root": "movePlate",
+    "load_anchor": "Pallet_Load_Anchor",
+    "outer_width_m": 0.6,
+    "tine_length_m": 1.3,
+    "physics_collider_threejs_m": [
+      2.0,
+      0.02,
+      2.0
+    ],
+    "physics_contract": "preserved from main branch plateTable",
+    "visual_contact_surface_y_m": 0.1,
+    "box_binding_vertical_offset_m": 0.6,
+    "fixed_visual_group": "ForkFixedAssembly",
+    "extending_visual_group": "ForkExtendingTines",
+    "fixed_outer_guides": [
+      "ForkFixedGuide_L",
+      "ForkFixedGuide_R"
+    ],
+    "extension_visualization": "inner tines stay anchored and lengthen along local Z; carrier and outer guides ignore Z extension"
+  },
+  "rail": {
+    "file": "asrs_ground_rail_4m.glb",
+    "root": "ASRS_Ground_Rail_4m",
+    "repeat_axis_threejs": "X",
+    "segment_length_m": 4.0,
+    "rail_gauge_m": 0.9,
+    "style": "double_running_rail_with_sleepers",
+    "runtime_active": false,
+    "preserved_for_future_use": true
+  },
+  "single_guide_rail": {
+    "file": "asrs_single_guide_rail_4m.glb",
+    "root": "ASRS_Single_Guide_Rail_4m",
+    "repeat_axis_threejs": "X",
+    "segment_length_m": 4.0,
+    "maximum_width_m": 0.34,
+    "profile_height_m": 0.142,
+    "style": "low_profile_grey_single_guide",
+    "runtime_active": true,
+    "placement": "segment center X = n * 4.0 with identical Y/Z/rotation/scale",
+    "runtime_centers_x_m": [
+      -4,
+      0,
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      28,
+      32,
+      36
+    ],
+    "runtime_extent_x_m": [
+      -6,
+      38
+    ],
+    "last_shelf_cell_outer_edge_x_m": 37
+  },
+  "active_runtime_rail": "single_guide_rail",
+  "clearance": {
+    "centered_box_to_each_mast_m": 0.11,
+    "fork_to_each_mast_m": 0.31,
+    "body_to_adjacent_2m_cell_boundary_m": 0.05,
+    "fork_width_margin_inside_1m_box_each_side_m": 0.2,
+    "fork_tine_overhang_beyond_1m_box_each_end_m": 0.15,
+    "fork_length_margin_inside_2m_plate_collider_each_end_m": 0.35
+  }
+}

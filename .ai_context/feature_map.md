@@ -207,3 +207,26 @@ Files:
 Rule:
 
 - Any DB/API contract change should update backend model, route, frontend store mapping, UI consumer, and this `.ai_context` documentation.
+
+## Fitted pallet stacker crane flow
+
+Files:
+
+- src/components/Crane.jsx
+- src/components/MoveTable.jsx
+- src/components/CraneInvisibleBulkSensor.jsx
+- src/components/CraneRail.jsx
+- src/constants/craneConfig.js
+- src/missions/builders/productionMissionFactory.js
+
+Flow:
+
+1. Production missions retain the original `main` crane targets and plateTable offsets without coordinate rewriting.
+2. `Crane.jsx` projects only the tall replacement body onto rail Y=0 while the logical crane position remains unchanged.
+3. The replacement movePlate follows the original plateTable physics body and lifts/extends using the existing mission flow.
+4. The load trigger and bound box retain the original 0.6 m binding offset. The visible fork contact surface is aligned to the resulting 1 m box bottom at local Y=0.10.
+5. The double-tine visual is kept inside the 1 m pallet footprint, and the body cabinet/counterweight remain outside the central load corridor.
+6. Separate 4 m rail segments can be repeated along X without changing the crane asset.
+
+Fit limits: 2 m shelf cell/plateTable envelope, 1 m load, 1.90 m body width,
+1.22 m mast inner gap, 0.60 m fork width, and 1.30 m visible tine length.

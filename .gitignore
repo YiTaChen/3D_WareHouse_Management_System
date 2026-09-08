@@ -83,3 +83,8 @@ backend/node_modules/
 backend/*.log
 backend/data/*.sqlite
 backend/data/*.sqlite-*
+
+# Generated Blender/Python tool caches
+__pycache__/
+*.py[cod]
+*.blend1
