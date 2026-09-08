@@ -16,7 +16,12 @@ Important actions:
 
 - `fetchBoxesData()`
   - Calls `GET ${VITE_API_BASE_URL}/boxPositions/mapFullData`.
-  - Sets `boxesData`.
+  - Runs `utils/boxLoadCleanup.js` before publishing `boxesData` to physics.
+  - Stable box-ID order retains one of intersecting 1 m cubes (2 cm contact tolerance); compares only retained boxes.
+  - Soft-deletes extras with the existing PATCH `/boxes/:id/remove`, preserving position/content rows.
+  - Concurrent startup calls share one in-flight request. Failed deletes stay hidden locally and retry on reload.
+  - `isLoadingBoxes` gates operator controls; fetch failures expose `boxLoadError` and a retry action.
+  - `boxLoadCleanup` records removed IDs, survivor IDs and failed deletion IDs.
 
 - `getInventoryDataAll()`
   - Calls `GET /boxInventory/fullData`.

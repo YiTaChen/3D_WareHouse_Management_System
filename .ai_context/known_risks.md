@@ -126,3 +126,7 @@
 - npm run test:crane-fit and the Blender import validator cover task coordinates and static geometry, but do not replace a deterministic browser physics end-to-end suite.
 - Binding/unbinding and shelf placement must retain `main` behavior; the visual integration must not snap boxes, rewrite persisted positions, or inject velocity changes.
 - The active single guide rail is 0.34 m wide and 0.142 m high. Keep it separate from the crane body and preserve the 4 m repeat length when changing its visual profile.
+
+## Startup overlap cleanup
+
+Cleanup compares persisted axis-aligned 1 m boxes before scene publication. It is a startup repair, not a server reservation/lock: concurrent visitors can still create new overlapping records after the snapshot. Non-finite/malformed coordinates are not grounds for automatic deletion. A server soft-delete failure is logged and the box remains excluded for that page; the next load retries. Row-order-independent box-ID sorting makes the survivor deterministic for identical snapshots. This does not merge contents; deleted boxes retain their content records.

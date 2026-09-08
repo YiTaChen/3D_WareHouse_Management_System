@@ -32,3 +32,7 @@
 - [x] Combine shelf instancing/row physics and latest anchored fork visuals.
 - [x] Extend guide rails and mast to cover the enlarged layout.
 - [x] Record browser regression outcomes in combined-warehouse-validation.md.
+
+## Startup inventory repair
+
+- [x] Filter overlapping persisted boxes before physics initialization, soft-delete duplicates and verify concurrency, contact tolerance, and failure behavior.

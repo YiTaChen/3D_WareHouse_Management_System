@@ -4,6 +4,7 @@ import * as THREE from 'three';
 
 import { useBoxEquipStore } from './boxEquipStore'; // 引入 useBoxEquipStore
 import { API_BASE_URL } from '../config/apiConfig';
+import { createBoxDataLoader } from '../utils/boxLoadCleanup.js';
 
 
 // const initialBoxesData = {
@@ -18,6 +19,9 @@ import { API_BASE_URL } from '../config/apiConfig';
 
 
 export const useBoxStore = create((set, get) => ({
+  isLoadingBoxes: true,
+  boxLoadError: null,
+  boxLoadCleanup: null,
   boxesData: {}, // 使用物件來存儲 Box 資料，key 為 boxId
   boxRefs: {}, // 儲存每個 Box 物理體的 React Ref
 
@@ -28,17 +32,14 @@ export const useBoxStore = create((set, get) => ({
 
   // 新增一個非同步函式來從 API 取得 initial Boxes 資料
   fetchBoxesData: async () => {
+    set({ isLoadingBoxes: true, boxLoadError: null });
     try {
-      const response = await fetch(`${API_BASE_URL}/boxPositions/mapFullData`); // api
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      // console.log("Fetched box data:", data);
-      set({ boxesData: data }); // 更新 store 中的 boxesData
+      return await loadInitialBoxes();
     } catch (error) {
-      console.error("Failed to fetch box data:", error);
-      // 可以考慮在這裡設定一個錯誤狀態
+      set({ boxLoadError: error.message });
+      console.error('Failed to load boxes:', error);
+    } finally {
+      set({ isLoadingBoxes: false });
     }
   },
 
@@ -570,3 +571,22 @@ wakeUpBox: (boxId) => {
 
 
 }));
+
+
+const loadInitialBoxes = createBoxDataLoader({
+  fetchMap: async () => {
+    const response = await fetch(`${API_BASE_URL}/boxPositions/mapFullData`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return response.json();
+  },
+  removeBox: async id => {
+    const response = await fetch(`${API_BASE_URL}/boxes/${encodeURIComponent(id)}/remove`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) throw new Error(`Box cleanup failed: ${response.status}`);
+  },
+  commit: ({ boxesData, removed, failedIds }) => {
+    useBoxStore.setState({ boxesData, boxLoadCleanup: { removed, failedIds } });
+    if (failedIds.length) console.warn('Overlapping boxes hidden; server cleanup will retry on reload:', failedIds);
+  },
+});

@@ -118,6 +118,7 @@ This system addresses the challenge by offering a **3D web-based visualization**
 - 📦 Inbound / Outbound inventory process simulation
 - 🔍 Real-time box content and inventory lookup
 - 🧲 Physics-enabled object placement (gravity, collision)
+- 🧹 Startup inventory cleanup: overlapping boxes are filtered before physics loads; redundant boxes are soft-deleted while retaining their stored contents.
 - 🛣️ Fixed-path routing algorithm
 - 🔧 Admin tools for creating, updating, removing box data
 

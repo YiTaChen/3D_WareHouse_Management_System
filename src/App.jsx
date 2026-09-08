@@ -25,6 +25,8 @@ export default function App() {
   const [isLowPowerDevice] = useState(() => (
     window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
   ));
+  const isLoadingBoxes = useBoxStore(state => state.isLoadingBoxes);
+  const boxLoadError = useBoxStore(state => state.boxLoadError);
   const boxesData = useBoxStore(state => state.boxesData);
   const fetchBoxesData = useBoxStore(state => state.fetchBoxesData);
 
@@ -51,12 +53,17 @@ export default function App() {
   return (
     <div className="app-shell">
       <DatabaseSwitcher />
+      {boxLoadError && <div role="alert" style={{position:'absolute',top:60,left:14,zIndex:20,background:'#fff',padding:12}}>
+        Inventory could not be loaded. <button onClick={fetchBoxesData}>Retry</button>
+      </div>}
      
 
 <div className="app-toolbar">
     {showSubPanel? 
       <SubPanelProduction  setShowSubPanel={setShowSubPanel}/> : 
-      <button className="app-primary-action" onClick={()=> setShowSubPanel(true)}>Open Control Panel</button>
+      <button className="app-primary-action" disabled={isLoadingBoxes || Boolean(boxLoadError)} onClick={()=> setShowSubPanel(true)}>
+        {isLoadingBoxes ? 'Loading inventory…' : 'Open Control Panel'}
+      </button>
       } 
 
 </div>

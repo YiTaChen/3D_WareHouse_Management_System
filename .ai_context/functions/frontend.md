@@ -271,3 +271,7 @@ follows travel and lift, while only inner tines use the extension transform.
 Do not drive the fixed carriage from the delayed hidden physics body.
 The registered hidden `visualRef` represents the full plate-table target for
 binding/motion diagnostics. Rails cover X=-6..38 and the mast is 11.7 m tall.
+
+### Startup inventory gate
+
+`App` disables opening the operator panel while `boxStore.fetchBoxesData` completes overlap cleanup. Fetch failure shows a retry action. Only the cleaned box map is published to Box components, so conflicting bodies never coexist during initial mount.
