@@ -119,6 +119,7 @@ This system addresses the challenge by offering a **3D web-based visualization**
 - 🔍 Real-time box content and inventory lookup
 - 🧲 Physics-enabled object placement (gravity, collision)
 - 🧹 Startup inventory cleanup: overlapping boxes are filtered before physics loads; redundant boxes are soft-deleted while retaining their stored contents.
+- Ground recovery: boxes touching the floor for six seconds are soft-disabled and hidden from future loads; crane-bound loads are protected.
 - 🛣️ Fixed-path routing algorithm
 - 🔧 Admin tools for creating, updating, removing box data
 

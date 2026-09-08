@@ -265,6 +265,16 @@ export const useBoxStore = create((set, get) => ({
     
   },
 
+  // Persist the disabled flag before unmounting its visible mesh and physics body.
+  disableGroundBox: async boxId => {
+    if (!get().boxesData[boxId]) return;
+    const response = await fetch(`${API_BASE_URL}/boxes/${encodeURIComponent(boxId)}/remove`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) throw new Error(`Ground box cleanup failed: ${response.status}`);
+    get().removeBox(boxId);
+  },
+
   removeBox: (boxId) => set((state) => {
     const newBoxesData = { ...state.boxesData };
     delete newBoxesData[boxId];

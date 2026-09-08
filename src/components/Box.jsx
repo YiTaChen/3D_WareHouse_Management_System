@@ -1,14 +1,24 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { useGLTF } from '@react-three/drei'; // 使用 drei 的 useGLTF
 import { useBoxStore } from '../stores/boxStore';
+import { createGroundBoxMonitor, isAboveGround } from '../utils/groundBoxCleanup.js';
 
 // 預載入模型（這樣所有實例都能共享同一個載入的模型）
 useGLTF.preload('/box_ver1.gltf');
 
 export default function Box({ id, initialPosition = [0, 5, 0] }) {
   const boxSize = [1, 1, 1];
+  const groundMonitor = useRef(null);
+  useEffect(() => {
+    const monitor = createGroundBoxMonitor({
+      isEligible: () => !useBoxStore.getState().boxBoundToMoveplate[id],
+      disable: () => useBoxStore.getState().disableGroundBox(id),
+    });
+    groundMonitor.current = monitor;
+    return () => { monitor.dispose(); groundMonitor.current = null; };
+  }, [id]);
   
   const boxData = useBoxStore(state => state.getBoxData(id));
   const setBoxRef = useBoxStore(state => state.setBoxRef);
@@ -39,6 +49,9 @@ export default function Box({ id, initialPosition = [0, 5, 0] }) {
     type: 'Dynamic',
     args: boxSize,
     material: 'box',
+    onCollideBegin: event => {
+      if (event.body.userData?.type === 'warehouse-ground') groundMonitor.current?.enter();
+    },
     sleepSpeedLimit: 0.1,
     sleepTimeLimit: 1,
     allowSleep: true,
@@ -50,6 +63,19 @@ export default function Box({ id, initialPosition = [0, 5, 0] }) {
       size: boxSize,
     },
   }));
+
+  useEffect(() => {
+    let currentPosition = position;
+    let currentQuaternion = [0, 0, 0, 1];
+    const checkSeparation = () => {
+      if (isAboveGround(currentPosition, currentQuaternion)) groundMonitor.current?.leave();
+    };
+    // Cannon also emits contact-end when a resting body sleeps. Confirm physical
+    // separation through the oriented box's bottom instead of cancelling on sleep.
+    const stopPosition = boxBodyApi.position.subscribe(value => { currentPosition = value; checkSeparation(); });
+    const stopQuaternion = boxBodyApi.quaternion.subscribe(value => { currentQuaternion = value; checkSeparation(); });
+    return () => { stopPosition(); stopQuaternion(); };
+  }, [boxBodyApi, position]);
 
   useEffect(() => {
     if (!boxData) {

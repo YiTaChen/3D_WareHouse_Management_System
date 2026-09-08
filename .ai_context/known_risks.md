@@ -130,3 +130,7 @@
 ## Startup overlap cleanup
 
 Cleanup compares persisted axis-aligned 1 m boxes before scene publication. It is a startup repair, not a server reservation/lock: concurrent visitors can still create new overlapping records after the snapshot. Non-finite/malformed coordinates are not grounds for automatic deletion. A server soft-delete failure is logged and the box remains excluded for that page; the next load retries. Row-order-independent box-ID sorting makes the survivor deterministic for identical snapshots. This does not merge contents; deleted boxes retain their content records.
+
+## Ground cleanup lifecycle
+
+The six-second cleanup runs in an open browser, after actual ground collision. It is not a background server job. Ground height is Y=0 and box colliders are 1 m cubes; update the oriented-bottom calculation if these contracts change. Sleeping contact-end events are ignored; actual vertical separation cancels the countdown. API errors leave the box visible and retry. Crane-bound loads are excluded.

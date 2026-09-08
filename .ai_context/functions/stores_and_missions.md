@@ -336,3 +336,7 @@ Status:
 Recommendation:
 
 - For feature work, keep using the shared production builder + runner path.
+
+## Ground box persistence
+
+`disableGroundBox(id)` PATCHes `/boxes/:id/remove` before calling local `removeBox`. The existing `isRemoved` filter excludes that box on future loads. Ground monitoring retries failed requests every six seconds while contact remains; records and contents are retained.

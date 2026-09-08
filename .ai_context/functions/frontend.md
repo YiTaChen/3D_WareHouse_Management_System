@@ -275,3 +275,7 @@ binding/motion diagnostics. Rails cover X=-6..38 and the mast is 11.7 m tall.
 ### Startup inventory gate
 
 `App` disables opening the operator panel while `boxStore.fetchBoxesData` completes overlap cleanup. Fetch failure shows a retry action. Only the cleaned box map is published to Box components, so conflicting bodies never coexist during initial mount.
+
+### Ground box cleanup
+
+Box starts a six-second timer on actual warehouse-ground collision. Position/quaternion subscriptions cancel it only when the oriented 1 m cube bottom separates more than 4 cm from the ground; Cannon contact-end alone is insufficient because sleeping bodies emit it. Crane-bound boxes are protected. Successful persisted soft removal unmounts the mesh and physics body.
