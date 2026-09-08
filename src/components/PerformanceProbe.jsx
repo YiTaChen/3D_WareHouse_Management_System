@@ -1,5 +1,8 @@
+import * as THREE from 'three';
 import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { useBoxStore } from '../stores/boxStore';
+import { useConveyorStore } from '../stores/conveyorStore';
 import { useCraneStore } from '../stores/craneStore';
 
 export default function PerformanceProbe({ enabled }) {
@@ -49,6 +52,18 @@ export default function PerformanceProbe({ enabled }) {
         }),
       ),
     );
+
+    document.documentElement.dataset.warehouseBoxes = JSON.stringify({
+      sampledAt: Date.now(),
+      boxes: Object.fromEntries(Object.entries(useBoxStore.getState().boxRefs)
+        .filter(([, value]) => value?.ref?.current)
+        .map(([id, value]) => [id, {
+          position: value.ref.current.getWorldPosition(new THREE.Vector3()).toArray(),
+          quaternion: value.ref.current.getWorldQuaternion(new THREE.Quaternion()).toArray(),
+        }])),
+      conveyors: Object.fromEntries(Object.entries(useConveyorStore.getState().conveyorStates)
+        .map(([id, value]) => [id, value.rotate])),
+    });
 
     sample.startedAt = now;
     sample.frames = 0;

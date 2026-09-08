@@ -36,3 +36,11 @@
 ## Startup inventory repair
 
 - [x] Filter overlapping persisted boxes before physics initialization, soft-delete duplicates and verify concurrency, contact tolerance, and failure behavior.
+
+## Stopped conveyor drift
+
+- [x] Reproduce idle drift and isolate stopped-contact solver instability.
+- [x] Add stopped-only contact relaxation and GLTF-based sleep/wake regression tests.
+- [x] Verify complete browser routes and record outcomes in `docs/conveyor-idle-drift-validation.md`.
+
+- [ ] Resolve or reproduce the intermittent high-shelf release confirmation timeout before claiming exhaustive regression-free verification. See the validation report.

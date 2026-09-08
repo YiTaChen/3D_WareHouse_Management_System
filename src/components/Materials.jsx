@@ -10,9 +10,11 @@
 // }
 
 import { useContactMaterial } from '@react-three/cannon'
+import { RUNNING_ROLLER_CONTACT, STOPPED_ROLLER_CONTACT } from './rollerContact.js'
 
 export default function Materials() {
-  useContactMaterial('roller', 'box', { friction: 0.001, restitution: 0 })
+  useContactMaterial('roller', 'box', RUNNING_ROLLER_CONTACT)
+  useContactMaterial('stoppedRoller', 'box', STOPPED_ROLLER_CONTACT)
   useContactMaterial('box', 'invisible', { friction: 0, restitution: 0 }) // Box 與隱形材料
   // useContactMaterial('box', 'default', { friction: 0.5, restitution: 0.1 }) // Box 與感應器 (如果沒有特定材質，使用 default)
   // 可以根據需要為 sensor1, sensor2 定義專屬材質

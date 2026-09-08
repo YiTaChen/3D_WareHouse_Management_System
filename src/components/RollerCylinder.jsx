@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react'
 import { useCylinder } from '@react-three/cannon'
 import * as THREE from 'three'
+import { rollerMaterial } from './rollerContact.js'
 
 export default function RollerCylinder({ rollerPosition, rotation, radius, length, angularVelocity, rotate }) {
   const euler = new THREE.Euler().setFromQuaternion(rotation)
@@ -12,7 +13,7 @@ export default function RollerCylinder({ rollerPosition, rotation, radius, lengt
     position: rollerPosition,
     rotation: rotationArray,
     args: [radius, radius, length, 16],
-    material: 'roller',
+    material: rollerMaterial(rotate),
     type: rotate ? 'Kinematic' : 'Static',
   }), undefined, [rotate])
 

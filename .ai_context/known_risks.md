@@ -134,3 +134,10 @@ Cleanup compares persisted axis-aligned 1 m boxes before scene publication. It i
 ## Ground cleanup lifecycle
 
 The six-second cleanup runs in an open browser, after actual ground collision. It is not a background server job. Ground height is Y=0 and box colliders are 1 m cubes; update the oriented-bottom calculation if these contracts change. Sleeping contact-end events are ignored; actual vertical separation cancels the countdown. API errors leave the box visible and retry. Crane-bound loads are excluded.
+
+## Idle roller contacts
+
+Stopped rollers use a dedicated contact material with relaxation 20 to suppress
+30 Hz contact creep. Preserve the separate running material. The GLTF-based
+fixture tests rest and wake-up but does not replace full-scene seam, slope,
+crane and mission checks documented in conveyor-idle-drift-validation.md.

@@ -257,3 +257,12 @@ For regression and filming, obtain mission shelf coordinates with
 `useShelfStore.getState().getShelfPosition(id)`; raw `ShelfData.position` omits
 the UI's +3 Y conversion. Treat a completed task at the wrong shelf as failure.
 See `docs/combined-warehouse-validation.md` for observed results.
+
+## Stopped conveyor contact follow-up
+
+Main's stopped 16-segment rollers can produce residual box creep with default
+contact relaxation 3 at the existing 30 Hz step. Stopped-only contact relaxation
+20 lets boxes settle naturally; running material parameters remain identical.
+Do not address this by changing axes/colliders or globally increasing friction,
+solver iterations, or forcing box sleep. See `docs/conveyor-idle-drift-validation.md`
+and `npm run test:conveyor-drift` for reproduction and regression coverage.

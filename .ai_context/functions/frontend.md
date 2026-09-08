@@ -279,3 +279,12 @@ binding/motion diagnostics. Rails cover X=-6..38 and the mast is 11.7 m tall.
 ### Ground box cleanup
 
 Box starts a six-second timer on actual warehouse-ground collision. Position/quaternion subscriptions cancel it only when the oriented 1 m cube bottom separates more than 4 cm from the ground; Cannon contact-end alone is insufficient because sleeping bodies emit it. Crane-bound boxes are protected. Successful persisted soft removal unmounts the mesh and physics body.
+
+### Stopped roller contact stability
+
+`rollerContact.js` preserves running roller friction/restitution and assigns
+stopped rollers a separate `stoppedRoller` material with contact relaxation 20.
+This lets 30 Hz contacts settle without changing roller geometry or forcing box
+transforms/sleep. Material switches with the existing Static/Kinematic rebuild.
+`PerformanceProbe` additionally exposes box world transforms and conveyor
+running flags in `data-warehouse-boxes` for development diagnostics.

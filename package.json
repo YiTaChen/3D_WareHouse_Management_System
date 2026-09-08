@@ -17,7 +17,8 @@
     "test:shelf-layout": "node --test src/components/shelfLayout.test.js",
     "test:box-binding": "node --test src/components/boxBinding.test.js",
     "test:crane-fit": "node --test src/constants/craneConfig.test.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:conveyor-drift": "node --test tools/physics/conveyor-drift.test.js"
   },
   "dependencies": {
     "@react-three/cannon": "^6.6.0",
