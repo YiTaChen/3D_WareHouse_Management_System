@@ -88,3 +88,6 @@ backend/data/*.sqlite-*
 __pycache__/
 *.py[cod]
 *.blend1
+
+# Local video reproduction output
+.video-production/

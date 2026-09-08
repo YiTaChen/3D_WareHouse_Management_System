@@ -1,6 +1,24 @@
 # 3D Warehouse Management System (3D-WMS)
 
-![Demo](./demo_resource_for_readme/warehouse_new.gif)
+## Latest Version — 450-Location AS/RS Warehouse
+
+A fresh recording of the integrated `main` version: 450 storage locations, optimized shelf rendering and physics, and the latest fitted crane mesh with synchronized travel, lift and telescopic forks. Follow one box through automated inbound storage and outbound retrieval.
+
+https://github.com/user-attachments/assets/75d21e07-e9d5-4084-870f-a2c4fedaab75
+
+**[▶ Watch the latest demo — 62 seconds](https://github.com/user-attachments/assets/75d21e07-e9d5-4084-870f-a2c4fedaab75)** · 1080p / 30 fps · Real project footage
+
+## Project Evolution — From Prototype to Optimized Automation
+
+The project's journey from its first conveyor prototype, through gravity and physics, 90-location automation, and 450-location performance optimization, to the latest crane integration. This is the corrected edition with a freshly recorded single-box crane sequence.
+
+https://github.com/user-attachments/assets/02e1741e-af2d-492e-be50-0fe25fc85724
+
+**[▶ Watch the project evolution — 70 seconds](https://github.com/user-attachments/assets/02e1741e-af2d-492e-be50-0fe25fc85724)** · 1080p / 30 fps · English titles
+
+[Recording provenance and reproduction scripts](./tools/video/latest/README.md)
+
+---
 
 🔗 [Live Demo](https://r3f-gravity-apply-test.firebaseapp.com)  
 

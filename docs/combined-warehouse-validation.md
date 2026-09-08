@@ -1,6 +1,6 @@
 # Combined warehouse validation
 
-Validated locally on 2026-09-07. No push, remote-main update or deployment.
+Validated locally on 2026-09-07. GitHub main publication authorized on 2026-09-08; no hosted application deployment.
 
 Merged remote main `5fc0549` and local `agent/fit-asrs-pallet-crane` `047fcd8`.
 Preserved 450 shelf locations, 25 aggregated physics rows, instanced shelf
@@ -48,3 +48,7 @@ Historical stages use actual Git snapshots 41a8714 (prototype), e71ffd4
 (new crane). Filming hooks only schedule existing actions, move the camera,
 adjust lighting, composite English titles and record the running WebGL canvas.
 Filming code is provided separately and is not enabled in the production app.
+
+## 2026-09-08 publication validation
+
+35 Node checks passed again. A fresh 62-second recording uses the integrated main source, unchanged production physics and one box. Both shelf056 inbound and outbound missions completed. The README lists the latest demo first and the corrected 70-second evolution film second. Filming code is isolated under `tools/video/latest`; no filming code is mounted in production.

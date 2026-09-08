@@ -1,0 +1,75 @@
+{
+  "sourceCommit": "f912d07d5307ccbe13f1fd3f61273eeb63d46dfa",
+  "videos": [
+    {
+      "file": "warehouse-latest-demo.mp4",
+      "sha256": "09e9db807b199115ac3d585415ee97e0b437f73637db8d8dc3436d5012321b42",
+      "bytes": 20482199,
+      "duration": 62,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "codec": "H.264",
+      "url": "https://github.com/user-attachments/assets/75d21e07-e9d5-4084-870f-a2c4fedaab75"
+    },
+    {
+      "file": "warehouse-project-intro.mp4",
+      "sha256": "38d1dcd0597b08fa0493de9d61fc76f4cc40397e8b1fe9295d2ba45bddbcd896",
+      "bytes": 23604469,
+      "duration": 70,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "codec": "H.264",
+      "url": "https://github.com/user-attachments/assets/02e1741e-af2d-492e-be50-0fe25fc85724"
+    }
+  ],
+  "missions": [
+    {
+      "shelfId": "shelf056",
+      "boxId": "film-1788891833446",
+      "direction": "inbound",
+      "portId": "Port1",
+      "start": 10756.59999999404,
+      "elapsed": 21.82730000001192,
+      "status": "done",
+      "equipment": "shelf056",
+      "position": [
+        3.9973366260528564,
+        8.5099458694458,
+        -7.992910861968994
+      ]
+    },
+    {
+      "shelfId": "shelf056",
+      "boxId": "film-1788891833446",
+      "direction": "outbound",
+      "portId": "Port2",
+      "start": 32600.69999998808,
+      "elapsed": 28.29270000001788,
+      "status": "done",
+      "equipment": "conv4",
+      "position": [
+        -8.305099487304688,
+        1.6992117166519165,
+        -4.055068016052246
+      ]
+    }
+  ],
+  "browserPlayback": {
+    "duration": 62,
+    "width": 1920,
+    "height": 1080,
+    "currentTime": 62,
+    "ended": true,
+    "decodedFrames": 1860,
+    "droppedFrames": 2
+  },
+  "checks": {
+    "nodeTestsPassed": 35,
+    "lintErrors": 0,
+    "lintWarnings": 61,
+    "fullDecode": "passed",
+    "singleBoxMissions": "passed"
+  }
+}
