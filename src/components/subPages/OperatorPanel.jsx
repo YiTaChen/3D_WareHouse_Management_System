@@ -39,6 +39,8 @@ const buildUniqueShelfOptions = (shelves) => {
 };
 
 function InboundDemo() {
+  const shelfStates = useShelfStore(state => state.shelfStates);
+  const boxCollisionStatus = useBoxEquipStore(state => state.boxCollisionStatus);
   const addBox = useBoxStore((state) => state.addBox);
   const mission = useMissionStore((state) => state.mission);
   const setMission = useMissionStore((state) => state.setMission);
@@ -64,7 +66,7 @@ function InboundDemo() {
     if (!uniqueShelves.some((shelf) => shelf.id === selectedShelfId)) {
       setSelectedShelfId(uniqueShelves[0].id);
     }
-  }, [getEmptyShelfListByZ, selectedShelfId]);
+  }, [getEmptyShelfListByZ, selectedShelfId, shelfStates, boxCollisionStatus]);
 
   const selectedShelf = shelfOptions.find((shelf) => shelf.id === selectedShelfId);
   const selectedPortId = getInboundPortForShelfZ(getShelfZ(selectedShelf?.position));
@@ -76,6 +78,7 @@ function InboundDemo() {
     useBoxStore.setState({ isPreparingInbound: true });
 
     try {
+      useShelfStore.getState().assertShelfAvailable(selectedShelf.position);
       setStatus('Clearing inbound port...');
       await useBoxStore.getState().prepareInboundPort(selectedPortId);
       // Allow React/Cannon to unmount old bodies before adding the replacement.
@@ -99,7 +102,7 @@ function InboundDemo() {
       setStatus('Mission running...');
       const completedMission = await useMissionStore.getState().runMission();
       if (completedMission?.status !== 'done') {
-        throw new Error('Inbound mission stopped before completion.');
+        throw new Error(completedMission?.error || 'Inbound mission stopped before completion.');
       }
       setStatus('Inbound mission completed.');
     } catch (error) {
@@ -155,6 +158,7 @@ function InboundDemo() {
 }
 
 function OutboundDemo() {
+  const boxCollisionStatus = useBoxEquipStore(state => state.boxCollisionStatus);
   const mission = useMissionStore((state) => state.mission);
   const setMission = useMissionStore((state) => state.setMission);
   const getAllShelfIds = useBoxEquipStore((state) => state.getAllShelfId);
@@ -178,7 +182,7 @@ function OutboundDemo() {
     if (!ids.includes(selectedShelfId)) {
       setSelectedShelfId(ids[0]);
     }
-  }, [getAllShelfIds, selectedShelfId]);
+  }, [getAllShelfIds, selectedShelfId, boxCollisionStatus]);
 
   const selectedShelfPosition = useMemo(
     () => (selectedShelfId ? getShelfPosition(selectedShelfId) : undefined),

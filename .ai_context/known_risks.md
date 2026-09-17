@@ -82,6 +82,8 @@
 
 - Inventory shelf id depends on runtime collision state.
   - Reloading can show incomplete shelf association until sensors fire.
+  - Inbound menus must subscribe to `shelfStates` and `boxCollisionStatus`; stable getter function identity is not an occupancy change notification. Availability now combines both signals and is checked again before running an inbound mission.
+  - This is a browser-local guard, not a database reservation across simultaneous clients. Cross-client allocation still requires a server transaction/unique shelf ownership model.
 
 - Box position in DB is not continuously synchronized.
   - Use `updateBoxCurrentPositionServer()` after movement/mission steps.

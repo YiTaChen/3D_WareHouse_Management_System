@@ -23,6 +23,14 @@ const setExecutionError = (mission, task, step, callbacks) => {
 export const runMission = async (mission, stepFunctions, callbacks = {}) => {
   if (!mission) return mission;
 
+  try {
+    callbacks.beforeStart?.(mission);
+  } catch (error) {
+    mission.error = error.message;
+    setMissionStatus(mission, 'error', callbacks);
+    return mission;
+  }
+
   mission.status = 'running';
   mission.currentTaskIndex = 0;
   notifyMissionChange(mission, callbacks);

@@ -10,6 +10,8 @@ import { useMissionStore } from '../../stores/missionStore';
 import { useShelfStore } from '../../stores/shelfStore';
 
 function MissionHighLevelPanel() {
+  const shelfStates = useShelfStore(state => state.shelfStates);
+  const boxCollisionStatus = useBoxEquipStore(state => state.boxCollisionStatus);
   const setMission = useMissionStore((state) => state.setMission);
   const runMission = useMissionStore((state) => state.runMission);
   const mission = useMissionStore((state) => state.mission);
@@ -46,7 +48,7 @@ function MissionHighLevelPanel() {
     if (!emptyShelves.some((shelf) => shelf.id === selectedInboundShelfId)) {
       setSelectedInboundShelfId(emptyShelves[0].id);
     }
-  }, [getEmptyShelfListByZ, selectedInboundShelfId, selectedMissionType, selectedPortId]);
+  }, [getEmptyShelfListByZ, selectedInboundShelfId, selectedMissionType, selectedPortId, shelfStates, boxCollisionStatus]);
 
   useEffect(() => {
     if (selectedMissionType !== 'outbound') return;
@@ -62,7 +64,7 @@ function MissionHighLevelPanel() {
     if (!shelfIds.includes(selectedOutboundShelfId)) {
       setSelectedOutboundShelfId(shelfIds[0]);
     }
-  }, [getAllShelfIds, selectedMissionType, selectedOutboundShelfId]);
+  }, [getAllShelfIds, selectedMissionType, selectedOutboundShelfId, boxCollisionStatus]);
 
   const buildSelectedMission = () => {
     if (selectedMissionType === 'inbound') {

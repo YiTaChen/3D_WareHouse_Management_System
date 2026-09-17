@@ -15,6 +15,7 @@
     "test:mission-production-factory": "node --test src/missions/builders/productionMissionFactory.test.js",
     "test:mission-runner": "node --test src/missions/runtime/missionRunner.test.js",
     "test:shelf-layout": "node --test src/components/shelfLayout.test.js",
+    "test:shelf-availability": "node --test src/stores/shelfStore.test.js src/missions/runtime/inboundGuard.test.js",
     "test:box-binding": "node --test src/components/boxBinding.test.js",
     "test:crane-fit": "node --test src/constants/craneConfig.test.js",
     "preview": "vite preview",
