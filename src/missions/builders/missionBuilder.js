@@ -11,6 +11,7 @@ import {
   buildInboundProductionMission,
   buildOutboundProductionMission,
 } from './productionMissionFactory.js';
+import { useShelfStore } from '../../stores/shelfStore.js';
 
 const inboundMissionConfigs = {
   Port1: {
@@ -48,7 +49,13 @@ const outboundMissionConfigs = {
   },
 };
 
-export const { buildInboundMission, buildOutboundMission } = createMissionBuilders({
+const builders = createMissionBuilders({
   inboundMissionConfigs,
   outboundMissionConfigs,
 });
+
+export const buildOutboundMission = builders.buildOutboundMission;
+export const buildInboundMission = (input) => {
+  useShelfStore.getState().assertShelfAvailable(input?.shelfPosition);
+  return { ...builders.buildInboundMission(input), inboundShelfPosition: [...input.shelfPosition] };
+};

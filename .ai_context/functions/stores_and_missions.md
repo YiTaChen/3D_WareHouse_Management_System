@@ -201,6 +201,15 @@ Important usage:
 
 - Mission UI uses shelf position/empty shelf helpers.
 
+Inbound availability (2026-09-17):
+
+- Empty-shelf queries exclude both `shelfStates[id].BulkSensorDetected` and boxes mapped to the shelf in `boxEquipStore.boxCollisionStatus`. A sleeping body's sensor-end event alone must not make a stored shelf available.
+- `isShelfAvailable(id)` and `assertShelfAvailable(position)` share this rule; positions use the existing shelf Y + 3 mission coordinates.
+- All three mission panels subscribe to actual shelf/equipment state, not only stable getter functions. Otherwise lists remain stale after inbound/outbound.
+- The production inbound builder validates availability and attaches `inboundShelfPosition`. `missionStore.runMission` rechecks it using the runtime's synchronous `beforeStart` callback before any equipment movement, including previously loaded missions.
+- Mission status notifications publish a new top-level object so React observes running/done/error updates. Running missions cannot be started a second time through `runMission`.
+- Run `npm run test:shelf-availability` and the browser scenario in `docs/inbound-shelf-availability-validation.md` after changes to these contracts.
+
 ## `src/stores/uiStore.js`
 
 State:

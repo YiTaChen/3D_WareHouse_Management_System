@@ -2,7 +2,8 @@ import { create } from 'zustand';
 // 假設你有一個 ShelfData.js 包含貨架的配置
 // import ShelfData from '../data/ShelfData'; // 如果有需要，可以引入貨架數據
 
-import ShelfData from '../data/ShelfData'; 
+import ShelfData from '../data/ShelfData.js';
+import { useBoxEquipStore } from './boxEquipStore.js';
 
 
 const initializeShelfStates = () => {
@@ -28,6 +29,19 @@ const initializeShelfStates = () => {
 
 export const useShelfStore = create((set, get) => ({
   shelfStates: initializeShelfStates(),
+
+  isShelfAvailable: (id) => ShelfData.shelves.some(shelf => shelf.id === id)
+    && !get().shelfStates[id]?.BulkSensorDetected
+    && !useBoxEquipStore.getState().getBoxIdbyEquipId(id),
+
+  assertShelfAvailable: (position) => {
+    const shelf = ShelfData.shelves.find(shelf => position?.every((value, axis) =>
+      value === shelf.position[axis] + (axis === 1 ? 3 : 0)) && position.length === 3);
+    if (!shelf || !get().isShelfAvailable(shelf.id)) {
+      throw new Error(`Destination ${shelf?.id || 'shelf'} is unavailable. Select an empty shelf.`);
+    }
+    return shelf.id;
+  },
 
   /**
    * 設定指定貨架的感應器狀態
@@ -92,7 +106,8 @@ export const useShelfStore = create((set, get) => ({
         // 如果 shelfId 在 currentShelfStates 中有定義，並且其 BulkSensorDetected 為 false
         // 或者如果 shelfId 尚未在 shelfStates 中被初始化（這表示它預設是空的）
         const shelfState = currentShelfStates[shelfId];
-        const isBulkSensorDetectedFalse = shelfState ? !shelfState.BulkSensorDetected : true;
+        const isBulkSensorDetectedFalse = !shelfState?.BulkSensorDetected
+          && !useBoxEquipStore.getState().getBoxIdbyEquipId(shelfId);
 
         return isCorrectZ && isBulkSensorDetectedFalse;
       }).map(shelf => ({
@@ -122,7 +137,8 @@ export const useShelfStore = create((set, get) => ({
 
           // 條件 2: 檢查 shelfStates 中的感測器狀態
           const shelfState = currentShelfStates[shelfId];
-          const isBulkSensorDetectedFalse = shelfState ? !shelfState.BulkSensorDetected : true;
+          const isBulkSensorDetectedFalse = !shelfState?.BulkSensorDetected
+            && !useBoxEquipStore.getState().getBoxIdbyEquipId(shelfId);
 
           return isCorrectZ && isBulkSensorDetectedFalse;
         }).map(shelf => ({
@@ -135,7 +151,6 @@ export const useShelfStore = create((set, get) => ({
     
 
 }));
-
 
 
 

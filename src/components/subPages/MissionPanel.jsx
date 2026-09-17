@@ -16,6 +16,8 @@ import {
 
 
 const MissionPanel = () => {
+  const shelfStates = useShelfStore(state => state.shelfStates);
+  const boxCollisionStatus = useBoxEquipStore(state => state.boxCollisionStatus);
   const mission = useMissionStore((s) => s.mission);
   const setMission = useMissionStore((s) => s.setMission);
   const runMission = useMissionStore((s) => s.runMission);
@@ -46,10 +48,10 @@ const MissionPanel = () => {
     setShelfIds(allShelfIds);
 
     // 如果目前沒有選定的 shelf，就預設選擇第一個
-    if (allShelfIds.length > 0 && !selectedShelfId) {
-      setSelectedShelfId(allShelfIds[0]);
+    if (!allShelfIds.includes(selectedShelfId)) {
+      setSelectedShelfId(allShelfIds[0] || '');
     }
-  }, [getAllShelfIds]); // 依賴 getAllShelfIds，當其更新時觸發
+  }, [getAllShelfIds, selectedShelfId, boxCollisionStatus]);
 
 
 
@@ -89,7 +91,7 @@ const MissionPanel = () => {
       } else if (emptyShelves.length === 0) {
         setSelectedInboundShelfId(''); // 如果列表為空，則清空選定
       }
-  }, [selectedPort, getEmptyShelfListByZ]); // 這裡需要依賴 getEmptyShelfListByZ
+  }, [selectedPort, getEmptyShelfListByZ, selectedInboundShelfId, shelfStates, boxCollisionStatus]);
 
 
 
