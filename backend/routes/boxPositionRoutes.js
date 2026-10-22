@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
     const newBoxPosition = await BoxPosition.create(req.body);
     res.status(201).json(newBoxPosition);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     const boxPositions = await BoxPosition.findAll();
     res.json(boxPositions);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -41,7 +41,7 @@ router.get('/map', async (req, res) => {
           }
       }
     );
-    const map = {};
+    const map = Object.create(null);
     all.forEach(p => {
       map[p.box_id] = {
         id: p.box_id,
@@ -50,7 +50,7 @@ router.get('/map', async (req, res) => {
     });
     res.json(map);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -80,7 +80,7 @@ router.get('/mapFullData', async (req, res) => {
       ],
     });
 
-    const mapFullData = {}; // Initialize an empty object to store the mapped data
+    const mapFullData = Object.create(null); // Initialize an empty object to store the mapped data
 
     boxes.forEach(box => {
       const boxData = {
@@ -88,7 +88,7 @@ router.get('/mapFullData', async (req, res) => {
         position: box.BoxPosition
           ? [box.BoxPosition.position_x, box.BoxPosition.position_y, box.BoxPosition.position_z]
           : [0, 0, 0], // Default position if not found
-        content: {}, // Initialize content for this box
+        content: Object.create(null), // Initialize content for this box
       };
 
       if (box.BoxContents && box.BoxContents.length > 0) {
@@ -119,7 +119,7 @@ router.get('/mapFullData', async (req, res) => {
     res.json(mapFullData); // Return the mapped object
   } catch (err) {
     console.error("Error fetching all full box data in map format:", err);
-    res.status(500).json({ error: 'Failed to retrieve all full box data in map format', details: err.message });
+    res.status(500).json({ error: 'Failed to retrieve all full box data in map format' });
   }
 });
 
@@ -137,7 +137,7 @@ router.get('/:id', async (req, res) => {
       res.status(404).json({ error: 'Not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -155,7 +155,7 @@ router.put('/:id', async (req, res) => {
       res.status(404).json({ error: 'Not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -172,7 +172,7 @@ router.delete('/:id', async (req, res) => {
       res.status(404).json({ error: 'Not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -190,7 +190,7 @@ router.get('/box/:boxId', async (req, res) => {
       res.status(404).json({ error: 'BoxPosition not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -220,7 +220,7 @@ router.post('/box/:boxId', async (req, res) => {
     });
     res.status(201).json(newPosition);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -244,7 +244,7 @@ router.patch('/box/:boxId', async (req, res) => {
       res.status(404).json({ error: 'BoxPosition not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 

@@ -49,3 +49,13 @@
 
 - [x] Soft-disable and hide existing inlet boxes before creating a replacement;
   protect other ports, use live positions, block duplicate clicks and abort on API failure.
+
+## 2026-10-21 security repair
+
+- [x] Patch vulnerable dependency trees and pin a supported patched Node runtime.
+- [x] Make shared mutations administrator-only and isolate public demo state.
+- [x] Close DB admin Host/proxy bypass and arbitrary SQLite path selection.
+- [x] Verify PostgreSQL TLS and disable production schema alteration.
+- [x] Add API schemas, compression/body/time/request bounds and error sanitization.
+- [x] Add API/demo regression coverage and Hosting CSP/security headers.
+- [ ] Confirm Render deployed application revision and actual Node patch after dashboard access is connected.

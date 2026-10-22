@@ -36,7 +36,8 @@ const getPostgresDialectOptions = (useSsl) => {
         return {
             ssl: {
                 require: true,
-                rejectUnauthorized: false,
+                rejectUnauthorized: true,
+                ...(process.env.PG_SSL_CA ? { ca: process.env.PG_SSL_CA } : {}),
             },
         };
     }
@@ -131,7 +132,7 @@ const normalizeDatabaseRequest = (input = {}) => {
     if (type === 'sqlite' || type === 'local_sqlite' || type === 'demo') {
         return {
             type: 'sqlite',
-            storage: input.storage || input.sqliteStorage || 'data/warehouse.sqlite',
+            storage: 'data/warehouse.sqlite',
         };
     }
 
@@ -231,7 +232,7 @@ const getModels = () => activeContext;
 
 const getDatabaseStatus = () => ({
     dialect: activeContext.sequelize.getDialect(),
-    config: activeContext.dbConfig,
+    config: { type: activeContext.dbConfig.type },
 });
 
 const setActiveDatabaseContext = async (nextContext) => {

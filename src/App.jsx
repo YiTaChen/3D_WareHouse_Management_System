@@ -1,3 +1,4 @@
+import { DEMO_MODE } from './api/client.js';
 import React, { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
@@ -52,7 +53,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <DatabaseSwitcher />
+      {DEMO_MODE ? <div role="status" style={{ position: 'absolute', bottom: 8, left: 12, zIndex: 20, background: '#ffffffdf', padding: '6px 10px', borderRadius: 6, fontSize: 12 }}>
+        Demo data stays in this browser session. Reload to reset.
+      </div> : <DatabaseSwitcher />}
       {boxLoadError && <div role="alert" style={{position:'absolute',top:60,left:14,zIndex:20,background:'#fff',padding:12}}>
         Inventory could not be loaded. <button onClick={fetchBoxesData}>Retry</button>
       </div>}

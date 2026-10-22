@@ -106,3 +106,7 @@ Frontend runtime owns:
 - Conveyor sensor state and light color.
 
 If a feature needs accurate saved box location, call `boxStore.updateBoxCurrentPositionServer()` after movement finishes.
+
+## Isolated public demo
+
+With default `VITE_DEMO_MODE=true`, the API adapter mirrors the active inventory contracts in memory for the current page only. It does not modify any Sequelize tables or shared Render state. The persistent model above applies when a trusted client explicitly opts into the backend; mutations require backend-only administrator authorization.

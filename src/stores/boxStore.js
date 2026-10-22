@@ -1,3 +1,4 @@
+import { apiFetch as fetch } from '../api/client.js';
 
 import { create } from 'zustand';
 import * as THREE from 'three';
@@ -124,7 +125,7 @@ export const useBoxStore = create((set, get) => ({
   // only remove all the box, mark at db  (soft delete)
   softDeleteAllBoxesData: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/boxes/all/remove`); // api
+      const response = await fetch(`${API_BASE_URL}/boxes/all/remove`, { method: 'PATCH' }); // api
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -165,7 +166,7 @@ export const useBoxStore = create((set, get) => ({
     try {
       const entries = Object.values(contentObj);
       for (const item of entries) {
-        await fetch(`${API_BASE_URL}/boxContents`, {
+        const response = await fetch(`${API_BASE_URL}/boxContents`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -174,9 +175,11 @@ export const useBoxStore = create((set, get) => ({
             quantity: item.quantity,
           }),
         });
+        if (!response.ok) throw new Error(`Could not save box content: ${response.status}`);
       }
     } catch (error) {
       console.error('Failed to update box content:', error);
+      throw error;
     }
   },
 
@@ -260,6 +263,7 @@ export const useBoxStore = create((set, get) => ({
 
     } catch (err) {
       console.error("在 addBox 過程中發生錯誤:", err.message);
+      return false;
       
     }
     
@@ -359,6 +363,7 @@ export const useBoxStore = create((set, get) => ({
       // console.log(` Box ${boxId} 位置已更新:`, updated);
     } catch (err) {
       console.error(` 更新 box ${boxId} 位置失敗:`, err.message);
+      throw err;
     }
   },
 
@@ -419,6 +424,7 @@ export const useBoxStore = create((set, get) => ({
       // console.log(` Box ${boxId} 已新增:`, updated);
     } catch (err) {
       console.error(` 新增 box ${boxId} 失敗:`, err.message);
+      throw err;
     }
   },
 

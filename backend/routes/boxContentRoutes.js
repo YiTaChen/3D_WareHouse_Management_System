@@ -11,7 +11,7 @@ router.post('/', async (req, res) => {
     const newBoxContent = await BoxContent.create(req.body);
     res.status(201).json(newBoxContent);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     const boxContents = await BoxContent.findAll();
     res.json(boxContents);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
       res.status(404).json({ error: 'Not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -55,7 +55,7 @@ router.put('/:id', async (req, res) => {
       res.status(404).json({ error: 'Not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -72,7 +72,7 @@ router.delete('/:id', async (req, res) => {
       res.status(404).json({ error: 'Not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -89,7 +89,7 @@ router.get('/box/:boxId', async (req, res) => {
     });
     res.json(contents);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 

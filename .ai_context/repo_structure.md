@@ -126,3 +126,12 @@ Zustand stores。
 - `src/assets/`：有部分 GLTF/BIN 與 React SVG，但主 runtime 多使用 `public/`。
 - `dist/`：Vite build output，也是 Firebase Hosting 目標。不要把它當原始碼修改。
 - `demo_resource_for_readme/`：README demo gif/png。
+
+## Security modules
+
+- `src/api/client.js`: default isolated demo routing, opt-in backend reads.
+- `src/api/demoApi.js` / `demoApi.test.js`: per-page demo API and isolation/contract tests.
+- `backend/middleware/security.js`: write authorization, local administration boundary, CORS/headers/budget.
+- `backend/middleware/validation.js`: mutation schemas.
+- `backend/test/security.test.js`: isolated SQLite security regressions.
+- root and backend `.node-version`: tested patched Node runtime.

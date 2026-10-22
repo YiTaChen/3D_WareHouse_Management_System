@@ -1,3 +1,4 @@
+import { apiFetch as fetch } from '../api/client.js';
 
 import { create } from 'zustand';
 import { ProductList } from '../data/ProductList'; // 引入預設資料

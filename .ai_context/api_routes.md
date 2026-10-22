@@ -1,6 +1,6 @@
 # API Routes
 
-Base URL is supplied by frontend env `VITE_API_BASE_URL`.
+Base URL is supplied by frontend env `VITE_API_BASE_URL` when `VITE_DEMO_MODE=false`. By default `src/api/client.js` routes active store calls to a private in-memory page-session API; no shared API writes occur.
 
 Backend entry: `backend/index.js`
 
@@ -46,7 +46,7 @@ File: `backend/routes/boxesRoutes.js`
 
 - `PATCH /boxes/all/remove`
   - Intended to soft delete all boxes.
-  - Risk: route order currently places this after `/:id/remove`, so Express may match `all` as an id before this route.
+  - Declared before `/:id/remove`; requires administrator authorization on the backend.
 
 ## Items
 
@@ -166,6 +166,17 @@ File: `backend/routes/boxInventoryRoutes.js`
 ## Contract notes
 
 - Response shapes are not fully standardized.
-- There is little request body validation.
+- Shared writes require administrator Bearer authentication and strict field/type/range validation.
 - Some routes have incomplete try/catch coverage.
 - Full-data aggregation logic is duplicated between `boxPositionRoutes.js` and `boxInventoryRoutes.js`.
+
+## Security contract (2026-10-21)
+
+- `GET /health`: public `{ status, api, securityRevision }`; no secrets/runtime version.
+- Every non-read method requires `WAREHOUSE_ADMIN_TOKEN` (at least 32 chars) before JSON parsing.
+- JSON is limited to 16 KiB and compression is disabled; invalid JSON/oversize/encoding requests return bounded 400/413/415 responses.
+- `backend/middleware/validation.js` rejects unknown fields, malformed identifiers, reserved object keys, nonfinite/out-of-range coordinates and invalid quantities.
+- `/db/status`, `/db/test`, `/db/switch` always reject cloud/production. Local admin additionally needs `ENABLE_DB_SWITCHER=true`, direct loopback without forwarded headers, and the Bearer token. A Host header is never authorization.
+- DB request payloads cannot choose an arbitrary SQLite file; API responses omit DB credentials/addresses and server error details.
+- CORS is an exact-origin allowlist, not authorization. Public reads are intentionally readable.
+- `src/api/demoApi.js` implements the subset used by the active stores for isolated demo boxes/products/positions/contents/inventory; its tests verify independent sessions and normal create/move/remove flows.

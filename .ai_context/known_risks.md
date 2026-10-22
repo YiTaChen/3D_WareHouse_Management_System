@@ -22,16 +22,13 @@
   - README mentions `/boxes/:boxId/full`, implementation is `/boxInventory/:boxId/full`.
   - README mentions `/boxes/fullData`, implementation is `/boxInventory/fullData`.
 
-- `sequelize.sync({ alter: true })` runs on backend startup.
-  - Risky for production schema changes.
-  - No migration system exists.
+- Production startup uses non-altering sync. Local PostgreSQL schema alteration needs `DB_SCHEMA_ALTER=true`; a migration system is still absent.
 
-- No request validation.
-  - Route handlers pass request bodies directly to Sequelize in several places.
+- API request validation is centralized in `backend/middleware/validation.js`; maintain its allowlists when adding routes/fields.
 
-- No auth/authorization.
+- Public API is read-only; mutations need a strong backend-only administrator Bearer token. Default interactive demos use isolated page-session data.
 
-- CORS is fully open with `app.use(cors())`.
+- CORS permits exact Firebase/local origins; it does not replace token authorization.
 
 - Add box flow is not transactional.
   - `POST /boxes`
@@ -112,8 +109,7 @@
 
 - Focused Node tests exist for mission building, the production mission factory, and the mission runner.
 - No React component tests, browser end-to-end suite, or deterministic physics/conveyor tests exist.
-- No backend tests found.
-- Backend `npm test` is placeholder.
+- Backend `npm test` covers real SQLite CRUD plus authorization, validation, body limits/compression, admin bypass attempts, CORS and request budgets.
 - No CI config found.
 - No API regression tests for route order, aggregation, or soft delete.
 - No DB migration tests.
@@ -150,3 +146,10 @@ Entrance cleanup uses current 2 x 2 m, ground-level inlet beds and 1 m boxes,
 including the drop corridor up to spawn Y + 0.5. Update its geometry when ports
 change. The UI lock is within one browser; the server has no multi-client port
 reservation, so simultaneous visitors are not serialized by this feature.
+
+## Public demo and remaining operational limits
+
+- Default `VITE_DEMO_MODE=true` keeps active store mutations in an in-memory per-page API. Reload resets data; it is not persisted or shared across visitors. Never reintroduce an administrator credential into browser code to restore shared writes.
+- Only authenticated mutations consume the fixed process-wide budget. Anonymous denials, public reads and health checks do not consume it. This is not distributed abuse prevention; Render/edge controls can supplement it.
+- Repo runtime pins do not override Render dashboard NODE_VERSION. Verify the actual startup log after redeploy before claiming Node core CVEs remediated in production.
+- The public frontend can be updated independently while an older backend remains online. The old backend remains exposed until its security commit is deployed.

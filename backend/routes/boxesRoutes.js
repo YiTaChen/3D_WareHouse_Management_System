@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     const newBox = await Box.create(req.body);
     res.json(newBox);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -52,6 +52,25 @@ router.delete('/:id', async (req, res) => {
 });
 
 
+// Soft delete all Boxes (set isRemoved to true for all)
+router.patch('/all/remove', async (req, res) => {
+  try {
+    const { Box } = database.getModels();
+    const [updatedCount] = await Box.update(
+      { isRemoved: true },
+      { where: {} } // 空的 where 條件表示更新所有記錄
+    );
+    res.json({ message: `Successfully soft-deleted ${updatedCount} boxes.` });
+  } catch (err) {
+    console.error("Error soft-deleting all boxes:", err);
+    res.status(500).json({ error: 'Failed to soft-delete all boxes.' });
+  }
+});
+
+
+
+
+
 // only remove the box (soft delete)
 router.patch('/:id/remove', async (req, res) => {
   try {
@@ -68,27 +87,9 @@ router.patch('/:id/remove', async (req, res) => {
       res.status(404).json({ error: 'Box not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
-
-
-// Soft delete all Boxes (set isRemoved to true for all)
-router.patch('/all/remove', async (req, res) => {
-  try {
-    const { Box } = database.getModels();
-    const [updatedCount] = await Box.update(
-      { isRemoved: true },
-      { where: {} } // 空的 where 條件表示更新所有記錄
-    );
-    res.json({ message: `Successfully soft-deleted ${updatedCount} boxes.` });
-  } catch (err) {
-    console.error("Error soft-deleting all boxes:", err);
-    res.status(500).json({ error: 'Failed to soft-delete all boxes.', details: err.message });
-  }
-});
-
-
 
 
 module.exports = router;

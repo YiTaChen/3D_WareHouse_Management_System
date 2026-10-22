@@ -96,7 +96,7 @@ Database selection rules:
 
 This keeps existing Render deployments working while allowing new users to run the full API without installing PostgreSQL.
 
-The app also includes a top-right `DB` switcher for local development. It can switch the running backend between local SQLite, local PostgreSQL, and cloud PostgreSQL. PostgreSQL options are tested before switching; after a successful switch, the page reloads so frontend state is fetched from the newly selected database. The switcher API is enabled automatically only for localhost requests. Set `ENABLE_DB_SWITCHER=true` only on trusted private servers.
+The default interactive demo stores changes only in the current browser page session. Reloading starts a new demo; visitors do not edit the shared Render database. `VITE_DEMO_MODE=false` opts a trusted local client into the backend read API. Shared API writes require a server-side administrator Bearer token; no credential is bundled into the frontend. The DB switcher is hidden in demo mode. Its management API is disabled by default, always disabled in production/Render, and only available to a direct-loopback local administrator with explicit opt-in and the token.
 
 The hosted Render backend can take a few seconds to respond after it has been idle.
 
@@ -244,7 +244,7 @@ All relationships are defined with Sequelize associations and are created automa
 
 ### 🗄️ Database Switcher APIs
 
-These APIs power the top-right `DB` switcher. They are enabled automatically for localhost requests. On a trusted private server, set `ENABLE_DB_SWITCHER=true` to enable them.
+These management APIs are for a trusted local administrator. They require `ENABLE_DB_SWITCHER=true`, a direct loopback connection without forwarding headers, and `Authorization: Bearer <WAREHOUSE_ADMIN_TOKEN>` with a credential of at least 32 characters. Render/production always rejects them. Browser frontend code never contains the token; use an authenticated local administration client.
 
 | Method | Endpoint      | Description                                      |
 |--------|---------------|--------------------------------------------------|
@@ -293,3 +293,22 @@ anchored telescopic forks. Rails cover the full 36 m storage length, and the
 11.7 m mast clears the highest storage level.
 
 Validation details: [combined warehouse validation](docs/combined-warehouse-validation.md).
+
+## Security and deployment
+
+Use the patched Node.js version in `.node-version` (22.23.4) for the frontend and `backend/.node-version` for Render's `backend/` root. Public Firebase Hosting serves static assets; only the Render API has an application Node runtime. Keep Render's dashboard `NODE_VERSION` unset or set it to this patched version, because it overrides repository pins. Confirm a fresh deployment's log says `Warehouse API started with Node v22.23.4` or a newer security patch in the same supported line. `GET /health` reports the application security revision, but does not prove the executable version.
+
+The default demo supports inventory creation, movement and removal without network writes. To reset, reload the page. The server rejects anonymous mutations before parsing JSON; authenticated mutations use field/type/range allowlists. Compressed JSON is rejected (415), bodies are limited to 16 KiB, connections have timeouts and authenticated mutations have a bounded process-wide budget; public reads and health checks do not consume it. CORS permits the two exact demo origins and local development origins, but authorization remains independent of CORS. Database errors and connection configuration are not returned to clients.
+
+`WAREHOUSE_ADMIN_TOKEN` is optional for a read-only deployment. If administrative API writes are needed, store a strong random credential only in the backend environment or secret manager and use a trusted client to send it in the Authorization header. Never put it in `VITE_*`, browser storage, URLs or source control. Database administration additionally requires explicit local opt-in and cannot be enabled on Render. `PG_SSL=true` verifies the provider certificate; use `PG_SSL_CA` for a private CA, rather than disabling verification. PostgreSQL startup does not alter existing columns; `DB_SCHEMA_ALTER=true` is a local development opt-in only.
+
+```sh
+npm run test:demo
+npm --prefix backend test
+npm audit
+npm --prefix backend audit
+npm run build
+firebase deploy --only hosting --project r3f-gravity-apply-test --non-interactive
+```
+
+The Firebase CSP allows existing local models, WebAssembly model decoding (`wasm-unsafe-eval`, without JavaScript `unsafe-eval`), blob physics workers and the exact hosted API origin. When deliberately changing the API origin or adding external assets, update and recheck that policy. Runtime models and physics contracts are unchanged by this security release.

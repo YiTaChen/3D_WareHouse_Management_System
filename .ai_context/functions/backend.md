@@ -6,10 +6,10 @@ Purpose:
 
 - Express app entry.
 - Enables JSON body parsing.
-- Enables CORS for all origins.
+- Enables an exact-origin CORS allowlist, independent of write authorization.
 - Mounts route modules.
 - Authenticates DB.
-- Runs `sequelize.sync({ alter: true })`.
+- Runs non-altering schema sync in production; local PostgreSQL alteration requires explicit opt-in.
 - Starts server.
 
 Mounted routes:
@@ -23,7 +23,7 @@ Mounted routes:
 
 Important risk:
 
-- `sequelize.sync({ alter: true })` runs on startup. This is convenient in development but risky in production.
+- `DB_SCHEMA_ALTER=true` only enables altering PostgreSQL sync outside production. Production uses non-altering sync; no migration system exists.
 
 ## `backend/models/index.js`
 
@@ -194,7 +194,11 @@ Handlers:
 
 - Routes directly use Sequelize models; there is no service layer.
 - Full-data aggregation logic is duplicated in `boxPositionRoutes.js` and `boxInventoryRoutes.js`.
-- Request validation is minimal.
+- Request field/type/range validation is centralized in middleware.
 - Error responses are inconsistent.
 - No migrations are present.
-- No backend tests are present.
+- `backend/test/security.test.js` verifies real SQLite CRUD and the security boundary.
+
+## Security boundary
+
+`backend/middleware/security.js` detects Render/production explicitly, rejects anonymous writes before decompression/parsing, checks strong Bearer credentials with constant-time comparison, never trusts Host/proxy headers for administration, and applies response headers, a fixed-size request budget and error sanitization. `/db` requires explicit local opt-in plus a direct loopback authenticated request and cannot be enabled in production. `backend/middleware/validation.js` owns mutation schemas. `PG_SSL=true` verifies certificates; `PG_SSL_CA` supplies an optional private CA. The server startup log records `process.version` for deployment verification; the public health endpoint exposes only an application revision.

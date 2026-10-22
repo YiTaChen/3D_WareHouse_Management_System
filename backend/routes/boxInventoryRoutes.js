@@ -39,7 +39,7 @@ router.get('/:boxId/full', async (req, res) => {
       position: box.BoxPosition
         ? [box.BoxPosition.position_x, box.BoxPosition.position_y, box.BoxPosition.position_z]
         : [0, 0, 0], // Default position if not found (though usually a Box has a position)
-      content: {}, // Initialize content as an empty object
+      content: Object.create(null), // Initialize content as an empty object
       isRemoved: box.isRemoved, // Include the isRemoved status
     };
 
@@ -73,7 +73,7 @@ router.get('/:boxId/full', async (req, res) => {
     res.json(boxData);
   } catch (err) {
     console.error(`Error fetching full box data for ID ${req.params.boxId}:`, err);
-    res.status(500).json({ error: 'Failed to retrieve full box data', details: err.message });
+    res.status(500).json({ error: 'Failed to retrieve full box data' });
   }
 });
 
@@ -109,7 +109,7 @@ router.get('/fullData', async (req, res) => {
         position: box.BoxPosition
           ? [box.BoxPosition.position_x, box.BoxPosition.position_y, box.BoxPosition.position_z]
           : [0, 0, 0], // Default position
-        content: {},
+        content: Object.create(null),
         isRemoved: box.isRemoved,
       };
 
@@ -139,7 +139,7 @@ router.get('/fullData', async (req, res) => {
     res.json(allBoxesData);
   } catch (err) {
     console.error("Error fetching all full box data:", err);
-    res.status(500).json({ error: 'Failed to retrieve all full box data', details: err.message });
+    res.status(500).json({ error: 'Failed to retrieve all full box data' });
   }
 });
 

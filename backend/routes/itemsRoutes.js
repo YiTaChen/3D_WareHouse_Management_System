@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
     const newItem = await Item.create(req.body);
     res.json(newItem);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -41,7 +41,7 @@ router.get('/categories', async (req, res) => {
 
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 
@@ -95,7 +95,7 @@ router.get('/category/:category', async (req, res) => {
     // res.json(results);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'The request could not be completed.' });
   }
 });
 

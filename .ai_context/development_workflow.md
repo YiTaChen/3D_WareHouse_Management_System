@@ -113,5 +113,13 @@ Current test status:
 
 - Focused Node tests cover the mission builder, production mission factory, and mission runner.
 - No React component, browser end-to-end, or deterministic physics/conveyor test suite exists.
-- Backend `npm test` is placeholder and intentionally fails.
+- Backend `npm test` runs security regression tests with an isolated SQLite file; no production credentials are needed.
 - No CI config was found.
+
+## Security modes and release checks
+
+Use patched Node 22.23.4 from the root/backend `.node-version`. The default frontend is an isolated demo (`VITE_DEMO_MODE=true`) for both development and production. Set false only to opt a trusted client into real API reads; backend administrative writes need `WAREHOUSE_ADMIN_TOKEN` and are never enabled by adding a frontend secret. DB administration requires explicit local opt-in, a direct loopback request, and administrator authentication, and is always off on Render/production.
+
+Before release run `npm run test:demo`, `npm --prefix backend test`, both npm audits, existing focused frontend tests/lint, and build. Verify browser models/physics worker load under Firebase CSP, and create/move/remove isolated demo data without backend requests. Deploy only Firebase project/site `r3f-gravity-apply-test`.
+
+Render root is `backend/`. Dashboard `NODE_VERSION` has precedence over `backend/.node-version` and `backend/package.json` engines; verify the startup log after fresh deployment. `/health` can verify the app revision but cannot establish the actual Node patch. PostgreSQL SSL uses certificate verification and optional `PG_SSL_CA`.

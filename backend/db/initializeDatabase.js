@@ -1,8 +1,9 @@
 const database = require('../models');
 const { defaultItems } = require('./defaultItems');
+const { isProduction } = require('../middleware/security');
 
 const getSyncOptions = (sequelize) => {
-  if (sequelize.getDialect() === 'sqlite') {
+  if (sequelize.getDialect() === 'sqlite' || isProduction() || process.env.DB_SCHEMA_ALTER !== 'true') {
     return {};
   }
 
