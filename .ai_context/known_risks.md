@@ -153,3 +153,10 @@ reservation, so simultaneous visitors are not serialized by this feature.
 - Only authenticated mutations consume the fixed process-wide budget. Anonymous denials, public reads and health checks do not consume it. This is not distributed abuse prevention; Render/edge controls can supplement it.
 - Repo runtime pins do not override Render dashboard NODE_VERSION. Verify the actual startup log after redeploy before claiming Node core CVEs remediated in production.
 - The public frontend can be updated independently while an older backend remains online. The old backend remains exposed until its security commit is deployed.
+
+
+## 2026-10-24 Brotli and compressed-body follow-up
+
+- Keep `body-parser >=2.4.0` for GHSA-27r3-jxmh-p828. The current `inflate:false` boundary also rejects compressed streams containing trailing data; retain both the parser patch and runtime patch.
+- Compression regression coverage now checks zero native Brotli decoder calls, GET/HEAD request bodies, authentication order, alternate media types/encodings and health/CRUD survival after rejected compressed trailing data. Run `npm --prefix backend test` when changing parser configuration or dependencies.
+- `process.versions.brotli` alone is insufficient to assess Node's backported CVE-2026-111497 fix. Check the actual supported Node release and deployment logs; repository pins alone do not prove the live process version.

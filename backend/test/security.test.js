@@ -3,7 +3,9 @@ const assert = require('node:assert/strict');
 const { mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
-const { brotliCompressSync } = require('node:zlib');
+const { request: httpRequest } = require('node:http');
+const zlib = require('node:zlib');
+const { brotliCompressSync, gzipSync, deflateSync } = zlib;
 const directory = mkdtempSync(join(tmpdir(), 'warehouse-security-'));
 process.env.NODE_ENV = 'production';
 process.env.DB_ENV = 'sqlite';
@@ -17,6 +19,44 @@ let server;
 let base;
 const adminHeaders = { Authorization: `Bearer ${process.env.WAREHOUSE_ADMIN_TOKEN}`, 'Content-Type': 'application/json' };
 const request = (path, body, method = 'POST', headers = adminHeaders) => fetch(`${base}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+
+// node:http permits real GET/HEAD request bodies, which fetch deliberately forbids.
+const rawRequest = ({ method = 'POST', path = '/boxes', body = Buffer.alloc(0),
+  encoding, contentType = 'application/json', authorized = false } = {}) => new Promise((resolve, reject) => {
+  const req = httpRequest(new URL(path, base), {
+    method,
+    agent: false,
+    headers: {
+      'Content-Type': contentType,
+      'Content-Length': String(body.length),
+      ...(encoding ? { 'Content-Encoding': encoding } : {}),
+      ...(authorized ? { Authorization: adminHeaders.Authorization } : {}),
+    },
+  }, response => {
+    const chunks = [];
+    response.on('data', chunk => chunks.push(chunk));
+    response.on('error', reject);
+    response.on('end', () => resolve({ status: response.statusCode, text: Buffer.concat(chunks).toString() }));
+  });
+  req.setTimeout(3000, () => req.destroy(new Error('Compressed-body request did not finish')));
+  req.on('error', reject);
+  req.end(body);
+});
+
+const assertNoBrotliDecoding = async run => {
+  const descriptor = Object.getOwnPropertyDescriptor(zlib, 'createBrotliDecompress');
+  let decoderCalls = 0;
+  Object.defineProperty(zlib, 'createBrotliDecompress', {
+    ...descriptor,
+    value() { decoderCalls++; throw new Error('Brotli decoding must stay unreachable'); },
+  });
+  try {
+    await run();
+    assert.equal(decoderCalls, 0, 'the application must reject compression before creating a Brotli decoder');
+  } finally {
+    Object.defineProperty(zlib, 'createBrotliDecompress', descriptor);
+  }
+};
 
 test.before(async () => {
   await initializeDatabase();
@@ -56,9 +96,52 @@ test('authenticated workflow works; invalid, extra, prototype and oversized valu
   assert.equal(JSON.stringify(await duplicate.json()).includes('SQLITE'), false);
   assert.equal((await request('/boxes/box-1/remove', undefined, 'PATCH')).status, 200);
 });
-test('authenticated compressed request is rejected without invoking Brotli decoder', async () => {
-  const response = await fetch(`${base}/boxes`, { method: 'POST', headers: { ...adminHeaders, 'Content-Encoding': 'br' }, body: brotliCompressSync(Buffer.from('{"box_id":"compressed"}')) });
-  assert.equal(response.status, 415);
+test('compression rejection covers read methods, media types and authentication without invoking Brotli', async () => {
+  await assertNoBrotliDecoding(async () => {
+    const json = Buffer.from('{"box_id":"compression-probe"}');
+    const cases = [
+      ['POST', 'br', false, 'application/json', 403],
+      ['POST', 'br', true, 'application/json', 415],
+      ['GET', 'br', false, 'application/json', 415],
+      ['HEAD', 'br', false, 'application/json', 415],
+      ['POST', 'BR', true, 'application/json', 415],
+      ['POST', 'gzip', true, 'application/json', 415],
+      ['POST', 'deflate', true, 'application/json', 415],
+      ['POST', 'gzip, br', true, 'application/json', 415],
+      ['POST', 'br', true, 'text/plain', 400],
+      ['GET', 'br', false, 'text/plain', 200],
+      ['POST', 'identity', true, 'application/json', 200],
+    ];
+    for (const [method, encoding, authorized, contentType, status] of cases) {
+      const body = encoding === 'gzip' ? gzipSync(json)
+        : encoding === 'deflate' ? deflateSync(json)
+        : encoding === 'gzip, br' ? brotliCompressSync(gzipSync(json))
+        : encoding === 'identity' ? json : brotliCompressSync(json);
+      const response = await rawRequest({ method, path: ['GET', 'HEAD'].includes(method) ? '/health' : '/boxes',
+        body, encoding, authorized, contentType });
+      assert.equal(response.status, status, `${method} ${contentType} ${encoding} authorized=${authorized}`);
+    }
+  });
+});
+
+test('compressed streams with trailing bytes cannot mutate inventory or stall subsequent requests', async () => {
+  await assertNoBrotliDecoding(async () => {
+    const before = await (await fetch(`${base}/boxes`)).json();
+    const json = Buffer.from('{"box_id":"rejected-trailing-body"}');
+    // Valid streams plus harmless trailing bytes exercise the GHSA-27r3-jxmh-p828
+    // boundary without using a memory-corruption payload or enabling inflation.
+    for (const [encoding, compress] of [['br', brotliCompressSync], ['gzip', gzipSync], ['deflate', deflateSync]]) {
+      const body = Buffer.concat([compress(json), Buffer.from('ordinary trailing data'.repeat(100))]);
+      const rejected = await rawRequest({ body, encoding, authorized: true });
+      assert.equal(rejected.status, 415, encoding);
+      const health = await rawRequest({ method: 'GET', path: '/health' });
+      assert.equal(health.status, 200, `health after ${encoding} with trailing bytes`);
+      assert.equal(JSON.parse(health.text).status, 'ok');
+    }
+    const after = await (await fetch(`${base}/boxes`)).json();
+    assert.deepEqual(after, before, 'rejected compressed input must not reach mutation routes');
+    assert.equal((await request('/boxes', { box_id: 'valid-after-compression' })).status, 200);
+  });
 });
 test('cloud database admin cannot be enabled with spoofed Host, proxy headers or admin token', async () => {
   process.env.ENABLE_DB_SWITCHER = 'true';

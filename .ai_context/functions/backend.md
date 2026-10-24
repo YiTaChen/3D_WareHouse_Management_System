@@ -202,3 +202,12 @@ Handlers:
 ## Security boundary
 
 `backend/middleware/security.js` detects Render/production explicitly, rejects anonymous writes before decompression/parsing, checks strong Bearer credentials with constant-time comparison, never trusts Host/proxy headers for administration, and applies response headers, a fixed-size request budget and error sanitization. `/db` requires explicit local opt-in plus a direct loopback authenticated request and cannot be enabled in production. `backend/middleware/validation.js` owns mutation schemas. `PG_SSL=true` verifies certificates; `PG_SSL_CA` supplies an optional private CA. The server startup log records `process.version` for deployment verification; the public health endpoint exposes only an application revision.
+
+
+## 2026-10-24 compression regression boundary
+
+- Keep the backend lockfile on `body-parser >=2.4.0`; GHSA-27r3-jxmh-p828 concerns trailing bytes after a compressed body in older 2.x parsers. `inflate:false` mitigates this application's compressed-request path, but does not replace the dependency patch.
+- Preserve authentication before parsing and the sole JSON parser's `inflate:false`. Additional raw/text/urlencoded/upload parsers or outgoing Node fetch/axios calls require a new decompression review.
+- `backend/test/security.test.js` now instruments `zlib.createBrotliDecompress` to assert zero calls across anonymous/authenticated POST, JSON GET/HEAD bodies, encoding case/stacking and non-JSON content types. Tests use `node:http` for GET/HEAD bodies because fetch rejects those request bodies client-side.
+- Benign Brotli/gzip/deflate streams with trailing bytes must return415, leave inventory unchanged, and preserve health responses plus subsequent valid JSON writes. Test request timeouts bound failures; no malformed memory-corruption payload is used.
+- CVE-2026-111497 is a native Brotli decoder issue, not evidence that this app implements HTTP/2. Keep Node at22.23.4,24.22.1,26.12.1 or a later supported patched release and verify the deployed process independently. A patched Node22.23.4 can report Brotli1.1.0 due to a backported fix.

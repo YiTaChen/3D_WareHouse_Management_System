@@ -59,3 +59,10 @@
 - [x] Add API schemas, compression/body/time/request bounds and error sanitization.
 - [x] Add API/demo regression coverage and Hosting CSP/security headers.
 - [ ] Confirm Render deployed application revision and actual Node patch after dashboard access is connected.
+
+
+## 2026-10-24 compression follow-up
+
+- [x] Document the body-parser2.4.0 minimum for GHSA-27r3-jxmh-p828 alongside the patched Node/Brotli runtime requirement.
+- [x] Extend backend regression tests with decoder-call assertions, GET/HEAD/media-type/encoding coverage, and survival after benign compressed streams with trailing bytes.
+- Verification: run `npm --prefix backend test` after the dependency lock update; confirm the live Render runtime separately.
